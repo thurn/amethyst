@@ -1,8 +1,10 @@
 # Project Amethyst: Game Design
 
 The initial design for the Project Amethyst MVP: one run of twelve connected
-arenas against neon hordes, with a sword, a dash and a special, and an upgrade
-system built so every pick changes what the player does and sees.
+arenas against neon monsters, with a sword, a dash and a special, and an upgrade
+system built so every pick changes what the player does and sees. It builds two
+combat modes, focused Hades-style fights and Vampire Survivors-style hordes, and
+compares them behind a flag ([Two combat modes](#two-combat-modes)).
 
 [What Makes ARPG Combat Feel Great](arpg-combat-feel.md) is the companion
 reference. This document says *what* the game is; the feel reference says how
@@ -10,26 +12,26 @@ every part of it must feel. Section references like "feel §3.1" point there.
 
 ## The game in one paragraph
 
-A white knight carves through hordes of neon monsters across twelve connected
-arenas, with no loading between them. Each arena streams in hundreds of enemies
-against a timer; when it runs out, the survivors shatter, the knight picks one
-of three upgrades, and walks into the next. An ogre guards the midpoint and a
+A white knight fights neon monsters across twelve connected arenas, with no
+loading between them. Each arena is a fight; when it's won, the knight picks one
+of three upgrades and walks into the next. An ogre guards the midpoint and a
 dragon waits at the end. Unlike Vampire Survivors or Brotato, nothing attacks on
 its own: the knight fights with three buttons, a sword combo, a dash and a
 leaping slam. Four upgrade suites (Voltage, Frost, Void, Gale) reshape those
 actions until a strong build clears the screen. It looks like the Playlist
 Survivors neon edge trailer: glowing wireframe figures on a black grid, every
-enemy type in its own neon hue.
+enemy type in its own neon hue. Whether each arena holds a horde or a handful of
+tougher enemies is the MVP's central experiment, and both are built.
 
 ## Pillars
 
 1. **Feel decides what exists.** A mechanic ships only if it gets first-class
    animation, effects and sound. If the asset set can't support it, it waits.
    Every number here is a starting value for a testbed, not a promise.
-2. **Explicit verbs, horde scale.** Vampire Survivors' crowds, but every kill
-   comes from a button the player pressed. The kit is for carving crowds.
+2. **Explicit verbs.** Every kill comes from a button the player pressed,
+   whether the arena holds eight enemies or three hundred.
 3. **Every outcome is confirmed.** Feedback reports success (feel §1, §3), and
-   at horde scale it has to stay small per hit so it never hides the next threat
+   in a horde it has to stay small per hit so it never hides the next threat
    (feel §3.4).
 4. **Upgrades change actions, not numbers** (feel §8). No upgrade is only a
    number; any number an upgrade raises comes with something you can see or
@@ -54,12 +56,10 @@ enemy type in its own neon hue.
 | Area             | Decision                                                                   |
 | ---------------- | -------------------------------------------------------------------------- |
 | Run              | 12 connected arenas, ~15 minutes, linear, no loading                       |
-| Rooms            | Timed: 45–75 s of streaming horde; survivors shatter at the buzzer         |
-| Density          | ~60–100 enemies alive early, 200–300 late                                  |
-| Threat           | Fodder deals contact damage; special types, elites and bosses telegraph    |
+| Combat modes     | Focused (Hades) and horde (Vampire Survivors), compared behind a flag      |
 | Controls         | WASD move, Space dash, LMB/F attack, RMB/Q special, E interact             |
 | Aim              | Cursor aim and movement-direction aim, both behind a flag                  |
-| Camera           | Fixed 3/4 top-down, pulled back so the hero is small                       |
+| Camera           | Fixed 3/4 top-down; pulled back for the horde, closer for focused fights   |
 | Kit              | Cleave (cone), Lunge dash-strike (line), Leap Slam special (circle), Dodge |
 | Health           | 100 HP, no regen, two full heals, one Second Wind, instant restart         |
 | Upgrades         | 3 exclusive action slots + passives; 4 suites; 3 Levels each; 6 Synergies  |
@@ -70,36 +70,81 @@ enemy type in its own neon hue.
 | Music            | Bundled soundtrack or `--file <m3u> --shuffle`; nothing reads the beat     |
 | Meta-progression | None                                                                       |
 
+## Two combat modes
+
+Is it more fun to fight a few tough enemies with focus, as in Hades, or to carve
+through a horde, as in Vampire Survivors and Brotato? The MVP builds both and
+lets play decide. One enum flag, `combat.mode`, selects:
+
+- `focused`: Hades-style fights against fewer, tougher enemies that all
+  telegraph.
+- `horde`: hundreds of contact-damage fodder with a few telegraphing threats.
+- `blind`: each run picks one of the two at random, so the comparison isn't
+  shaped by which mode the player chose or played first (feel §11.3).
+
+Everything else is shared: the roster, the look, the kit, the suites and their
+effects, the arena modules, the run's structure and the bosses' attacks. Each
+mode is a tuning table plus its own rule for ending a room:
+
+| Aspect             | Focused                                              | Horde                                                     |
+| ------------------ | ---------------------------------------------------- | --------------------------------------------------------- |
+| Enemies per room   | 6–14 over 2–3 waves; at most ~6 alive early, ~9 late | Streaming; ~60–100 alive early, 200–300 late              |
+| Who telegraphs     | Every enemy                                          | Special types, elites and bosses                          |
+| Contact damage     | None                                                 | Fodder, 4–6 per touch                                     |
+| Basic enemy HP     | 2–4 hits early (feel §7)                             | 1–2 hits                                                  |
+| Stagger            | Every hit staggers basic enemies                     | Knockback only                                            |
+| Aggression tokens  | 2 early, 3 late                                      | 3 early, 5 late, for telegraphing enemies                 |
+| Room ends          | When every wave is dead                              | At the timer's buzzer; survivors shatter, elites must die |
+| Camera             | Closer: the hero larger                              | Pulled back: the hero small, the crowd visible            |
+| Hitstop            | Feel §3.1's values per target                        | 1–2 frames on fodder; global freezes only for big moments |
+| Upgrade magnitudes | Counts halved (rounded up), ranges ×0.7              | As in the suite tables                                    |
+| Shard drops        | 1–2 per kill                                         | About 1 in 3 fodder kills                                 |
+| During boss fights | Small capped groups at phase changes                 | A thin horde that each phase change shatters              |
+
+**Recording.** The run card names the mode. Each run also writes a summary to
+its run folder: mode, time played, rooms reached, win or loss, kills, damage
+taken, actions per second, and whether the player started another run straight
+away. Free-choice playtime per mode is the measure that matters most (feel §1,
+§11.3).
+
+**Deciding.** The human plays both, ideally in `blind`, and picks. Until then
+every milestone keeps both modes working and tuned. Then the winner becomes the
+default, and the flag and the losing mode's code are deleted (AGENTS.md, Flags
+and concepts).
+
 ## The run
 
 ### Structure
 
-| Room | Name        | What happens                                                             |
-| ---- | ----------- | ------------------------------------------------------------------------ |
-| 0    | Threshold   | A gentle horde (skeletons only) and a short timer; grants the first pick |
-| 1–4  | Early rooms | Timed arenas, escalating                                                 |
-| 5    | The Warden  | Miniboss                                                                 |
-| 6    | Respite     | Fountain (full heal) and shop; no fight                                  |
-| 7–10 | Late rooms  | Timed arenas with heavies and more elites                                |
-| 11   | Antechamber | Fountain (full heal) and shop; a quiet beat before the end               |
-| 12   | Heartwyrm   | Final boss                                                               |
+| Room | Name        | What happens                                               |
+| ---- | ----------- | ---------------------------------------------------------- |
+| 0    | Threshold   | A gentle fight (skeletons only); grants the first pick     |
+| 1–4  | Early rooms | Combat arenas, escalating                                  |
+| 5    | The Warden  | Miniboss                                                   |
+| 6    | Respite     | Fountain (full heal) and shop; no fight                    |
+| 7–10 | Late rooms  | Combat arenas with heavies and more elites                 |
+| 11   | Antechamber | Fountain (full heal) and shop; a quiet beat before the end |
+| 12   | Heartwyrm   | Final boss                                                 |
 
 Nine combat rooms and two bosses give about eleven picks per run: enough to fill
 all three slots, collect four or five passives, and find one or two Synergies.
 
-### Timed arenas
+### Arenas
 
 Each combat room is a bounded arena of about 40×30 m: a black floor with the
 trailer's faint grid, grey walls at its edges and a few pillars.
 
-- **Entry.** Stepping in seals the gate behind the hero. The room timer appears
-  and the horde starts streaming in from the arena's edges, each group behind a
-  0.5–1 s spawn marker, never within a few meters of the hero (feel §7).
-- **The timer** runs 45–75 s. Spawn pressure builds through it.
-- **The buzzer.** Spawning stops and every surviving fodder enemy shatters in
-  one outward wave from the hero, with global hitstop and a slow-motion tail
-  (feel §3.1). This is the room-clear moment.
-- **Elites alive at the buzzer** don't shatter; the room clears when they die.
+- **Entry.** Stepping in seals the gate behind the hero. Enemies arrive from the
+  arena's edges, each group behind a 0.5–1 s spawn marker, never within a few
+  meters of the hero (feel §7).
+- **Horde mode** shows a room timer of 45–75 s, with spawn pressure building
+  through it. At the buzzer, spawning stops and every surviving fodder enemy
+  shatters in one outward wave from the hero, with global hitstop and a
+  slow-motion tail (feel §3.1). Elites alive at the buzzer don't shatter; the
+  room clears when they die.
+- **Focused mode** sends 2–3 waves. The next wave's markers appear when the
+  current wave is down to its last two enemies. The room clears with its last
+  kill, which gets the global hitstop and slow-motion tail.
 - **Clear.** The exit's laser gate dissolves, the remaining Shards rush to the
   hero, and a prism shard forms in front of the exit.
 - **Corridor.** A 3–5 s walk to the next arena is the breather.
@@ -124,19 +169,20 @@ so walking between them never loads. Boss arenas have no timer.
 
 - The hero has 100 HP and doesn't regenerate, so damage carries from room to
   room.
-- Contact damage from fodder is small (4–6), and after any hit the hero has ~0.8
-  s of invulnerability, so a crowd can't take a big bite at once. The danger is
-  being surrounded with no dash ready.
+- After any hit the hero has ~0.8 s of invulnerability. In horde mode, contact
+  damage from fodder is small (4–6), so a crowd can't take a big bite at once;
+  the danger is being surrounded with no dash ready. Focused mode has no contact
+  damage: every hit comes from a telegraphed attack.
 - The fountains in the Respite and the Antechamber heal fully.
 - **Second Wind**, once per run: lethal damage revives the hero at 40% HP with a
   slow-motion shockwave that shatters the fodder around it.
 - Some upgrades heal as a side effect. Healing is never one of the three
   choices.
 - Death shatters the hero into white shards. A 5-second **run card** follows
-  (time, rooms cleared, kills, the build's slots and Synergies, damage taken
-  from contact and from telegraphed attacks, and the share of telegraphed hits
-  that were avoidable, feel §6.5), then a key press starts the next run in the
-  Threshold. Winning shows the same card.
+  (the combat mode, time, rooms cleared, kills, the build's slots and Synergies,
+  damage taken from contact and from telegraphed attacks, and the share of
+  telegraphed hits that were avoidable, feel §6.5), then a key press starts the
+  next run in the Threshold. Winning shows the same card.
 
 There is no hub, no meta-progression and no story. The game launches straight
 into the Threshold.
@@ -161,10 +207,11 @@ into the Threshold.
 
 In both, the Lunge follows the dash direction, so a dash is also an aim.
 
-**Camera**: fixed 3/4 top-down, pulled back as in the trailer so the hero is
-small and the crowd around it is visible on every side. It follows the hero,
-leans slightly toward the cursor, and never rotates (feel §5). It zooms only for
-boss introductions.
+**Camera**: fixed 3/4 top-down. In horde mode it's pulled back as in the
+trailer, so the hero is small and the crowd around it is visible on every side;
+in focused mode it sits closer, so each enemy's telegraph reads. It follows the
+hero, leans slightly toward the cursor, and never rotates (feel §5). It zooms
+only for boss introductions.
 
 ## The hero's kit
 
@@ -291,8 +338,8 @@ appears more often after the midpoint, or from a shop.
 
 The run's currency is Shards. They don't carry between runs.
 
-- **Dropping**: fodder kills drop one now and then (about 1 in 3), elites drop
-  5\.
+- **Dropping**: in horde mode, fodder kills drop one now and then (about 1 in
+  3); in focused mode, every kill drops 1–2. Elites drop 5.
 - **Collecting**: Shards within a magnet radius (~3 m) fly to the hero all the
   time, Vampire Survivors-style; at the clear, every Shard left in the arena
   rushes in at once.
@@ -316,9 +363,11 @@ The run's currency is Shards. They don't carry between runs.
 
 ## The suites
 
-Each suite has three slot upgrades and three passives, with numbers sized for
-crowds. Chain reactions stop after two generations, which keeps them readable
-and cheap. Levels read I / II / III.
+Each suite has three slot upgrades and three passives. The tables give horde
+mode's numbers, sized for crowds; focused mode halves the counts (chain targets,
+shards, Pinball links; rounded up) and scales ranges and radii by 0.7. Chain
+reactions stop after two generations, which keeps them readable and cheap.
+Levels read I / II / III.
 
 ### Voltage
 
@@ -396,42 +445,60 @@ each of its two suites. Each one adds an interaction, not a number.
 
 ### Rules
 
+In both modes:
+
+- **Telegraphs** use two channels (feel §6.1): 400–600 ms for melee, 300–500 ms
+  aim poses with slow projectiles, 600–1000 ms filling ground markers for areas.
+- **Projectiles** travel at most half the dash's speed (feel §5).
+- **Spacing**: enemies keep small gaps between bodies, so even a swarm reads as
+  many figures with dark between them, as in the trailer.
+- **Kills** shatter the enemy along outlined cracks in its own hue, thrown away
+  from the blow, gone within half a second. A kill earns empty space.
+
+In horde mode:
+
 - **Density**: ~60–100 alive early in the run, 200–300 late.
 - **Fodder** threatens by contact and by surrounding the hero. It doesn't wind
   up attacks; it walks into you. Fodder dies in one or two hits, a deliberate
   departure from feel §7's 2–5: here the crowd is the enemy, not the individual.
-- **Special types, elites and bosses** telegraph every attack on two channels
-  (feel §6.1): 400–600 ms for melee, 300–500 ms aim poses with slow projectiles,
-  600–1000 ms filling ground markers for areas.
-- **Aggression tokens** (feel §6.4) apply only to enemies that telegraph: at
-  most 3 winding up at once early, 5 late.
-- **Projectiles** travel at most half the dash's speed (feel §5).
-- **Spacing**: the crowd keeps small gaps between bodies, so a swarm reads as
-  many figures with dark between them, as in the trailer.
-- **Kills** shatter the enemy along outlined cracks in its own hue, thrown away
-  from the blow, gone within half a second. A kill earns empty space.
+- **Special types, elites and bosses** telegraph every attack. Aggression tokens
+  (feel §6.4) apply only to them: at most 3 winding up at once early, 5 late.
 - **Hitstop at scale**: fodder freezes 1–2 frames when hit and the hero not at
   all. Global freezes are kept for elite kills, the buzzer and boss moments
   (feel §3.1).
+
+In focused mode:
+
+- **Density**: 6–14 enemies per room over 2–3 waves, at most ~6 alive early and
+  ~9 late.
+- **Every enemy telegraphs**, fodder included, using the attack clips in the
+  roster table, and none deals contact damage. Aggression tokens: 2 early, 3
+  late.
+- **Basic enemies** die in 2–4 hits early (feel §7), and every hit staggers
+  them, so attacking is also defense.
+- **Hitstop** uses feel §3.1's values: 2–4 frames on the target for a light hit,
+  5–8 for the finisher, 4–8 for a kill.
 
 ### Roster
 
 Playlist Survivors' monsters, already proven in the look and baked in its
 `monsters.json`. Colors follow its palette families (`palette.json`).
 
-| Enemy    | Source                                 | Family                   | Role                                      | Key clips                     |
-| -------- | -------------------------------------- | ------------------------ | ----------------------------------------- | ----------------------------- |
-| Skeleton | Magic Pig Skeleton Warrior             | Key (cyan, blue)         | Fodder walker                             | `Walk`, `Got Hit`             |
-| Slime    | Magic Pig Slime                        | Key                      | Slow, tough fodder                        | `Walk Cycle`, `Been Hit`      |
-| Demon    | Magic Pig Demons                       | Key                      | Fast fodder                               | `walk`, `hit reaction`        |
-| Bat      | Magic Pig Bats                         | Key                      | Flying swarm stream                       | `Fly Forward`, `Got Hit`      |
-| Goblin   | Magic Pig Goblin                       | Accent (magenta, violet) | Rusher: telegraphed lunge                 | `Attack1`, `Dodge`            |
-| Mushroom | Magic Pig Mushroom Monster             | Accent                   | Ranged: spore volleys                     | `MushAttack01`, `MushHit`     |
-| Big Ork  | Synty Fantasy Rivals (with the Slayer) | Counter (orange, amber)  | Heavy: telegraphed lunge along a line     | Sword Combat `HeavyStab01`    |
-| Troll    | Synty Fantasy Rivals                   | Counter                  | Heavy: telegraphed leap smash with a ring | Sword Combat `LightLeaping01` |
+| Enemy    | Source                                 | Family                   | Role                                      | Key clips                               |
+| -------- | -------------------------------------- | ------------------------ | ----------------------------------------- | --------------------------------------- |
+| Skeleton | Magic Pig Skeleton Warrior             | Key (cyan, blue)         | Fodder walker                             | `Walk`, `Got Hit`, `Attack 1`           |
+| Slime    | Magic Pig Slime                        | Key                      | Slow, tough fodder                        | `Walk Cycle`, `Been Hit`, `Spit Attack` |
+| Demon    | Magic Pig Demons                       | Key                      | Fast fodder                               | `walk`, `hit reaction`, `attack1`       |
+| Bat      | Magic Pig Bats                         | Key                      | Flying swarm stream                       | `Fly Forward`, `Got Hit`, `Attack 1`    |
+| Goblin   | Magic Pig Goblin                       | Accent (magenta, violet) | Rusher: telegraphed lunge                 | `Attack1`, `Dodge`                      |
+| Mushroom | Magic Pig Mushroom Monster             | Accent                   | Ranged: spore volleys                     | `MushAttack01`, `MushHit`               |
+| Big Ork  | Synty Fantasy Rivals (with the Slayer) | Counter (orange, amber)  | Heavy: telegraphed lunge along a line     | Sword Combat `HeavyStab01`              |
+| Troll    | Synty Fantasy Rivals                   | Counter                  | Heavy: telegraphed leap smash with a ring | Sword Combat `LightLeaping01`           |
 
-- **Fodder** comes in streams and rings, the trailer's shapes. Slimes soak hits;
-  demons close fast; bats arrive in flying streams that ignore pillars.
+- **Fodder** comes in streams and rings in horde mode, the trailer's shapes.
+  Slimes soak hits; demons close fast; bats arrive in flying streams that ignore
+  pillars. The attack clips are used in focused mode, and by Empowered fodder in
+  both.
 - **Goblins** crouch for 300 ms behind a red lane marker, then lunge along it.
 - **Mushrooms** hang back and loft slow spore volleys at a marked spot.
 - **Heavies** are always armored (an armor bar) and give the Lunge and the Leap
@@ -450,6 +517,20 @@ skeleton's `Attack 1`, the slime's `Spit Attack`).
 - Elites don't shatter at the buzzer; the room waits for them.
 
 ### Escalation
+
+Focused mode:
+
+| Rooms | Waves | Enemies | Alive at once | Types             | Elites      |
+| ----- | ----- | ------- | ------------- | ----------------- | ----------- |
+| 0     | 1     | 4       | 4             | Skeletons         | —           |
+| 1     | 2     | 6–8     | 5             | + slimes, bats    | —           |
+| 2     | 2     | 8       | 6             | + demons, goblins | —           |
+| 3     | 2–3   | 10      | 6             | + mushrooms       | 1           |
+| 4     | 3     | 12      | 7             | + big orks        | 1–2         |
+| 7     | 3     | 12      | 8             | + trolls          | 2           |
+| 8–10  | 3     | 14      | 9             | All               | ~1 per wave |
+
+Horde mode:
 
 | Rooms | Timer | Alive at once | Types             | Elites |
 | ----- | ----- | ------------- | ----------------- | ------ |
@@ -471,9 +552,10 @@ skeleton's `Attack 1`, the slime's `Spit Attack`).
   §3.1), a stun pose, and +50% damage taken. Each Break makes the next one
   harder.
 - **Suite effects convert** (see the table above).
-- **A thin horde** streams in during boss fights (at most ~40 fodder for the
-  Warden, ~60 for the Heartwyrm) to keep pressure and feed Shards and suites.
-  Each phase change shatters it.
+- **Adds.** In horde mode, a thin horde streams in during boss fights (at most
+  ~40 fodder for the Warden, ~60 for the Heartwyrm) to keep pressure and feed
+  Shards and suites, and each phase change shatters it. In focused mode, a small
+  capped group (3–4 skeletons or bats) joins at each phase change.
 - **Phases**: two for the Warden, three for the Heartwyrm. Each change is a
   short invulnerable roar, never a cutscene.
 - **No timers.** Strong builds end fights sooner; no phase waits on a clock.
@@ -494,8 +576,8 @@ test: dodge the combo, punish the recovery.
 | Boulder         | `Attack2`                                          | A filling circle where it will land                       | Leave the circle                                    |
 | Stomp           | `Attack1`                                          | 900 ms filling marker                                     | Its shockwave ring expands to 10 m: dash through it |
 
-- **Phase 2 (50%)**: `RoarTaunt`. A horde surge, and its patterns chain: a club
-  slam into a stomp ring, a charge into a boulder, always with a recovery
+- **Phase 2 (50%)**: `RoarTaunt`. A surge of adds, and its patterns chain: a
+  club slam into a stomp ring, a charge into a boulder, always with a recovery
   interval.
 - **Broken**: it has no stun loop, so it holds `GetHit2`'s deepest frame.
 
@@ -531,7 +613,7 @@ Broken: `StunnedStanding`.
 
 **Phase 3, grounded (33–0%)**
 
-- A roar raises the horde to its peak and arms every Spike Vent.
+- A roar calls its last and largest adds and arms every Spike Vent.
 - The breath sweeps all the way around, with a safe gap that follows it.
 - Concentric rings and earlier patterns combine, under the shared rule above.
 - Its `Death` plays with the run's largest shatter, takes the horde with it, and
@@ -552,10 +634,10 @@ uses none.
 
 No pits in the MVP: they would need fall states and edge rules for the hero.
 
-**The Threshold** teaches by pacing: a thin skeleton horde, a short timer, room
-to try the Cleave, the dash and the Leap Slam, then the first prism. **The
-Respite** and **the Antechamber** hold a fountain (E to drink, full heal) and a
-shop, and nothing attacks there.
+**The Threshold** teaches by pacing: a few skeletons (a thin horde with a short
+timer in horde mode), room to try the Cleave, the dash and the Leap Slam, then
+the first prism. **The Respite** and **the Antechamber** hold a fountain (E to
+drink, full heal) and a shop, and nothing attacks there.
 
 ## Look
 
@@ -599,9 +681,10 @@ never committed.
 ### Visual priority
 
 From highest to lowest (feel §3.4, §6.2): telegraphs, elite and boss moments,
-kills, hits, statuses, swings. Per-hit effects on fodder stay small, because
-hundreds of them land each second. The white slash crescents can be large but
-are thin and short-lived. Enemy telegraphs draw above the hero's effects.
+kills, hits, statuses, swings. In horde mode, per-hit effects on fodder stay
+small, because hundreds of them land each second. The white slash crescents can
+be large but are thin and short-lived. Enemy telegraphs draw above the hero's
+effects.
 
 ## Sound and music
 
@@ -630,7 +713,7 @@ ducking.
 Minimal, and out of the way of the fight:
 
 - Health, with a pip for Second Wind.
-- The room timer.
+- The room timer (horde mode).
 - Dash charges and the special's cooldown ring under the hero.
 - The Shard count.
 - Three slot icons in their suites' colors, with Levels.
@@ -639,17 +722,19 @@ Minimal, and out of the way of the fight:
 ## Build order
 
 What each step builds on. Each step makes its part feel right through testbed
-variants (AGENTS.md).
+variants (AGENTS.md), and every step builds and tunes both combat modes.
 
 1. **The feel room**: one arena, the look with its crowd renderer, the hero's
-   kit, and a skeleton horde with every hit-feedback channel (feel §11).
+   kit, `combat.mode`, and skeletons in both modes with every hit-feedback
+   channel (feel §11).
 2. **The chain**: the rest of the roster, Empowered elites, hazards, and four
-   timed arenas connected without loading.
+   arenas connected without loading, each playable as timed horde rooms or
+   wave-cleared focused rooms.
 3. **The suites**, one at a time with all three Levels: Gale first (knockback
    needs only walls and the crowd), then Frost, Voltage and Void. Synergies
    arrive as their pairs exist.
 4. **The Warden**, with prisms, Shards, offers and shops.
-5. **The Heartwyrm** and the full 12-room run.
+5. **The Heartwyrm** and the full 12-room run, in both modes and in `blind`.
 
 ## Out of scope
 
@@ -661,9 +746,11 @@ variants (AGENTS.md).
 
 ## Open questions
 
-These are for testbeds to answer:
+The big one is answered by playing: which combat mode is more fun (Two combat
+modes). These are for testbeds:
 
-- How far back the camera sits, and how many enemies read well at once.
+- How far back the camera sits in each mode, and how many enemies read well at
+  once.
 - Whether damage numbers help or clutter (feel §3.2).
 - Whether `LightFencing01` or `HeavyStab01` makes the better Lunge.
 - Every number above.
