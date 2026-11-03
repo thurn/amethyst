@@ -1,0 +1,15 @@
+# Enact configuration. See ~/enact/README.md.
+remote = "origin"
+staging_branch = "staging"
+master_branch = "master"
+
+[checks]
+fast = "uv run --quiet --project tools am check"
+slow = "uv run --quiet --project tools am ci"
+
+[worktree]
+root = ".worktrees"   # inside the checkout; gitignored
+# Before Enact deletes a worktree, move each Unity project's warm Library into
+# the cache, where the next worktree's first Unity step clones it from
+# (tools/src/amethyst_tools/worktree.py).
+remove = 'f="$ENACT_WORKTREE_PATH/tools/src/amethyst_tools/worktree.py"; [ -f "$f" ] || f="$ENACT_REPO/tools/src/amethyst_tools/worktree.py"; python3 "$f" remove'

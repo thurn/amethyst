@@ -1,0 +1,10 @@
+{
+  "name": "Amethyst.Action",
+  "rootNamespace": "Amethyst.Action",
+  "references": [
+    "Amethyst.Core",
+    "Amethyst.Core.Unity",
+    "Amethyst.Native",
+    "Unity.InputSystem"
+  ]
+}

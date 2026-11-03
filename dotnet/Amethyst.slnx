@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Amethyst.Core/Amethyst.Core.csproj" />
+  <Project Path="Amethyst.Core.Tests/Amethyst.Core.Tests.csproj" />
+</Solution>

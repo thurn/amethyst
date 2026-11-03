@@ -1,0 +1,5 @@
+{
+  "name": "Amethyst.Core.Unity",
+  "rootNamespace": "Amethyst",
+  "references": ["Amethyst.Core"]
+}

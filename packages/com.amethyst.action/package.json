@@ -1,0 +1,11 @@
+{
+  "name": "com.amethyst.action",
+  "version": "0.1.0",
+  "displayName": "Amethyst Action",
+  "description": "The 3D action baseline: arena, hero and camera.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.amethyst.core": "0.1.0",
+    "com.amethyst.native": "0.1.0"
+  }
+}

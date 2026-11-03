@@ -1,0 +1,4 @@
+# Snappy crystal: instant top speed, short dash
+hero.move = snappy
+hero.look = crystal
+hero.speed = 7

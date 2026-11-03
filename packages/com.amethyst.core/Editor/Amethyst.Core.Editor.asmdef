@@ -1,0 +1,6 @@
+{
+  "name": "Amethyst.Core.Editor",
+  "rootNamespace": "Amethyst.Editor",
+  "references": ["Amethyst.Core", "Amethyst.Core.Unity"],
+  "includePlatforms": ["Editor"]
+}

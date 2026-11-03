@@ -1,0 +1,5 @@
+{
+  "name": "Amethyst.Core",
+  "rootNamespace": "Amethyst",
+  "noEngineReferences": true
+}

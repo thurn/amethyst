@@ -1,0 +1,5 @@
+# Floaty orb: slow to start and stop, chase camera
+hero.move = floaty
+hero.look = orb
+camera.view = chase
+camera.distance = 9

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Every package's engine-free code (Runtime/Pure/), as Unity compiles it. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Amethyst</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../packages/*/Runtime/Pure/**/*.cs" />
+  </ItemGroup>
+</Project>

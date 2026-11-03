@@ -1,0 +1,5 @@
+{
+  "name": "Sandbox",
+  "rootNamespace": "Amethyst.Sandbox",
+  "references": ["Amethyst.Core", "Amethyst.Core.Unity", "Amethyst.Action"]
+}

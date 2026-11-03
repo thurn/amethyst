@@ -1,0 +1,51 @@
+# Unity's generated folders and builds, in the game and every testbed.
+/game/[Ll]ibrary/
+/game/[Tt]emp/
+/game/[Oo]bj/
+/game/[Bb]uilds/
+/game/[Ll]ogs/
+/game/[Uu]ser[Ss]ettings/
+/game/*.csproj
+/game/*.sln
+/game/*.slnx
+/game/.vsconfig
+/testbeds/*/[Ll]ibrary/
+/testbeds/*/[Tt]emp/
+/testbeds/*/[Oo]bj/
+/testbeds/*/[Bb]uilds/
+/testbeds/*/[Ll]ogs/
+/testbeds/*/[Uu]ser[Ss]ettings/
+/testbeds/*/*.csproj
+/testbeds/*/*.sln
+/testbeds/*/*.slnx
+/testbeds/*/.vsconfig
+
+# Vendor files and anything derived from them: the repository is public (AGENTS.md).
+**/Assets/Vendor/
+**/Assets/Vendor.meta
+**/Assets/Baked/
+**/Assets/Baked.meta
+
+# Build output: the native plugin (`just native`), dotnet, Python.
+/native/target/
+/packages/com.amethyst.native/Plugins/
+/packages/com.amethyst.native/Plugins.meta
+/dotnet/**/bin/
+/dotnet/**/obj/
+/tools/.venv/
+/tools/.pyre/
+__pycache__/
+*.egg-info/
+
+# Logs, captures and run folders live in ~/Library/Caches/amethyst, never here.
+/out/
+.DS_Store
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
+/.worktrees/
+/.beads/interactions.jsonl

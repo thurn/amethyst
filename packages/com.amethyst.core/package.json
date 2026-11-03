@@ -1,0 +1,7 @@
+{
+  "name": "com.amethyst.core",
+  "version": "0.1.0",
+  "displayName": "Amethyst Core",
+  "description": "Flags, launch arguments, run isolation and preview variants.",
+  "unity": "6000.0"
+}

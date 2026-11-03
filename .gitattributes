@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# FLAGS.md's tables are generated; parallel beads both add rows, so keep both
+# sides and let `just flags-check` catch the order (`just flags-doc` fixes it).
+FLAGS.md merge=union
