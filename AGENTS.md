@@ -19,9 +19,10 @@ Delete freely. The repository is public.
   that wins moves into a package. Delete testbeds once they have served.
 - `game/`: the Unity project that pulls the packages together.
 - `native/`: the Rust workspace behind `libamethyst_native.dylib`.
-- `docs/`: reference material the human provides, such as
-  [the combat feel reference](docs/arpg-combat-feel.md). Read what bears on your
-  work; agents don't add files here.
+- `docs/`: reference material the human provides or requests, such as
+  [the combat feel reference](docs/arpg-combat-feel.md) and
+  [the game design](docs/game-design.md). Read what bears on your work; agents
+  add files here only when explicitly requested.
 - `tools/`: `am`, the Python CLI behind the justfile. `just` lists the commands.
 - Outside the tree: `~/Library/Caches/amethyst` (`$AMETHYST_CACHE`: warm
   Libraries, run folders, test metrics), the vendor packs in `~/synty` and
@@ -141,8 +142,8 @@ of a project shares.
   clippy with `-D warnings`. C# is Unity's C# 9.
 - Scripts are Python in `tools/`, standard library unless a dependency earns its
   place.
-- Markdown: agents add none. README.md, AGENTS.md, FLAGS.md and the human's
-  `docs/` are all there is; plans, designs and notes go in beads.
+- Markdown: agents add none unless explicitly requested. README.md, AGENTS.md,
+  FLAGS.md and `docs/` are all there is; plans, designs and notes go in beads.
 - Never commit logs, captures, screenshots or other evidence of a run; they stay
   in the cache. No "operator pending" lists or checklists for the human either:
   say what they must see in one line of your final message, or nothing.
