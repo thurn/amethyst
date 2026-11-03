@@ -1,5 +1,6 @@
 # Unity's generated folders and builds, in the game and every testbed.
 /game/[Ll]ibrary/
+/game/[Ll]ibrary.tmp-*/
 /game/[Tt]emp/
 /game/[Oo]bj/
 /game/[Bb]uilds/
@@ -10,6 +11,7 @@
 /game/*.slnx
 /game/.vsconfig
 /testbeds/*/[Ll]ibrary/
+/testbeds/*/[Ll]ibrary.tmp-*/
 /testbeds/*/[Tt]emp/
 /testbeds/*/[Oo]bj/
 /testbeds/*/[Bb]uilds/

@@ -136,8 +136,11 @@ def content_keys(root: Path = paths.REPO) -> tuple[str, str]:
         blobs[path] = meta.split()[1]
     changed = git("diff", "--name-only", "HEAD").split()
     for path in changed + git("ls-files", "-o", "--exclude-standard").splitlines():
-        f = root / path
-        blobs[path] = hashlib.sha256(f.read_bytes()).hexdigest() if f.is_file() else "-"
+        # Parallel lanes create and delete files meanwhile: a vanished one counts as absent.
+        try:
+            blobs[path] = hashlib.sha256((root / path).read_bytes()).hexdigest()
+        except OSError:
+            blobs[path] = "-"
     code, tests = hashlib.sha256(), hashlib.sha256()
     for path in sorted(blobs):
         (tests if is_test_path(path) else code).update(
