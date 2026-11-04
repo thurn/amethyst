@@ -40,7 +40,7 @@ namespace Amethyst.Flags
         /// <summary>Changes on every write, and differs between states.</summary>
         public long Version { get; private set; }
 
-        public event Action Changed;
+        public event System.Action Changed;
 
         public void SetLayer(string layer, IEnumerable<KeyValuePair<string, string>> values)
         {
@@ -149,9 +149,9 @@ namespace Amethyst.Flags
 
         sealed class Scope : IDisposable
         {
-            Action dispose;
+            System.Action dispose;
 
-            public Scope(Action dispose) => this.dispose = dispose;
+            public Scope(System.Action dispose) => this.dispose = dispose;
 
             public void Dispose()
             {
