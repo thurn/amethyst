@@ -56,6 +56,9 @@ namespace Amethyst.Action
 
         public Vector2 Knock;
 
+        /// <summary>Whether its knockback has already struck another enemy.</summary>
+        public bool Bumped;
+
         /// <summary>The current attack's wind-up, s, and its way.</summary>
         public float Windup;
         public Vector2 AttackDirection;
@@ -139,6 +142,15 @@ namespace Amethyst.Action
         Wave,
         Buzzer,
         Clear,
+
+        /// <summary>A pushed enemy strikes a wall, pillar, pylon or another enemy at <see cref="RoomEvent.Speed"/>.</summary>
+        Impact,
+
+        /// <summary>A pylon bursts (<see cref="RoomEvent.Amount"/> is its index).</summary>
+        Burst,
+
+        /// <summary>A Spike Vent erupts (<see cref="RoomEvent.Amount"/> is its index).</summary>
+        Erupt,
     }
 
     public struct RoomEvent
@@ -151,6 +163,8 @@ namespace Amethyst.Action
         public bool Killed;
         public bool Telegraphed;
         public HitWeight Weight;
+        public float Speed;
+        public HazardKind Hazard;
     }
 
     public enum RoomPhase
@@ -167,7 +181,9 @@ namespace Amethyst.Action
     /// its <see cref="SpawnList"/>'s enemies arriving from the room's edges behind spawn markers,
     /// never near the hero, walking at it with small gaps between bodies; the horde's contact
     /// damage and Empowered elites, the focused mode's waves and telegraphs; aggression tokens,
-    /// stagger, knockback and per-target hitstop; the horde's timer and buzzer wave. Everything it
+    /// stagger, knockback and per-target hitstop; the horde's timer and buzzer wave; its
+    /// <see cref="Hazards"/>: walls and pillars that block and split the crowd, pylons that burst on
+    /// enemies, Spike Vents that hurt everyone. Everything it
     /// does is a <see cref="RoomEvent"/> in <see cref="Events"/>, which its presenter drains.
     /// </summary>
     public sealed class CombatRoom
@@ -201,11 +217,23 @@ namespace Amethyst.Action
         int nextCount;
         float nextElite;
         int nextId;
+        readonly int[] erupted;
 
-        public CombatRoom(ModeTuning mode, int seed, SpawnList spawns = null)
+        /// <summary>A room of <paramref name="spawns"/> (M1's skeletons by default) in
+        /// <paramref name="layout"/> (by default the mode's square room, walled in).</summary>
+        public CombatRoom(
+            ModeTuning mode,
+            int seed,
+            SpawnList spawns = null,
+            HazardLayout layout = null
+        )
         {
             Mode = mode;
             Spawns = spawns ?? SpawnList.Skeletons;
+            Hazards = new Hazards(layout ?? HazardLayout.Open(new Vector2(mode.ArenaHalfSize)));
+            erupted = new int[Hazards.Layout.Vents.Length];
+            for (int i = 0; i < erupted.Length; i++)
+                erupted[i] = Hazards.Eruption(i, 0f);
             rng = new Random(seed);
             Tokens = new AggressionTokens(mode.AggressionTokens);
             nextElite = mode.EliteEvery * 0.5f;
@@ -214,6 +242,7 @@ namespace Amethyst.Action
         public ModeTuning Mode { get; }
         public SpawnList Spawns { get; }
         public AggressionTokens Tokens { get; }
+        public Hazards Hazards { get; }
         public readonly List<RoomEvent> Events = new List<RoomEvent>();
 
         public IReadOnlyList<Enemy> Enemies => enemies;
@@ -257,6 +286,7 @@ namespace Amethyst.Action
             Spawn(hero, dt);
             Grid();
             var vulnerable = heroVulnerable;
+            Vents(hero, ref vulnerable);
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 var s = enemies[i];
@@ -303,8 +333,16 @@ namespace Amethyst.Action
                     {
                         var step = Mode.WalkSpeed * s.Kind.Speed * dt;
                         var way = distance > far ? toward : -toward;
+                        if (!s.Kind.Flies)
+                            way = Hazards.Steer(
+                                s.Position,
+                                way,
+                                s.Radius,
+                                distance > far ? distance : float.MaxValue
+                            );
                         s.Position += way * step;
                         s.Walked += step;
+                        face = way;
                     }
                     if (
                         telegraphs
@@ -364,7 +402,11 @@ namespace Amethyst.Action
                         Enter(s, EnemyState.Walking);
                     break;
             }
-            s.Position += s.Knock * dt;
+            if (s.Knock.LengthSquared() > 1e-4f)
+            {
+                s.Position += s.Knock * dt;
+                Knocked(s);
+            }
             s.Knock *= MathF.Exp(-KnockDamping * dt);
             var yaw = MathF.Atan2(face.X, face.Y);
             var turn = Wrap(yaw - s.Yaw);
@@ -514,12 +556,23 @@ namespace Amethyst.Action
         /// </summary>
         public (int Hits, int Kills) Hit(Strike strike)
         {
-            int hits = 0,
-                kills = 0;
             var weight =
                 strike.Move == Move.CleaveC || strike.Move == Move.LeapSlam
                     ? HitWeight.Finisher
                     : HitWeight.Light;
+            var result = Deal(strike, weight);
+            var pylons = Hazards.Layout.Pylons;
+            for (int i = 0; i < pylons.Length; i++)
+                if (!Hazards.Broken(i) && strike.Hits(pylons[i].Center, pylons[i].Radius))
+                    Burst(i);
+            return result;
+        }
+
+        // A blow on every enemy in the fight it reaches, from the hero's sword or a hazard.
+        (int Hits, int Kills) Deal(Strike strike, HitWeight weight)
+        {
+            int hits = 0,
+                kills = 0;
             foreach (var s in enemies)
             {
                 if (!s.Fighting || !strike.Hits(s.Position, s.Radius))
@@ -541,7 +594,10 @@ namespace Amethyst.Action
                 var blow =
                     push.LengthSquared() > 1e-6f ? Vector2.Normalize(push) : strike.Direction;
                 if (!wasArmored)
+                {
                     s.Knock = push;
+                    s.Bumped = false;
+                }
                 var killed = s.Hp <= 0;
                 var hitWeight = killed ? HitWeight.Kill : weight;
                 Events.Add(
@@ -574,6 +630,137 @@ namespace Amethyst.Action
                 End();
             return (hits, kills);
         }
+
+        // A pylon's burst: a ring that hurts and throws only enemies, and may burst its neighbours.
+        void Burst(int pylon)
+        {
+            if (!Hazards.Break(pylon))
+                return;
+            var at = Hazards.Layout.Pylons[pylon].Center;
+            Events.Add(
+                new RoomEvent
+                {
+                    Kind = RoomEventKind.Burst,
+                    Position = at,
+                    Amount = pylon,
+                }
+            );
+            Deal(
+                new Strike
+                {
+                    Move = Move.CleaveC,
+                    Shape = StrikeShape.Circle,
+                    Origin = at,
+                    Direction = Vector2.UnitY,
+                    Reach = Hazards.BurstRadius,
+                    Damage = Hazards.BurstDamage,
+                    Knockback = Hazards.BurstKnockback,
+                },
+                HitWeight.Finisher
+            );
+            var pylons = Hazards.Layout.Pylons;
+            for (int i = 0; i < pylons.Length; i++)
+                if (
+                    !Hazards.Broken(i)
+                    && Vector2.Distance(pylons[i].Center, at)
+                        <= Hazards.BurstRadius + pylons[i].Radius
+                )
+                    Burst(i);
+        }
+
+        // Each vent erupts as its marker fills, hurting the hero (a telegraphed hit) and every
+        // enemy in it.
+        void Vents(Vector2 hero, ref bool vulnerable)
+        {
+            var vents = Hazards.Layout.Vents;
+            for (int i = 0; i < vents.Length; i++)
+            {
+                var n = Hazards.Eruption(i, Time);
+                if (n <= erupted[i])
+                    continue;
+                erupted[i] = n;
+                var v = vents[i];
+                Events.Add(
+                    new RoomEvent
+                    {
+                        Kind = RoomEventKind.Erupt,
+                        Position = v.Center,
+                        Amount = i,
+                    }
+                );
+                var off = hero - v.Center;
+                if (vulnerable && off.Length() <= v.Radius + HeroRadius * 0.5f)
+                {
+                    vulnerable = false;
+                    Events.Add(
+                        new RoomEvent
+                        {
+                            Kind = RoomEventKind.HeroHit,
+                            Position = v.Center,
+                            Direction =
+                                off.LengthSquared() > 1e-6f
+                                    ? Vector2.Normalize(off)
+                                    : Vector2.UnitY,
+                            Amount = Mode.VentDamage,
+                            Telegraphed = true,
+                        }
+                    );
+                }
+                Deal(
+                    new Strike
+                    {
+                        Move = Move.LeapSlam,
+                        Shape = StrikeShape.Circle,
+                        Origin = v.Center,
+                        Direction = Vector2.UnitY,
+                        Reach = v.Radius,
+                        Damage = Mode.VentEnemyDamage,
+                        Knockback = 2f,
+                    },
+                    HitWeight.Light
+                );
+            }
+        }
+
+        // A knocked-back enemy stops at what blocks it; striking it fast enough is an Impact,
+        // and a fast Impact on a pylon bursts it.
+        void Knocked(Enemy s)
+        {
+            if (
+                !Hazards.Collide(
+                    ref s.Position,
+                    s.Radius,
+                    s.Kind.Flies,
+                    out var what,
+                    out var index,
+                    out var normal
+                )
+            )
+                return;
+            var knock = s.Knock;
+            if (Vector2.Dot(knock, normal) >= 0f)
+                return;
+            s.Knock = Vector2.Zero;
+            var speed = knock.Length();
+            if (speed < Hazards.ImpactSpeed)
+                return;
+            Impact(s, knock, what);
+            if (what == HazardKind.Pylon && speed >= Hazards.PylonSpeed)
+                Burst(index);
+        }
+
+        void Impact(Enemy s, Vector2 knock, HazardKind what) =>
+            Events.Add(
+                new RoomEvent
+                {
+                    Kind = RoomEventKind.Impact,
+                    Enemy = s,
+                    Position = s.Position,
+                    Direction = Vector2.Normalize(knock),
+                    Speed = knock.Length(),
+                    Hazard = what,
+                }
+            );
 
         void Die(Enemy s, Vector2 blow, float force, float breakAt)
         {
@@ -662,20 +849,20 @@ namespace Amethyst.Action
         // or in a ring around the hero instead.
         void Pack(Vector2 hero, EnemyKind kind, int count, bool empowered)
         {
-            var half = Mode.ArenaHalfSize;
+            var half = Hazards.Layout.Half;
             var at = Vector2.Zero;
             var best = -1f;
             for (int tries = 0; tries < 8; tries++)
             {
-                var along = ((float)rng.NextDouble() * 2f - 1f) * (half - 1f);
-                var inset = half - 0.8f - (float)rng.NextDouble() * 1.5f;
+                var along = (float)rng.NextDouble() * 2f - 1f;
+                var inset = 0.8f + (float)rng.NextDouble() * 1.5f;
                 var side = rng.Next(4);
                 var p = side switch
                 {
-                    0 => new Vector2(along, inset),
-                    1 => new Vector2(along, -inset),
-                    2 => new Vector2(inset, along),
-                    _ => new Vector2(-inset, along),
+                    0 => new Vector2(along * (half.X - 1f), half.Y - inset),
+                    1 => new Vector2(along * (half.X - 1f), inset - half.Y),
+                    2 => new Vector2(half.X - inset, along * (half.Y - 1f)),
+                    _ => new Vector2(inset - half.X, along * (half.Y - 1f)),
                 };
                 var d = Vector2.Distance(p, hero);
                 if (d > best)
@@ -723,7 +910,8 @@ namespace Amethyst.Action
                         p = at + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
                         break;
                 }
-                p = Vector2.Clamp(p, new Vector2(-half + 0.5f), new Vector2(half - 0.5f));
+                p = Vector2.Clamp(p, -half + new Vector2(0.5f), half - new Vector2(0.5f));
+                Hazards.Collide(ref p, kind.Radius * (empowered ? 1.5f : 1f), kind.Flies);
                 var to = hero - p;
                 var s = new Enemy
                 {
@@ -808,7 +996,6 @@ namespace Amethyst.Action
         // overlapping neighbours moves apart by half the overlap, once a step.
         void Separate(Vector2 hero)
         {
-            var half = Mode.ArenaHalfSize - 0.4f;
             foreach (var s in enemies)
             {
                 if (!s.Fighting)
@@ -833,6 +1020,8 @@ namespace Amethyst.Action
                         var n =
                             d > 1e-4f ? apart / d : new Vector2(MathF.Cos(s.Id), MathF.Sin(s.Id));
                         var push = n * ((want - d) * 0.5f);
+                        Bump(s);
+                        Bump(o);
                         if (s.Frozen <= 0f)
                             s.Position += push;
                         if (o.Frozen <= 0f)
@@ -844,8 +1033,17 @@ namespace Amethyst.Action
                 var dh = off.Length();
                 if (dh < clear)
                     s.Position = hero + (dh > 1e-4f ? off / dh : Vector2.UnitY) * clear;
-                s.Position = Vector2.Clamp(s.Position, new Vector2(-half), new Vector2(half));
+                Hazards.Collide(ref s.Position, s.Radius, s.Kind.Flies);
             }
+        }
+
+        // An enemy knocked into another strikes it once per knockback.
+        void Bump(Enemy s)
+        {
+            if (s.Bumped || s.Knock.LengthSquared() < Hazards.ImpactSpeed * Hazards.ImpactSpeed)
+                return;
+            s.Bumped = true;
+            Impact(s, s.Knock, HazardKind.Enemy);
         }
 
         void Grid()

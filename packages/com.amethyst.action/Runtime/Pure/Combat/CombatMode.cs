@@ -90,6 +90,11 @@ namespace Amethyst.Action
         public int FreezeClear,
             FreezeElite;
 
+        /// <summary>A Spike Vent's eruption: damage to the hero (a telegraphed hit) and to each
+        /// enemy in it (enough to kill basic fodder in the horde).</summary>
+        public int VentDamage,
+            VentEnemyDamage;
+
         /// <summary>Shards per kill, on average (later milestones drop them).</summary>
         public float ShardsPerKill;
 
@@ -123,6 +128,8 @@ namespace Amethyst.Action
             HitstopCap = 12,
             FreezeClear = 16,
             FreezeElite = 12,
+            VentDamage = 15,
+            VentEnemyDamage = 20,
             ShardsPerKill = 1.5f,
             UpgradeCounts = 0.5f,
             UpgradeRanges = 0.7f,
@@ -152,6 +159,8 @@ namespace Amethyst.Action
             HitstopCap = 2,
             FreezeClear = 18,
             FreezeElite = 12,
+            VentDamage = 15,
+            VentEnemyDamage = 24,
             ShardsPerKill = 1f / 3f,
             UpgradeCounts = 1f,
             UpgradeRanges = 1f,
