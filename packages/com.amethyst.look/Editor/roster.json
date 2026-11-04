@@ -73,7 +73,8 @@
           "impact": 0.083,
           "end": 1.05
         }
-      ]
+      ],
+      "recipe": "slime"
     },
     {
       "id": "bat",
@@ -108,7 +109,8 @@
           "impact": 0.067,
           "end": 2.0
         }
-      ]
+      ],
+      "recipe": "bat"
     },
     {
       "id": "demon",
@@ -142,7 +144,8 @@
           "impact": 0.067,
           "end": 1.25
         }
-      ]
+      ],
+      "recipe": "demon"
     },
     {
       "id": "goblin",
@@ -180,7 +183,8 @@
           "impact": 0.0,
           "end": 1.617
         }
-      ]
+      ],
+      "recipe": "goblin"
     },
     {
       "id": "mushroom",
@@ -214,7 +218,8 @@
           "impact": 0.0,
           "end": 0.983
         }
-      ]
+      ],
+      "recipe": "mushroom"
     },
     {
       "id": "bigOrk",
@@ -257,7 +262,8 @@
           "impact": 0.0,
           "end": 0.617
         }
-      ]
+      ],
+      "recipe": "bigOrk"
     },
     {
       "id": "troll",
@@ -300,7 +306,8 @@
           "impact": 0.0,
           "end": 0.617
         }
-      ]
+      ],
+      "recipe": "troll"
     },
     {
       "id": "fatOgre",

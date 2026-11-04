@@ -1,0 +1,5 @@
+# Review, accent, vendor meshes: the same poses drawn from the vendor meshes
+look.scene = review
+look.review = goblin,mushroom
+look.view = 8
+look.mesh = vendor

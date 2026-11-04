@@ -39,7 +39,7 @@ namespace Amethyst.LookTestbed
             var lib = MonsterLibrary.Load();
             bool vendor = LookFlags.Mesh.Value == LookMesh.Vendor;
             if (lib != null && LookFlags.Scene.Value == LookScene.Review)
-                review = new ReviewDemo(lib, palette, vendor);
+                review = new ReviewDemo(lib, palette, vendor, LookFlags.Review.Value);
             else if (lib != null)
                 crowd = new CrowdDemo(lib, palette, LookFlags.Crowd.Value, vendor);
             else
@@ -53,10 +53,10 @@ namespace Amethyst.LookTestbed
             var target = Vector3.zero;
             if (review != null)
             {
-                // The hero runs on the spot at the end of the knights' row.
-                target = new Vector3(ReviewDemo.Spacing * 0.5f, 0, 0);
+                // The hero runs on the spot at the end of the first row.
+                target = new Vector3(review.Spacing * 0.5f, 0, 0);
                 hero?.transform.SetPositionAndRotation(
-                    ReviewDemo.Spot(0, 4),
+                    review.HeroSpot,
                     Quaternion.Euler(0, (Mathf.PI - 0.6f) * Mathf.Rad2Deg, 0)
                 );
             }

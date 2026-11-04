@@ -117,6 +117,14 @@ class Source:
         """The bone a rigid part (a held weapon) rides."""
         return int(self.bones[self.part(name).first, 0])
 
+    def held(self) -> np.ndarray:
+        """Which vertices belong to a rigid part (a held weapon or shield), (n,) bool."""
+        mask = np.zeros(len(self.positions), bool)
+        for p in self.parts:
+            if p.rigid:
+                mask[p.first : p.first + p.count] = True
+        return mask
+
     def transfer(self, points, bones: list[str]) -> tuple[np.ndarray, np.ndarray]:
         """Skin weights for `points` by transfer from the source's nearest vertices
         whose strongest bone is one of `bones` (a shape's own region: never across

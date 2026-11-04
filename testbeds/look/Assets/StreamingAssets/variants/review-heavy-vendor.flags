@@ -1,0 +1,5 @@
+# Review, heavy, vendor meshes: the same poses drawn from the vendor meshes
+look.scene = review
+look.review = bigOrk,troll
+look.view = 15
+look.mesh = vendor

@@ -269,21 +269,24 @@ in `Awake` or `Start`, or every frame.
 ### testbeds/look
 
 - `look.crowd` = `320` (int): Crowd figures around the hero.
-  [LookEntry.cs:47](testbeds/look/Assets/Look/LookEntry.cs#L47)
+  [LookEntry.cs:53](testbeds/look/Assets/Look/LookEntry.cs#L53)
 
 - `look.grid` = `1` (float): The floor grid's brightness, times its resting
-  light. [LookEntry.cs:41](testbeds/look/Assets/Look/LookEntry.cs#L41)
+  light. [LookEntry.cs:47](testbeds/look/Assets/Look/LookEntry.cs#L47)
 
 - `look.mesh` = `recipe` (enum: recipe | vendor): Figures' meshes: their
   wireframe recipes' where they have one, or the vendor's.
   [LookEntry.cs:29](testbeds/look/Assets/Look/LookEntry.cs#L29)
+
+- `look.review` = `knight,skeleton` (string): The review's rows: crowd type ids,
+  comma-separated. [LookEntry.cs:35](testbeds/look/Assets/Look/LookEntry.cs#L35)
 
 - `look.scene` = `crowd` (enum: crowd | review): The crowd round the running
   hero, or the wireframe meshes posed up close.
   [LookEntry.cs:23](testbeds/look/Assets/Look/LookEntry.cs#L23)
 
 - `look.view` = `36` (float): Ground the camera sees across, m (the trailer's
-  36). [LookEntry.cs:35](testbeds/look/Assets/Look/LookEntry.cs#L35)
+  36). [LookEntry.cs:41](testbeds/look/Assets/Look/LookEntry.cs#L41)
 
 - variant `default`: Trailer: the neon edge trailer's framing (36 m across) and
   grid. Sets .
@@ -296,6 +299,36 @@ in `Awake` or `Start`, or every frame.
 - variant `near-bright`: Near, bright grid: 26 m across, the grid at 170%. Sets
   `look.view=26`, `look.grid=1.7`.
   [near-bright.flags](testbeds/look/Assets/StreamingAssets/variants/near-bright.flags)
+
+- variant `review-accent-vendor`: Review, accent, vendor meshes: the same poses
+  drawn from the vendor meshes. Sets `look.scene=review`,
+  `look.review=goblin,mushroom`, `look.view=8`, `look.mesh=vendor`.
+  [review-accent-vendor.flags](testbeds/look/Assets/StreamingAssets/variants/review-accent-vendor.flags)
+
+- variant `review-accent`: Review, accent: the accent family's goblin and
+  mushroom up close, still and mid-clip. Sets `look.scene=review`,
+  `look.review=goblin,mushroom`, `look.view=8`.
+  [review-accent.flags](testbeds/look/Assets/StreamingAssets/variants/review-accent.flags)
+
+- variant `review-heavy-vendor`: Review, heavy, vendor meshes: the same poses
+  drawn from the vendor meshes. Sets `look.scene=review`,
+  `look.review=bigOrk,troll`, `look.view=15`, `look.mesh=vendor`.
+  [review-heavy-vendor.flags](testbeds/look/Assets/StreamingAssets/variants/review-heavy-vendor.flags)
+
+- variant `review-heavy`: Review, heavy: the counter family's big ork and troll
+  up close, still and mid-clip. Sets `look.scene=review`,
+  `look.review=bigOrk,troll`, `look.view=15`.
+  [review-heavy.flags](testbeds/look/Assets/StreamingAssets/variants/review-heavy.flags)
+
+- variant `review-key-vendor`: Review, key, vendor meshes: the same poses drawn
+  from the vendor meshes. Sets `look.scene=review`,
+  `look.review=slime,bat,demon`, `look.view=11`, `look.mesh=vendor`.
+  [review-key-vendor.flags](testbeds/look/Assets/StreamingAssets/variants/review-key-vendor.flags)
+
+- variant `review-key`: Review, key: the key family's slime, bat and demon up
+  close, still and mid-clip. Sets `look.scene=review`,
+  `look.review=slime,bat,demon`, `look.view=11`.
+  [review-key.flags](testbeds/look/Assets/StreamingAssets/variants/review-key.flags)
 
 - variant `review-vendor`: Review, vendor meshes: the same poses drawn from the
   vendor meshes. Sets `look.scene=review`, `look.view=9`, `look.mesh=vendor`.

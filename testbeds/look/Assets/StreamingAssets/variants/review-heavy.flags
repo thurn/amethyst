@@ -1,0 +1,4 @@
+# Review, heavy: the counter family's big ork and troll up close, still and mid-clip
+look.scene = review
+look.review = bigOrk,troll
+look.view = 15

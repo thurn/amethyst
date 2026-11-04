@@ -15,12 +15,14 @@ namespace Amethyst.LookTestbed
         /// <summary>Each type's share of the crowd, by roster id.</summary>
         static readonly Dictionary<string, float> Shares = new Dictionary<string, float>
         {
-            ["skeleton"] = 0.28f,
-            ["demon"] = 0.2f,
-            ["goblin"] = 0.17f,
-            ["mushroom"] = 0.12f,
+            ["skeleton"] = 0.24f,
+            ["demon"] = 0.17f,
+            ["goblin"] = 0.15f,
+            ["slime"] = 0.1f,
+            ["mushroom"] = 0.1f,
             ["bat"] = 0.09f,
-            ["bigOrk"] = 0.1f,
+            ["bigOrk"] = 0.09f,
+            ["troll"] = 0.06f,
         };
 
         const float WalkSpeed = 1.3f; // m/s

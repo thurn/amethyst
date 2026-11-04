@@ -32,6 +32,12 @@ namespace Amethyst.LookTestbed
             "Figures' meshes: their wireframe recipes' where they have one, or the vendor's"
         );
 
+        public static readonly Flag<string> Review = Flag.String(
+            "look.review",
+            "knight,skeleton",
+            "The review's rows: crowd type ids, comma-separated"
+        );
+
         public static readonly Flag<float> View = Flag.Float(
             "look.view",
             36f,

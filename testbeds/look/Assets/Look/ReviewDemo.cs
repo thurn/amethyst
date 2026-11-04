@@ -1,18 +1,17 @@
 using System;
+using System.Linq;
 using Amethyst.Look;
 using UnityEngine;
 
 namespace Amethyst.LookTestbed
 {
     /// <summary>
-    /// The wireframe meshes up close, drawn by the crowd renderer: a row of knights and a row of
-    /// skeletons, each standing still (idle at its start), mid-stride, mid-swing and recoiling,
-    /// turned three-quarters to the camera.
+    /// The wireframe meshes up close, drawn by the crowd renderer: one row per type in look.review,
+    /// each figure standing still (idle at its start), mid-stride, mid-swing and recoiling, turned
+    /// three-quarters to the camera, spaced for the tallest of them.
     /// </summary>
     sealed class ReviewDemo : IDisposable
     {
-        public static readonly string[] Types = { "knight", "skeleton" };
-
         /// <summary>Each column's clip role and how far into the clip it is posed (0 to 1); the
         /// impact time where the roster gives one.</summary>
         static readonly (string role, float at)[] Poses =
@@ -23,29 +22,44 @@ namespace Amethyst.LookTestbed
             ("hit", 0.25f),
         };
 
-        public const float Spacing = 1.6f;
-        public const float RowGap = 2.6f;
-
         public readonly MonsterCrowd Crowd;
         readonly MonsterLibrary lib;
+        readonly int[] rows;
 
-        public ReviewDemo(MonsterLibrary lib, Palette palette, bool vendorMeshes)
+        /// <summary>Between columns and between rows, m.</summary>
+        public readonly float Spacing,
+            RowGap;
+
+        public ReviewDemo(MonsterLibrary lib, Palette palette, bool vendorMeshes, string types)
         {
             this.lib = lib;
+            rows = types
+                .Split(',')
+                .Select(id => lib.IndexOf(id.Trim()))
+                .Where(i => i >= 0)
+                .ToArray();
+            float tallest = rows.Length > 0 ? rows.Max(i => lib.Types[i].HeightM) : 0f;
+            Spacing = Mathf.Max(1.6f, 0.95f * tallest);
+            RowGap = Mathf.Max(2.6f, 1.45f * tallest);
             Crowd = new MonsterCrowd(lib, Poses.Length, palette, vendorMeshes);
         }
 
         /// <summary>Where a row's column stands: rows from the back, columns from the left.</summary>
-        public static Vector3 Spot(int row, float column) =>
-            new Vector3((column - (Poses.Length - 1) * 0.5f) * Spacing, 0, (0.5f - row) * RowGap);
+        public Vector3 Spot(int row, float column) =>
+            new Vector3(
+                (column - (Poses.Length - 1) * 0.5f) * Spacing,
+                0,
+                ((rows.Length - 1) * 0.5f - row) * RowGap
+            );
+
+        /// <summary>Where the hero stands: at the end of the first row.</summary>
+        public Vector3 HeroSpot => Spot(0, Poses.Length);
 
         public void Update(float time)
         {
-            for (int row = 0; row < Types.Length; row++)
+            for (int row = 0; row < rows.Length; row++)
             {
-                int type = lib.IndexOf(Types[row]);
-                if (type < 0)
-                    continue;
+                int type = rows[row];
                 var t = lib.Types[type];
                 var instances = Crowd.Instances(type, Poses.Length);
                 var motion = Crowd.Motion(type, Poses.Length);
