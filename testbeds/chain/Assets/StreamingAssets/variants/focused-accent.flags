@@ -1,0 +1,4 @@
+# Focused, accent: goblins and mushrooms in the waves among the skeletons
+combat.mode = focused
+chain.crowd = accent
+hero.aim = cursor

@@ -37,6 +37,14 @@ namespace Amethyst.Action
         /// <summary>A cone in front of it, <see cref="EnemyKind.Reach"/> deep, at the clip's impact:
         /// the skeleton's Attack 1, the slime's Spit Attack.</summary>
         Cone,
+
+        /// <summary>A crouch behind a red lane marker <see cref="EnemyKind.Reach"/> long, then a
+        /// dash along it that hits whatever is in it: the goblin's.</summary>
+        Lunge,
+
+        /// <summary>Slow spores lofted at the hero's spot under a filling red circle, from
+        /// <see cref="EnemyKind.Reach"/> away: the mushroom's.</summary>
+        Volley,
     }
 
     /// <summary>How a horde pack arrives (the trailer's crowd shapes); focused waves come in packs.</summary>
@@ -74,6 +82,12 @@ namespace Amethyst.Action
 
         /// <summary>Carries an armor bar even when not Empowered.</summary>
         public bool Armored;
+
+        /// <summary>Its telegraph's wind-up, s; 0 for the mode's.</summary>
+        public float Windup;
+
+        /// <summary>A volley's spores' speed over the ground, m/s: at most half the dash's.</summary>
+        public float ProjectileSpeed = 8f;
         public AttackKind Attack;
 
         /// <summary>Its attack's reach at scale 1, m; its wind-up starts from 0.8 of it.</summary>
@@ -136,7 +150,41 @@ namespace Amethyst.Action
             Formation = Formation.Stream,
         };
 
-        public static readonly IReadOnlyList<EnemyKind> All = new[] { Skeleton, Slime, Demon, Bat };
+        /// <summary>A rusher: crouches 300 ms behind its lane marker, then lunges along it.</summary>
+        public static readonly EnemyKind Goblin = new EnemyKind
+        {
+            Id = "goblin",
+            Family = EnemyFamily.Accent,
+            Role = EnemyRole.Special,
+            Speed = 1.3f,
+            Radius = 0.35f,
+            Attack = AttackKind.Lunge,
+            Windup = 0.3f,
+            Reach = 5f,
+        };
+
+        /// <summary>Ranged: hangs back 6-8 m and lofts slow spore volleys at a marked spot.</summary>
+        public static readonly EnemyKind Mushroom = new EnemyKind
+        {
+            Id = "mushroom",
+            Family = EnemyFamily.Accent,
+            Role = EnemyRole.Special,
+            Speed = 0.8f,
+            Radius = 0.4f,
+            Attack = AttackKind.Volley,
+            Windup = 0.4f,
+            Reach = 9f,
+        };
+
+        public static readonly IReadOnlyList<EnemyKind> All = new[]
+        {
+            Skeleton,
+            Slime,
+            Demon,
+            Bat,
+            Goblin,
+            Mushroom,
+        };
 
         public static EnemyKind Of(string id)
         {
@@ -183,23 +231,32 @@ namespace Amethyst.Action
             EnemyKinds.Demon
         );
 
-        /// <summary>A pack's kind; a list of one kind draws nothing from <paramref name="rng"/>.</summary>
-        public EnemyKind Pick(Random rng)
+        /// <summary>Skeletons with the accent family's specials, goblins and mushrooms, among them.</summary>
+        public static readonly SpawnList Accent = new SpawnList(
+            new[] { (EnemyKinds.Skeleton, 2f), (EnemyKinds.Goblin, 1f), (EnemyKinds.Mushroom, 1f) }
+        );
+
+        /// <summary>A pack's kind, with specials' and heavies' weights times
+        /// <paramref name="special"/>; a list of one kind draws nothing from <paramref name="rng"/>.</summary>
+        public EnemyKind Pick(Random rng, float special = 1f)
         {
             if (Mix.Length == 1)
                 return Mix[0].Kind;
             float total = 0f;
-            foreach (var (_, w) in Mix)
-                total += w;
+            foreach (var (kind, w) in Mix)
+                total += Weight(kind, w, special);
             var at = (float)rng.NextDouble() * total;
             foreach (var (kind, w) in Mix)
             {
-                at -= w;
+                at -= Weight(kind, w, special);
                 if (at < 0f)
                     return kind;
             }
             return Mix[Mix.Length - 1].Kind;
         }
+
+        static float Weight(EnemyKind kind, float weight, float special) =>
+            kind.Role == EnemyRole.Fodder ? weight : weight * special;
 
         public EnemyKind PickElite(Random rng) =>
             Elites.Length == 1 ? Elites[0] : Elites[rng.Next(Elites.Length)];

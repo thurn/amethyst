@@ -232,9 +232,15 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
-- `chain.crowd` = `skeletons` (enum: skeletons | mixed): What the room spawns:
-  skeletons, or the key family's fodder mixed.
-  [ChainEntry.cs:21](testbeds/chain/Assets/Chain/ChainEntry.cs#L21)
+- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent): What the room
+  spawns: skeletons, the key family's fodder mixed, or skeletons with the accent
+  family's goblins and mushrooms.
+  [ChainEntry.cs:24](testbeds/chain/Assets/Chain/ChainEntry.cs#L24)
+
+- variant `focused-accent`: Focused, accent: goblins and mushrooms in the waves
+  among the skeletons. Sets `combat.mode=focused`, `chain.crowd=accent`,
+  `hero.aim=cursor`.
+  [focused-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-accent.flags)
 
 - variant `focused-mixed`: Focused, mixed: waves of skeletons, slimes, demons
   and bats, each telegraphing its own attack. Sets `combat.mode=focused`,
@@ -244,6 +250,11 @@ in `Awake` or `Start`, or every frame.
 - variant `focused`: Focused: waves of a few enemies that all telegraph, the
   camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
+
+- variant `horde-accent`: Horde, accent: a few goblins and mushrooms among the
+  skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=accent`,
+  `hero.aim=cursor`.
+  [horde-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-accent.flags)
 
 - variant `horde-mixed`: Horde, mixed: slimes in rings, demons and skeletons in
   packs, bats in streams. Sets `combat.mode=horde`, `hero.aim=cursor`,

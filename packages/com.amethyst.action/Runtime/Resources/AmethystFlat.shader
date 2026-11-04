@@ -1,11 +1,13 @@
 // Flat unlit colour for the fight's ground shapes and bars (Flat.cs): the swing crescents, spawn markers,
 // telegraphs, armor bars. Alpha blended, no depth writes, so a later queue draws over an earlier one where they
-// overlap: enemy telegraphs (a later queue) draw above the hero's effects. No keywords.
+// overlap: enemy telegraphs (a later queue) draw above the hero's effects, and with _ZTest Always above the
+// crowd's figures too. No keywords.
 Shader "Amethyst/Flat"
 {
     Properties
     {
         [HDR] _Color ("Colour (linear, alpha)", Color) = (1, 1, 1, 1)
+        [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth test", Float) = 4
     }
     SubShader
     {
@@ -16,6 +18,7 @@ Shader "Amethyst/Flat"
             Tags { "LightMode" = "UniversalForward" }
             Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
+            ZTest [_ZTest]
             Cull Off
             HLSLPROGRAM
             #pragma vertex vert

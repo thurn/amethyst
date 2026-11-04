@@ -14,6 +14,9 @@ namespace Amethyst.Chain
 
         /// <summary>The key family's fodder mixed: skeletons, slimes, demons and bats.</summary>
         Mixed,
+
+        /// <summary>Skeletons with the accent family's goblins and mushrooms among them.</summary>
+        Accent,
     }
 
     public static class ChainFlags
@@ -21,7 +24,7 @@ namespace Amethyst.Chain
         public static readonly Flag<ChainCrowd> Crowd = Flag.Enum(
             "chain.crowd",
             ChainCrowd.Skeletons,
-            "What the room spawns: skeletons, or the key family's fodder mixed"
+            "What the room spawns: skeletons, the key family's fodder mixed, or skeletons with the accent family's goblins and mushrooms"
         );
     }
 
@@ -45,9 +48,12 @@ namespace Amethyst.Chain
         {
             if (Object.FindAnyObjectByType<Fight>() == null)
                 Fight.Begin(
-                    ChainFlags.Crowd.Value == ChainCrowd.Mixed
-                        ? SpawnList.KeyFodder
-                        : SpawnList.Skeletons
+                    ChainFlags.Crowd.Value switch
+                    {
+                        ChainCrowd.Mixed => SpawnList.KeyFodder,
+                        ChainCrowd.Accent => SpawnList.Accent,
+                        _ => SpawnList.Skeletons,
+                    }
                 );
         }
     }

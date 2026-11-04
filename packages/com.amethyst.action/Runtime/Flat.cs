@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Amethyst.Action
 {
@@ -6,7 +7,8 @@ namespace Amethyst.Action
     /// Materials in one flat unlit colour (Resources/AmethystFlat.shader), alpha blended without
     /// depth writes, for effects and ground shapes. The queue orders them where they overlap: the
     /// hero's effects at <see cref="Effects"/>, enemy telegraphs above them (docs/game-design.md,
-    /// Look &gt; Visual priority).
+    /// Look &gt; Visual priority). From <see cref="Telegraphs"/> on they skip the depth test, so a
+    /// crowd's figures never hide a telegraph or a bar.
     /// </summary>
     public static class Flat
     {
@@ -24,6 +26,10 @@ namespace Amethyst.Action
                 shader = Resources.Load<Shader>("AmethystFlat");
             var m = new Material(shader) { renderQueue = queue };
             m.SetColor("_Color", color);
+            m.SetFloat(
+                "_ZTest",
+                (float)(queue >= Telegraphs ? CompareFunction.Always : CompareFunction.LessEqual)
+            );
             return m;
         }
     }

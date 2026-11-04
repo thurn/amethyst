@@ -1,0 +1,4 @@
+# Horde, accent: a few goblins and mushrooms among the skeleton fodder
+combat.mode = horde
+chain.crowd = accent
+hero.aim = cursor

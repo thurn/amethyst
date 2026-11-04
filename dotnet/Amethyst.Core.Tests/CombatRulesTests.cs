@@ -50,10 +50,16 @@ namespace Amethyst.Tests
             Assert.That(tokens.Held, Is.EqualTo(2));
         }
 
-        [Test]
-        public void FocusedRoomNeverHasMoreThanTwoWindingUp()
+        [TestCase(CombatMode.Focused, false)]
+        [TestCase(CombatMode.Focused, true)]
+        [TestCase(CombatMode.Horde, true)]
+        public void TokensCapWindUpsInBothModes(CombatMode mode, bool specials)
         {
-            var room = new CombatRoom(ModeTuning.Focused, 7);
+            var tuning = ModeTuning.For(mode);
+            var spawns = specials
+                ? new SpawnList(new[] { (EnemyKinds.Goblin, 1f), (EnemyKinds.Mushroom, 1f) })
+                : SpawnList.Skeletons;
+            var room = new CombatRoom(tuning, 7, spawns);
             int most = 0;
             for (int f = 0; f < 60 * 20; f++)
             {
@@ -63,7 +69,74 @@ namespace Amethyst.Tests
                     room.Enemies.Count(s => s.State == EnemyState.WindingUp)
                 );
             }
-            Assert.That(most, Is.EqualTo(2), "the wave crowds the hero, two at a time wind up");
+            Assert.That(most, Is.EqualTo(tuning.AggressionTokens), "the crowd fills the tokens");
+        }
+
+        [TestCase(0f, true)]
+        [TestCase(2f, false)]
+        public void AGoblinsLungeHitsOnlyAHeroStillInItsLane(float sidestep, bool hit)
+        {
+            var mode = ModeTuning.Focused.Copy();
+            mode.WaveMin = mode.WaveMax = 1;
+            mode.Waves = 1;
+            var room = new CombatRoom(mode, 5, new SpawnList(new[] { (EnemyKinds.Goblin, 1f) }));
+            var hero = Vector2.Zero;
+            Enemy goblin = null;
+            for (int f = 0; f < 60 * 20 && goblin == null; f++)
+            {
+                room.Step(1f / 60f, hero, false);
+                goblin = room.Enemies.FirstOrDefault(s => s.State == EnemyState.WindingUp);
+            }
+            Assert.That(goblin, Is.Not.Null, "the goblin crouches behind its lane");
+            var side = new Vector2(-goblin.AttackDirection.Y, goblin.AttackDirection.X);
+            hero += side * sidestep;
+            bool lunged = false,
+                struck = false;
+            for (int f = 0; f < 60 * 2 && goblin.State != EnemyState.Recovering; f++)
+            {
+                room.Step(1f / 60f, hero, true);
+                lunged |= goblin.State == EnemyState.Lunging;
+                struck |= room.Events.Any(e => e.Kind == RoomEventKind.HeroHit && e.Telegraphed);
+                room.Events.Clear();
+            }
+            Assert.That(lunged, Is.True);
+            Assert.That(struck, Is.EqualTo(hit));
+        }
+
+        [TestCase(CombatMode.Focused)]
+        [TestCase(CombatMode.Horde)]
+        public void SporesNeverOutpaceHalfTheDash(CombatMode mode)
+        {
+            var dash = new Dash();
+            var most = 0.5f * dash.Distance / dash.Duration;
+            var room = new CombatRoom(
+                ModeTuning.For(mode),
+                11,
+                new SpawnList(new[] { (EnemyKinds.Mushroom, 1f) })
+            );
+            var last = new System.Collections.Generic.Dictionary<(Volley, int), Vector3>();
+            const float dt = 1f / 60f;
+            int moves = 0;
+            for (int f = 0; f < 60 * 20; f++)
+            {
+                // The hero circles, so the volleys come from every distance.
+                var hero =
+                    new Vector2(System.MathF.Cos(f * 0.01f), System.MathF.Sin(f * 0.01f)) * 3f;
+                room.Step(dt, hero, false);
+                foreach (var v in room.Volleys)
+                    for (int i = 0; i < v.Landings.Length; i++)
+                    {
+                        var (at, height) = v.Spore(i, room.Time);
+                        var p = new Vector3(at.X, height, at.Y);
+                        if (last.TryGetValue((v, i), out var was))
+                        {
+                            Assert.That(Vector3.Distance(p, was) / dt, Is.LessThanOrEqualTo(most));
+                            moves++;
+                        }
+                        last[(v, i)] = p;
+                    }
+            }
+            Assert.That(moves, Is.GreaterThan(100), "mushrooms lofted volleys");
         }
 
         [Test]

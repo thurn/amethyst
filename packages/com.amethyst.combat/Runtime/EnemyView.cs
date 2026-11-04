@@ -209,6 +209,12 @@ namespace Amethyst.Combat
                     time = f * k.Impact;
                     flare = Mathf.Max(flare, 0.3f + 0.7f * f);
                     break;
+                case EnemyState.Lunging:
+                    // The strike's pose held through the dash, burning.
+                    clip = k.Attack;
+                    time = k.Impact;
+                    flare = Mathf.Max(flare, 1f);
+                    break;
                 case EnemyState.Recovering:
                     clip = k.Attack;
                     time = k.Impact + s.Age;
@@ -290,8 +296,10 @@ namespace Amethyst.Combat
         /// <summary>
         /// The enemies' ground shapes, each in its kind's hue: each spawn marker filling over its
         /// time, each telegraph a red shape filling toward its impact (above the hero's effects; a
-        /// cone's a wedge), an Empowered one's ring and an armored one's armor bar. <paramref name="view"/> sets
-        /// the bars' heights; without one they float at a skeleton's.
+        /// cone's a wedge, a lunge's its lane, a volley's the circle it lands in, filling on through
+        /// the spores' flight), the spores in the air, an Empowered one's ring and an armored one's
+        /// armor bar. <paramref name="view"/> sets the bars' heights; without one they float at a
+        /// skeleton's.
         /// </summary>
         public static void Shapes(
             Shapes shapes,
@@ -303,6 +311,17 @@ namespace Amethyst.Combat
         {
             var telegraph = Danger(palette, 0.25f);
             var telegraphFill = Danger(palette, 0.55f);
+            foreach (var v in room.Volleys)
+            {
+                var flight = Mathf.Clamp01((room.Time - v.Launched) / (v.Lands - v.Launched));
+                Landing(shapes, v.Target, v.Radius, 0.5f + 0.5f * flight, palette);
+                for (int i = 0; i < v.Landings.Length; i++)
+                {
+                    var (spore, height) = v.Spore(i, room.Time);
+                    var p = new Vector3(spore.X, height + 0.3f, spore.Y);
+                    shapes.Disc(p, 0.22f, Danger(palette, 1f), Flat.Telegraphs + 2);
+                }
+            }
             foreach (var s in room.Enemies)
             {
                 var at = new Vector3(s.Position.X, 0.02f, s.Position.Y);
@@ -335,7 +354,22 @@ namespace Amethyst.Combat
                                     Flat.Telegraphs + 1
                                 );
                                 break;
+                            case AttackKind.Lunge:
+                                Lane(shapes, s, fill, telegraph, telegraphFill);
+                                break;
+                            case AttackKind.Volley:
+                                Landing(
+                                    shapes,
+                                    s.Aim,
+                                    CombatRoom.VolleyRadius * s.Scale,
+                                    0.5f * fill,
+                                    palette
+                                );
+                                break;
                         }
+                        break;
+                    case EnemyState.Lunging:
+                        Lane(shapes, s, 1f, telegraph, telegraphFill);
                         break;
                 }
                 if (s.State != EnemyState.Dying && (s.Empowered || s.MaxArmor > 0))
@@ -357,6 +391,32 @@ namespace Amethyst.Combat
                     }
                 }
             }
+        }
+
+        // A lunge's lane from where it crouched, filled to `fill` of its length.
+        static void Lane(Shapes shapes, Enemy s, float fill, Color back, Color front)
+        {
+            var at = new Vector3(s.Aim.X, 0.02f, s.Aim.Y);
+            var toward = new Vector3(s.AttackDirection.X, 0f, s.AttackDirection.Y);
+            var length = s.Kind.Reach * s.Scale;
+            var width = 2f * CombatRoom.LaneHalfWidth * s.Scale;
+            shapes.Lane(at, toward, length, width, back, Flat.Telegraphs);
+            shapes.Lane(at, toward, length * fill, width, front, Flat.Telegraphs + 1);
+        }
+
+        // A volley's landing circle, its outline and its fill to `fill` of its radius.
+        static void Landing(
+            Shapes shapes,
+            System.Numerics.Vector2 at,
+            float radius,
+            float fill,
+            Palette palette
+        )
+        {
+            var p = new Vector3(at.X, 0.02f, at.Y);
+            shapes.Ring(p, radius, Danger(palette, 0.9f), Flat.Telegraphs);
+            shapes.Disc(p, radius, Danger(palette, 0.2f), Flat.Telegraphs);
+            shapes.Disc(p, radius * fill, Danger(palette, 0.55f), Flat.Telegraphs + 1);
         }
 
         static Color Hue(Palette palette, EnemyKind kind) =>

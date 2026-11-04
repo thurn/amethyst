@@ -12,6 +12,9 @@ namespace Amethyst.Action
 
         /// <summary>The telegraph: Attack 1 up to its impact, holding a token.</summary>
         WindingUp,
+
+        /// <summary>A lunge's dash along its lane.</summary>
+        Lunging,
         Recovering,
         Staggered,
 
@@ -57,6 +60,12 @@ namespace Amethyst.Action
         public float Windup;
         public Vector2 AttackDirection;
 
+        /// <summary>Where the current attack aims: a lunge's lane starts there, a volley lands there.</summary>
+        public Vector2 Aim;
+
+        /// <summary>Whether the current lunge has hit the hero.</summary>
+        public bool Landed;
+
         /// <summary>The blow that killed it (unit), its force and when it shatters (room time).</summary>
         public Vector2 Blow;
         public float Force;
@@ -76,6 +85,35 @@ namespace Amethyst.Action
         public bool Fighting => State != EnemyState.Arriving && State != EnemyState.Dying;
 
         public float Age => Clock - Since;
+    }
+
+    /// <summary>
+    /// A volley's spores in flight from <see cref="From"/>, each lofted on its own arc to its
+    /// landing, all landing together at <see cref="Lands"/> inside the marked circle around
+    /// <see cref="Target"/>, which hurts the hero then.
+    /// </summary>
+    public sealed class Volley
+    {
+        /// <summary>An arc's peak, times its length, so a short lob is as slow as a long one.</summary>
+        public const float Loft = 0.15f;
+
+        public Enemy Owner;
+        public Vector2 From,
+            Target;
+        public float Radius;
+        public Vector2[] Landings;
+        public float Launched,
+            Lands;
+
+        /// <summary>Spore <paramref name="i"/> at room time <paramref name="time"/>: where over the
+        /// ground and how high.</summary>
+        public (Vector2 At, float Height) Spore(int i, float time)
+        {
+            var f = Math.Clamp((time - Launched) / Math.Max(Lands - Launched, 1e-4f), 0f, 1f);
+            var to = Landings[i];
+            var peak = Loft * Vector2.Distance(From, to);
+            return (Vector2.Lerp(From, to, f), 4f * peak * f * (1f - f));
+        }
     }
 
     public enum RoomEventKind
@@ -141,14 +179,22 @@ namespace Amethyst.Action
         const float ConeHalfAngle = 1.2f; // radians
         const float StaggerSeconds = 0.4f;
         const float RecoverSeconds = 0.6f;
+        const float LungeSpeed = 14f;
+        const int Spores = 3;
         const float KnockDamping = 7f;
         const float TurnRate = 9f;
         const float WaveSpeed = 40f;
         const float Cell = 1.2f;
         const float StreamGap = 0.3f; // s between a stream's arrivals
 
+        /// <summary>A lunge's lane's half width and a volley's landing circle's radius at scale 1,
+        /// m: the hero's centre in them is hit.</summary>
+        public const float LaneHalfWidth = 0.6f,
+            VolleyRadius = 1.3f;
+
         readonly Random rng;
         readonly List<Enemy> enemies = new List<Enemy>();
+        readonly List<Volley> volleys = new List<Volley>();
         readonly Dictionary<long, List<Enemy>> grid = new Dictionary<long, List<Enemy>>();
         float spawnBudget;
         EnemyKind nextKind; // the horde's next pack, once drawn
@@ -171,6 +217,9 @@ namespace Amethyst.Action
         public readonly List<RoomEvent> Events = new List<RoomEvent>();
 
         public IReadOnlyList<Enemy> Enemies => enemies;
+
+        /// <summary>Volleys in flight.</summary>
+        public IReadOnlyList<Volley> Volleys => volleys;
         public float Time { get; private set; }
         public RoomPhase Phase { get; private set; }
         public int Wave { get; private set; }
@@ -232,6 +281,7 @@ namespace Amethyst.Action
                 s.Clock += dt;
                 Think(s, hero, dt, ref vulnerable);
             }
+            Land(hero, ref vulnerable);
             Separate(hero);
             End();
         }
@@ -248,11 +298,12 @@ namespace Amethyst.Action
             {
                 case EnemyState.Walking:
                     var range = Range(s);
-                    var stop = telegraphs ? range * 0.75f : 0f;
-                    if (distance > stop + s.Radius + HeroRadius)
+                    var (near, far) = telegraphs ? Keep(s, range) : (0f, s.Radius + HeroRadius);
+                    if (distance > far || distance < near)
                     {
                         var step = Mode.WalkSpeed * s.Kind.Speed * dt;
-                        s.Position += toward * step;
+                        var way = distance > far ? toward : -toward;
+                        s.Position += way * step;
                         s.Walked += step;
                     }
                     if (
@@ -264,9 +315,13 @@ namespace Amethyst.Action
                     {
                         Enter(s, EnemyState.WindingUp);
                         s.Windup =
-                            Mode.TelegraphMin
-                            + (float)rng.NextDouble() * (Mode.TelegraphMax - Mode.TelegraphMin);
+                            s.Kind.Windup > 0f
+                                ? s.Kind.Windup
+                                : Mode.TelegraphMin
+                                    + (float)rng.NextDouble()
+                                        * (Mode.TelegraphMax - Mode.TelegraphMin);
                         s.AttackDirection = toward;
+                        s.Aim = s.Kind.Attack == AttackKind.Volley ? hero : s.Position;
                         Emit(RoomEventKind.Windup, s, s.Position, toward);
                     }
                     else if (
@@ -292,10 +347,11 @@ namespace Amethyst.Action
                 case EnemyState.WindingUp:
                     face = s.AttackDirection;
                     if (s.Age >= s.Windup)
-                    {
-                        Strike(s, hero, ref vulnerable);
-                        Enter(s, EnemyState.Recovering);
-                    }
+                        Enter(s, Strike(s, hero, ref vulnerable));
+                    break;
+                case EnemyState.Lunging:
+                    face = s.AttackDirection;
+                    Lunge(s, hero, dt, ref vulnerable);
                     break;
                 case EnemyState.Recovering:
                     face = s.AttackDirection;
@@ -315,8 +371,9 @@ namespace Amethyst.Action
             s.Yaw = Wrap(s.Yaw + Math.Clamp(turn, -TurnRate * dt, TurnRate * dt));
         }
 
-        // An attack's impact, by its kind: what it reaches and what it does.
-        void Strike(Enemy s, Vector2 hero, ref bool vulnerable)
+        // An attack's impact, by its kind: what it reaches and what it does, and the state it
+        // leaves the attacker in.
+        EnemyState Strike(Enemy s, Vector2 hero, ref bool vulnerable)
         {
             Tokens.Release(s.Id);
             s.NextAttack = s.Clock + 1.4f + (float)rng.NextDouble();
@@ -333,21 +390,106 @@ namespace Amethyst.Action
                             )
                             : 0f;
                     if (distance <= s.Kind.Reach * s.Scale + HeroRadius && angle <= ConeHalfAngle)
-                        HurtHero(s, ref vulnerable);
-                    break;
+                        HurtHero(s, s.Position, ref vulnerable);
+                    return EnemyState.Recovering;
+                case AttackKind.Lunge:
+                    s.Landed = false;
+                    return EnemyState.Lunging;
+                case AttackKind.Volley:
+                    Launch(s);
+                    return EnemyState.Recovering;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(s), s.Kind.Attack, null);
             }
         }
 
-        // The attack kinds' one other difference: how near the hero each starts its wind-up.
-        static float Range(Enemy s) =>
+        // How near the hero an attacker starts its wind-up.
+        static float Range(Enemy s) => s.Kind.Reach * WindupReach * s.Scale;
+
+        // The attack kinds' other difference: how near the hero each keeps while it walks, centre
+        // to centre: a volley's thrower backs off when nearer than `Near`.
+        static (float Near, float Far) Keep(Enemy s, float range) =>
             s.Kind.Attack switch
             {
-                AttackKind.Cone => s.Kind.Reach * WindupReach * s.Scale,
-                _ => throw new ArgumentOutOfRangeException(nameof(s), s.Kind.Attack, null),
+                AttackKind.Volley => (range * 0.8f, range),
+                _ => (0f, range * 0.75f + s.Radius + HeroRadius),
             };
 
-        // A telegraphed attack's damage, if the hero can take it this step.
-        void HurtHero(Enemy s, ref bool vulnerable)
+        // A lunge's dash along its lane, which hits the hero once if it is in the lane where the
+        // attacker reaches; it ends when the lane does.
+        void Lunge(Enemy s, Vector2 hero, float dt, ref bool vulnerable)
+        {
+            var length = s.Kind.Reach * s.Scale;
+            var duration = length / LungeSpeed;
+            s.Position += s.AttackDirection * (LungeSpeed * dt);
+            if (!s.Landed)
+            {
+                var off = hero - s.Aim;
+                var along = Vector2.Dot(off, s.AttackDirection);
+                var across = MathF.Abs(off.X * s.AttackDirection.Y - off.Y * s.AttackDirection.X);
+                var front = Vector2.Dot(s.Position - s.Aim, s.AttackDirection) + s.Radius;
+                if (
+                    across <= LaneHalfWidth * s.Scale
+                    && along >= -HeroRadius
+                    && along <= Math.Min(front + HeroRadius, length)
+                    && vulnerable
+                )
+                {
+                    s.Landed = true;
+                    HurtHero(s, s.Position, ref vulnerable);
+                }
+            }
+            if (s.Age >= duration)
+                Enter(s, EnemyState.Recovering);
+        }
+
+        // A volley's launch: its spores leave for their landings around its aim and land together,
+        // none faster than the kind's projectile speed (feel §5: at most half the dash's).
+        void Launch(Enemy s)
+        {
+            var radius = VolleyRadius * s.Scale;
+            var landings = new Vector2[Spores];
+            landings[0] = s.Aim;
+            var far = Vector2.Distance(s.Position, s.Aim);
+            for (int i = 1; i < Spores; i++)
+            {
+                var angle = (float)rng.NextDouble() * MathF.PI * 2f;
+                var spread = radius * (0.4f + 0.3f * (float)rng.NextDouble());
+                landings[i] = s.Aim + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
+                far = Math.Max(far, Vector2.Distance(s.Position, landings[i]));
+            }
+            // Over the ground at the kind's speed; the arc's climb adds at most Loft * 4 of it.
+            var ground = s.Kind.ProjectileSpeed / MathF.Sqrt(1f + 16f * Volley.Loft * Volley.Loft);
+            volleys.Add(
+                new Volley
+                {
+                    Owner = s,
+                    From = s.Position,
+                    Target = s.Aim,
+                    Radius = radius,
+                    Landings = landings,
+                    Launched = Time,
+                    Lands = Time + Math.Max(far, 0.5f) / ground,
+                }
+            );
+        }
+
+        // Volleys that land this step hurt a hero inside their circle.
+        void Land(Vector2 hero, ref bool vulnerable)
+        {
+            for (int i = volleys.Count - 1; i >= 0; i--)
+            {
+                var v = volleys[i];
+                if (Time < v.Lands)
+                    continue;
+                volleys.RemoveAt(i);
+                if (Vector2.Distance(hero, v.Target) <= v.Radius)
+                    HurtHero(v.Owner, v.Target, ref vulnerable);
+            }
+        }
+
+        // A telegraphed attack's damage from `from`, if the hero can take it this step.
+        void HurtHero(Enemy s, Vector2 from, ref bool vulnerable)
         {
             if (!vulnerable)
                 return;
@@ -357,7 +499,7 @@ namespace Amethyst.Action
                 {
                     Kind = RoomEventKind.HeroHit,
                     Enemy = s,
-                    Position = s.Position,
+                    Position = from,
                     Direction = s.AttackDirection,
                     Amount = s.Empowered ? Mode.AttackDamage * 3 / 2 : Mode.AttackDamage,
                     Telegraphed = true,
@@ -468,7 +610,7 @@ namespace Amethyst.Action
                 {
                     if (nextKind == null)
                     {
-                        nextKind = Spawns.Pick(rng);
+                        nextKind = Spawns.Pick(rng, Mode.SpecialWeight);
                         nextCount = Math.Min(Mode.Alive, PackSize(nextKind));
                     }
                     if (nextCount < 1 || spawnBudget < nextCount)
@@ -500,7 +642,7 @@ namespace Amethyst.Action
                 for (int left = n; left > 0; )
                 {
                     var pack = Math.Min(left, 1 + rng.Next(3));
-                    Pack(hero, Spawns.Pick(rng), pack, false);
+                    Pack(hero, Spawns.Pick(rng, Mode.SpecialWeight), pack, false);
                     left -= pack;
                 }
             }
@@ -626,6 +768,7 @@ namespace Amethyst.Action
                 var d = away.Length();
                 Die(s, d > 1e-4f ? away / d : Vector2.UnitY, 6f, Time + d / WaveSpeed);
             }
+            volleys.RemoveAll(v => !v.Owner.Empowered);
         }
 
         // The room clears when its last wave or its last elite after the buzzer is dead.
@@ -640,6 +783,7 @@ namespace Amethyst.Action
             if (!done)
                 return;
             Phase = RoomPhase.Cleared;
+            volleys.Clear();
             Emit(RoomEventKind.Clear, null, Vector2.Zero, Vector2.Zero);
         }
 

@@ -71,6 +71,10 @@ namespace Amethyst.Action
         /// <summary>Whether every hit staggers an unarmored enemy (focused) or only knocks it back.</summary>
         public bool Stagger;
 
+        /// <summary>A spawn list's specials' and heavies' weights, times the list's: part of each
+        /// focused wave, a few among the horde's fodder.</summary>
+        public float SpecialWeight;
+
         /// <summary>Enemies winding up at once at most (feel §6.4).</summary>
         public int AggressionTokens;
 
@@ -110,6 +114,7 @@ namespace Amethyst.Action
             TelegraphMin = 0.45f,
             TelegraphMax = 0.55f,
             Stagger = true,
+            SpecialWeight = 1f,
             AggressionTokens = 2,
             HitstopLight = 3,
             HitstopFinisher = 6,
@@ -139,6 +144,7 @@ namespace Amethyst.Action
             AttackDamage = 14,
             TelegraphMin = 0.5f,
             TelegraphMax = 0.6f,
+            SpecialWeight = 0.1f,
             AggressionTokens = 3,
             HitstopLight = 1,
             HitstopFinisher = 2,

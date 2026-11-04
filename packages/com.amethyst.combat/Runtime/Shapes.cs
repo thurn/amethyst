@@ -7,7 +7,7 @@ namespace Amethyst.Combat
 {
     /// <summary>
     /// The fight's flat shapes, redrawn every frame from a pool of renderers in flat colours
-    /// (<see cref="Flat"/>): discs, rings and wedges on the ground, and bars facing the camera.
+    /// (<see cref="Flat"/>): discs, rings, wedges and lanes on the ground, and bars facing the camera.
     /// Call <see cref="Begin"/>, draw, then <see cref="End"/>, which hides what wasn't drawn.
     /// </summary>
     sealed class Shapes : System.IDisposable
@@ -28,6 +28,7 @@ namespace Amethyst.Combat
         readonly Dictionary<int, Mesh> wedges = new Dictionary<int, Mesh>();
         readonly Mesh disc,
             ring,
+            lane,
             quad;
         int used;
 
@@ -45,6 +46,15 @@ namespace Amethyst.Combat
                 new Vector3(1f, 0.5f, 0f),
             };
             quad.triangles = new[] { 0, 2, 1, 1, 2, 3 };
+            lane = new Mesh { name = "Lane" };
+            lane.vertices = new[]
+            {
+                new Vector3(-0.5f, 0f, 0f),
+                new Vector3(0.5f, 0f, 0f),
+                new Vector3(-0.5f, 0f, 1f),
+                new Vector3(0.5f, 0f, 1f),
+            };
+            lane.triangles = new[] { 0, 2, 1, 1, 2, 3 };
         }
 
         public void Begin() => used = 0;
@@ -72,6 +82,25 @@ namespace Amethyst.Combat
                 wedges[degrees] = mesh = Sector(degrees, 0f);
             Draw(mesh, at, Quaternion.LookRotation(toward), Vector3.one * reach, color, queue);
         }
+
+        /// <summary>A filled lane <paramref name="width"/> m wide from <paramref name="at"/> out to
+        /// <paramref name="length"/> m toward <paramref name="toward"/>.</summary>
+        public void Lane(
+            Vector3 at,
+            Vector3 toward,
+            float length,
+            float width,
+            Color color,
+            int queue
+        ) =>
+            Draw(
+                lane,
+                at,
+                Quaternion.LookRotation(toward),
+                new Vector3(width, 1f, length),
+                color,
+                queue
+            );
 
         /// <summary>A bar facing <paramref name="camera"/>, centred at <paramref name="at"/>, filled
         /// from the left to <paramref name="fill"/>.</summary>
@@ -164,6 +193,7 @@ namespace Amethyst.Combat
                 Object.Destroy(m);
             Object.Destroy(disc);
             Object.Destroy(ring);
+            Object.Destroy(lane);
             Object.Destroy(quad);
             if (root != null)
                 Object.Destroy(root.gameObject);
