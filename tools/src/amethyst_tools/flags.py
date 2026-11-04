@@ -86,7 +86,9 @@ def enums(sources: dict[str, str]) -> dict[str, tuple[str, ...]]:
     found: dict[str, tuple[str, ...]] = {}
     for text in sources.values():
         for m in ENUM.finditer(text):
-            members = re.sub(r"//.*|/\*.*?\*/|\[[^\]]*\]", "", m.group(2), flags=re.S)
+            members = re.sub(
+                r"//[^\n]*|/\*.*?\*/|\[[^\]]*\]", "", m.group(2), flags=re.S
+            )
             names = [n.split("=")[0].strip() for n in members.split(",")]
             found[m.group(1)] = tuple(kebab(n) for n in names if n)
     return found

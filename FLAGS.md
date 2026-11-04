@@ -232,8 +232,8 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
-- `chain.crowd` = `skeletons` (enum): What the room spawns: skeletons, or the
-  key family's fodder mixed.
+- `chain.crowd` = `skeletons` (enum: skeletons | mixed): What the room spawns:
+  skeletons, or the key family's fodder mixed.
   [ChainEntry.cs:21](testbeds/chain/Assets/Chain/ChainEntry.cs#L21)
 
 - variant `focused-mixed`: Focused, mixed: waves of skeletons, slimes, demons
