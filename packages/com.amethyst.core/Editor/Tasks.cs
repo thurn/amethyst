@@ -48,7 +48,8 @@ namespace Amethyst.Editor
         }
 
         /// <summary>
-        /// Builds the Apple silicon Mac player: <c>-amOut APP</c> (the .app path),
+        /// Runs every <see cref="BeforeBuildAttribute"/> method, then builds the Apple silicon Mac
+        /// player: <c>-amOut APP</c> (the .app path),
         /// <c>-amBackend mono|il2cpp</c> (default mono), <c>-amDevelopment</c>. The build's
         /// rewrites of tracked settings are undone, so it leaves the checkout clean.
         /// </summary>
@@ -64,6 +65,8 @@ namespace Amethyst.Editor
                 "il2cpp" => ScriptingImplementation.IL2CPP,
                 _ => throw new Exception("Tasks.BuildPlayer: unknown backend " + backend),
             };
+            foreach (var method in TypeCache.GetMethodsWithAttribute<BeforeBuildAttribute>())
+                method.Invoke(null, null);
             var scenes = EditorBuildSettings
                 .scenes.Where(s => s.enabled)
                 .Select(s => s.path)
@@ -127,6 +130,13 @@ namespace Amethyst.Editor
                     yield return path.Replace('\\', '/');
         }
     }
+
+    /// <summary>
+    /// Marks a static method <see cref="Tasks.BuildPlayer"/> calls before it builds: a package's
+    /// bake of what the build needs (the look's crowd).
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class BeforeBuildAttribute : Attribute { }
 
     /// <summary>Counts the shader variants a build keeps, for the build's log line.</summary>
     sealed class ShaderVariantCount : IPreprocessShaders

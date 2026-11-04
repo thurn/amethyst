@@ -1,0 +1,11 @@
+{
+  "name": "LookTestbed",
+  "rootNamespace": "Amethyst.LookTestbed",
+  "references": [
+    "Amethyst.Core",
+    "Amethyst.Core.Unity",
+    "Amethyst.Look",
+    "Amethyst.Look.Pure",
+    "Unity.RenderPipelines.Universal.Runtime"
+  ]
+}

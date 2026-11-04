@@ -1,0 +1,165 @@
+{
+  "assets": [
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_F_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "6c670ea8c84cf324980a21b4b9b927a0",
+      "use": "hero run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Walk/A_Walk_F_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "eead3eb07cb89cb4eb25b3550df5e84b",
+      "use": "big ork walk"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/HeavyStab01/A_Attack_HeavyStab01_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b963d0c4e093a9c4ea792b8095e51ba2",
+      "use": "big ork attack"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitReact/A_Hit_F_React_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "adc1feaf8563f6247989bffd0737b6ad",
+      "use": "big ork hit"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Idle/Base/A_Idle_Base_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b94969b4c36c3c94284f72888ad9289d",
+      "use": "big ork and hero idle"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Characters/Character_BR_BigOrk_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "0d42bc61d684259409d481c6f5dd5d5c",
+      "use": "crowd: big ork"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Weapons/SM_Wep_Slayer_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "404a923dea987c14498264bf7d13d458",
+      "use": "crowd: big ork weapon"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Characters/Character_Knight_01_Orange.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "360c73b9bf9a34d4c84bc0581d0499eb",
+      "use": "hero: knight"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Broadsword_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "f61def225eac3e247985f6679965a655",
+      "use": "hero: sword"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Shield_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "a7b97d24ba2370040ba159577de7b931",
+      "use": "hero: shield"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Bats/_Prefabs/Bats LP.prefab",
+      "sourceSha256": "dcb6e090ea21acaad3efd3cf9264c2fedd7f543b5a767cecb7c5a38c6dd39611",
+      "guid": "4f9257d4aec394d59be5f34d00fa97e8",
+      "use": "crowd: bat"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Bats/Meshes/Bats LP.fbx",
+      "sourceSha256": "e06900ac2ca26a8d9a4af69398069851eb8821d6af68f3bcad4594b57e0160ec",
+      "guid": "eec0bfdad45f34788ba93083b71f06dc",
+      "use": "crowd: bat clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Demons/_Prefabs/Demons_LP.prefab",
+      "sourceSha256": "3bc3d9c5819bb19c9352f6a6bbf4e03cff20da3de84f3542582abac37d19de13",
+      "guid": "97be6194801464926b2c78020bf4eb32",
+      "use": "crowd: demon"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Demons/Models/Demons_LP.fbx",
+      "sourceSha256": "e3c7dfd3827edcc7948e42e097727077e7911d8119c2568b9dfe21be97ba10dd",
+      "guid": "bebd353bcd71a47dabd72141665125c1",
+      "use": "crowd: demon clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Goblin/_Prefabs/Goblins LP.prefab",
+      "sourceSha256": "2a36906f05a8a301a13d8595bec436a6bb6f5abbfbbbd4eb3d3afe2d52c84175",
+      "guid": "2d5e83b858ed8424291e890a090902db",
+      "use": "crowd: goblin"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Goblin/Animations/Goblins@Attack1.fbx",
+      "sourceSha256": "699e2061158c2c1b6ed5869c5d1fd785b6cd43213c5e56e7a03ac2c81ef188b3",
+      "guid": "737c1f0a1861943258251a79e1729de0",
+      "use": "crowd: goblin clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Goblin/Animations/Goblins@GotHit.fbx",
+      "sourceSha256": "b67ac1f2a0de87d8e97d82965c7954b1d2e590961fad61bd4500c5bdc2d2ba7c",
+      "guid": "5399d5151847d4e3681776932651afe6",
+      "use": "crowd: goblin clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Goblin/Animations/Goblins@Idle.fbx",
+      "sourceSha256": "95d0ec91b43fa7de2c42578f589e32ac0aa2440a38a3dbb5ee5fe9167c655e96",
+      "guid": "907a74ad4197d4f268e118a17c5aa22e",
+      "use": "crowd: goblin clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Goblin/Animations/Goblins@Walk.fbx",
+      "sourceSha256": "cf9ba8598004f179a41ccc7d32db1e3b94d16186d1d5b04bbf944739c1525972",
+      "guid": "da8c9ca50ca4e4ab5b4f5b27efb389d0",
+      "use": "crowd: goblin clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Mushroom Monster/_Prefabs/Mushroom_LP.prefab",
+      "sourceSha256": "a80eb3799721fc0fe5b540f2db856c9e4d60cb5aeee6a635244387e171057bd9",
+      "guid": "be803e2df48344dafbabe4dce2b5b5c4",
+      "use": "crowd: mushroom"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Mushroom Monster/Models/Mushroom_LP.fbx",
+      "sourceSha256": "259710e41bf8251ebcc249d8caa1f2024acdc4e6cadf5f9e5515dfc002e33a90",
+      "guid": "119e98e7044e846bb86de248d6b7c57d",
+      "use": "crowd: mushroom clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Skeleton Warrior/_Prefabs/SkeletonWarriorLP.prefab",
+      "sourceSha256": "a722c1da9a55f88a871f956f53a4838bf294cb1af5298047afb2a469904f6c94",
+      "guid": "6e3f218b742294893ad834f61c027945",
+      "use": "crowd: skeleton"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Skeleton Warrior/Models/SkeletonWarriorLP.fbx",
+      "sourceSha256": "de8f13673aade336a5d2ef08ed843e2966d2148d0ce00bc5138bed2198d8644a",
+      "guid": "d6688b4afa37b4b15b476037d756982c",
+      "use": "crowd: skeleton clips"
+    }
+  ]
+}

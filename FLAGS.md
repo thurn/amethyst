@@ -155,6 +155,29 @@ in `Awake` or `Start`, or every frame.
   as Hades on a controller. Sets `hero.aim=movement`, `camera.distance=14`.
   [movement-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/movement-focused.flags)
 
+### testbeds/look
+
+- `look.crowd` = `320` (int): Crowd figures around the hero.
+  [LookEntry.cs:23](testbeds/look/Assets/Look/LookEntry.cs#L23)
+
+- `look.grid` = `1` (float): The floor grid's brightness, times its resting
+  light. [LookEntry.cs:17](testbeds/look/Assets/Look/LookEntry.cs#L17)
+
+- `look.view` = `36` (float): Ground the camera sees across, m (the trailer's
+  36). [LookEntry.cs:11](testbeds/look/Assets/Look/LookEntry.cs#L11)
+
+- variant `default`: Trailer: the neon edge trailer's framing (36 m across) and
+  grid. Sets .
+  [default.flags](testbeds/look/Assets/StreamingAssets/variants/default.flags)
+
+- variant `far-dim`: Far, dim grid: pulled back to 50 m across, the grid at 60%.
+  Sets `look.view=50`, `look.grid=0.6`.
+  [far-dim.flags](testbeds/look/Assets/StreamingAssets/variants/far-dim.flags)
+
+- variant `near-bright`: Near, bright grid: 26 m across, the grid at 170%. Sets
+  `look.view=26`, `look.grid=1.7`.
+  [near-bright.flags](testbeds/look/Assets/StreamingAssets/variants/near-bright.flags)
+
 ### testbeds/sandbox
 
 - variant `close`: Close camera, cursor aim. Sets `camera.distance=12`.

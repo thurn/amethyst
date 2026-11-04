@@ -1,0 +1,9 @@
+{
+  "name": "Amethyst.Look",
+  "rootNamespace": "Amethyst.Look",
+  "references": [
+    "Amethyst.Look.Pure",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime"
+  ]
+}

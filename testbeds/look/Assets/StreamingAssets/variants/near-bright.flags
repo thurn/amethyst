@@ -1,0 +1,3 @@
+# Near, bright grid: 26 m across, the grid at 170%
+look.view = 26
+look.grid = 1.7

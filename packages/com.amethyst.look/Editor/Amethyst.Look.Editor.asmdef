@@ -1,0 +1,12 @@
+{
+  "name": "Amethyst.Look.Editor",
+  "rootNamespace": "Amethyst.Look.Editor",
+  "references": [
+    "Amethyst.Look",
+    "Amethyst.Look.Pure",
+    "Amethyst.Core.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

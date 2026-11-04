@@ -1,0 +1,11 @@
+{
+  "name": "com.amethyst.look",
+  "version": "0.1.0",
+  "displayName": "Amethyst Look",
+  "description": "The neon edge look: the palette's roles, the edge shaders, the GPU crowd renderer, the hero's edge dress, the grid floor and the trailer's grade.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.amethyst.core": "0.1.0",
+    "com.unity.render-pipelines.universal": "17.6.0"
+  }
+}

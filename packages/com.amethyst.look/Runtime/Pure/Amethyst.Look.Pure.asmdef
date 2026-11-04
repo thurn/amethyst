@@ -1,0 +1,5 @@
+{
+  "name": "Amethyst.Look.Pure",
+  "rootNamespace": "Amethyst.Look",
+  "noEngineReferences": true
+}

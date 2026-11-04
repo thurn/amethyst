@@ -1,0 +1,3 @@
+# Far, dim grid: pulled back to 50 m across, the grid at 60%
+look.view = 50
+look.grid = 0.6
