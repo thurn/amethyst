@@ -1,0 +1,7 @@
+# Horde, elites: an Empowered skeleton, slime, demon and bat among the fodder; every armor breaks at 3 s
+combat.mode = horde
+chain.crowd = fodder-elites
+combat.elites = 4
+combat.elite-every = 0.5
+chain.break-at = 3
+hero.aim = cursor

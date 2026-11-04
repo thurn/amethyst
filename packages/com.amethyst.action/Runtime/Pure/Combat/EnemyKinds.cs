@@ -233,7 +233,7 @@ namespace Amethyst.Action
 
     /// <summary>
     /// What a <see cref="CombatRoom"/> spawns: each pack's kind drawn from <see cref="Mix"/> by
-    /// weight, each Empowered one's from <see cref="Elites"/>. The mode's tuning sets how many.
+    /// weight, its Empowered ones' from <see cref="Elites"/> in turn. The mode's tuning sets how many.
     /// </summary>
     public sealed class SpawnList
     {
@@ -277,6 +277,24 @@ namespace Amethyst.Action
             new[] { (EnemyKinds.Skeleton, 1.5f), (EnemyKinds.BigOrk, 1f), (EnemyKinds.Troll, 1f) }
         );
 
+        /// <summary>Key-family fodder with every fodder kind Empowered.</summary>
+        public static readonly SpawnList FodderElites = new SpawnList(
+            KeyFodder.Mix,
+            EnemyKinds.Skeleton,
+            EnemyKinds.Slime,
+            EnemyKinds.Demon,
+            EnemyKinds.Bat
+        );
+
+        /// <summary>Key-family fodder with every special and heavy Empowered.</summary>
+        public static readonly SpawnList SpecialElites = new SpawnList(
+            KeyFodder.Mix,
+            EnemyKinds.Goblin,
+            EnemyKinds.Mushroom,
+            EnemyKinds.BigOrk,
+            EnemyKinds.Troll
+        );
+
         /// <summary>A pack's kind, with specials' and heavies' weights times
         /// <paramref name="special"/>; a list of one kind draws nothing from <paramref name="rng"/>.</summary>
         public EnemyKind Pick(Random rng, float special = 1f)
@@ -299,7 +317,9 @@ namespace Amethyst.Action
         static float Weight(EnemyKind kind, float weight, float special) =>
             kind.Role == EnemyRole.Fodder ? weight : weight * special;
 
-        public EnemyKind PickElite(Random rng) =>
-            Elites.Length == 1 ? Elites[0] : Elites[rng.Next(Elites.Length)];
+        /// <summary>The <paramref name="n"/>th Empowered one's kind: the elites in turn, so each
+        /// kind comes before any repeats.</summary>
+        public EnemyKind PickElite(int n) =>
+            Elites[(n % Elites.Length + Elites.Length) % Elites.Length];
     }
 }

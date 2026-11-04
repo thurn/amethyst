@@ -206,6 +206,16 @@ namespace Amethyst.Action
         const float WaveSpeed = 40f;
         const float Cell = 1.2f;
         const float StreamGap = 0.3f; // s between a stream's arrivals
+        const float BreakFlash = 0.12f; // s of white on an armor break, held through its freeze
+
+        /// <summary>An Empowered enemy's size, HP and armor, and its telegraphed hits' damage, as
+        /// multiples of its kind's (docs/game-design.md, Elites: Empowered).</summary>
+        public const float EliteScale = 1.5f,
+            EliteHp = 2.5f,
+            EliteDamage = 1.5f;
+
+        /// <summary>The armor bar of an Empowered or armored enemy.</summary>
+        public const int ArmorBar = 30;
 
         /// <summary>A lunge's lane's half width and a volley's landing circle's radius at scale 1,
         /// m: the hero's centre in them is hit.</summary>
@@ -226,6 +236,7 @@ namespace Amethyst.Action
         int nextCount;
         float nextElite;
         int nextId;
+        int elites; // Empowered ones spawned, for the elites' turns
         readonly int[] erupted;
 
         /// <summary>A room of <paramref name="spawns"/> (M1's skeletons by default) in
@@ -246,6 +257,7 @@ namespace Amethyst.Action
             rng = new Random(seed);
             Tokens = new AggressionTokens(mode.AggressionTokens);
             nextElite = mode.EliteEvery * 0.5f;
+            elites = seed & 0xffff;
         }
 
         public ModeTuning Mode { get; }
@@ -581,7 +593,9 @@ namespace Amethyst.Action
                     Enemy = s,
                     Position = from,
                     Direction = s.AttackDirection,
-                    Amount = s.Empowered ? Mode.AttackDamage * 3 / 2 : Mode.AttackDamage,
+                    Amount = s.Empowered
+                        ? (int)(Mode.AttackDamage * EliteDamage)
+                        : Mode.AttackDamage,
                     Telegraphed = true,
                 }
             );
@@ -629,10 +643,10 @@ namespace Amethyst.Action
                     damage = chipped >= s.Armor ? (int)((chipped - s.Armor) / chip) : 0;
                     s.Armor = Math.Max(0, s.Armor - chipped);
                     if (!s.Armored)
-                        Emit(RoomEventKind.ArmorBreak, s, s.Position, strike.Direction);
+                        BreakArmor(s, strike.Direction);
                 }
                 s.Hp -= damage;
-                s.Flash = FlashFrames / 60f;
+                s.Flash = Math.Max(s.Flash, FlashFrames / 60f);
                 var push = strike.Push(s.Position) * KnockbackScale;
                 var blow =
                     push.LengthSquared() > 1e-6f ? Vector2.Normalize(push) : strike.Direction;
@@ -672,6 +686,17 @@ namespace Amethyst.Action
             if (kills > 0)
                 End();
             return (hits, kills);
+        }
+
+        /// <summary>Breaks <paramref name="s"/>'s armor at once, by a blow along
+        /// <paramref name="direction"/>: the big moment (a held white flash, an
+        /// <see cref="RoomEventKind.ArmorBreak"/> for the outline's shatter and the global freeze).
+        /// From then on it staggers and is pushed as the mode allows.</summary>
+        public void BreakArmor(Enemy s, Vector2 direction)
+        {
+            s.Armor = 0;
+            s.Flash = Math.Max(s.Flash, BreakFlash);
+            Emit(RoomEventKind.ArmorBreak, s, s.Position, direction);
         }
 
         // A pylon's burst: a ring that hurts and throws only enemies, and may burst its neighbours.
@@ -852,12 +877,12 @@ namespace Amethyst.Action
                 if (Mode.EliteEvery > 0f && Time >= nextElite)
                 {
                     nextElite = Time + Mode.EliteEvery;
-                    int elites = 0;
+                    int alive = 0;
                     foreach (var s in enemies)
                         if (s.Empowered && s.State != EnemyState.Dying)
-                            elites++;
-                    if (elites < Mode.ElitesAlive)
-                        Pack(hero, Spawns.PickElite(rng), 1, true);
+                            alive++;
+                    if (alive < Mode.ElitesAlive)
+                        Pack(hero, Spawns.PickElite(elites++), 1, true);
                 }
                 return;
             }
@@ -869,6 +894,13 @@ namespace Amethyst.Action
                     Mode.Alive,
                     Mode.WaveMin + rng.Next(Mode.WaveMax - Mode.WaveMin + 1)
                 );
+                // The room's elites come with its first wave, each alone, as part of it.
+                if (Wave == 1)
+                    for (int e = 0; e < Mode.RoomElites; e++)
+                    {
+                        Pack(hero, Spawns.PickElite(elites++), 1, true);
+                        n = Math.Max(0, n - 1);
+                    }
                 for (int left = n; left > 0; )
                 {
                     var pack = Math.Min(left, 1 + rng.Next(3));
@@ -960,7 +992,8 @@ namespace Amethyst.Action
                         break;
                 }
                 p = Vector2.Clamp(p, -half + new Vector2(0.5f), half - new Vector2(0.5f));
-                Hazards.Collide(ref p, kind.Radius * (empowered ? 1.5f : 1f), kind.Flies);
+                var scale = empowered ? EliteScale : 1f;
+                Hazards.Collide(ref p, kind.Radius * scale, kind.Flies);
                 var to = hero - p;
                 var s = new Enemy
                 {
@@ -969,9 +1002,9 @@ namespace Amethyst.Action
                     Empowered = empowered,
                     Position = p,
                     Yaw = MathF.Atan2(to.X, to.Y),
-                    Scale = empowered ? 1.5f : 1f,
-                    MaxHp = empowered ? hp * 5 / 2 : hp,
-                    MaxArmor = empowered || kind.Armored ? 30 : 0,
+                    Scale = scale,
+                    MaxHp = empowered ? (int)(hp * EliteHp) : hp,
+                    MaxArmor = empowered || kind.Armored ? ArmorBar : 0,
                     State = EnemyState.Arriving,
                     MarkerSeconds = marker + delay,
                     ArriveAt = Time + marker + delay,

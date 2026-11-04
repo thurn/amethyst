@@ -1,0 +1,7 @@
+# Focused, elites, white break: as focused-elites, but each armor break's outline shatters into white shards
+combat.mode = focused
+chain.crowd = fodder-elites
+combat.elites = 4
+chain.break-at = 3
+combat.armor-shatter = white
+hero.aim = cursor

@@ -3,6 +3,16 @@ using Amethyst.Flags;
 
 namespace Amethyst.Combat
 {
+    /// <summary>What an armor break's outer outline shatters into.</summary>
+    public enum ArmorShatter
+    {
+        /// <summary>Shards of a shell around the body, in its hue.</summary>
+        Hue,
+
+        /// <summary>The same shards, white.</summary>
+        White,
+    }
+
     /// <summary>A fight's combat mode and its feedback channels, each with its own toggle (feel §11.1).</summary>
     public static class CombatFlags
     {
@@ -28,6 +38,24 @@ namespace Amethyst.Combat
             "combat.room-seconds",
             0f,
             "The horde room's timer, s, until its buzzer (0 keeps the mode's)"
+        );
+
+        public static readonly Flag<int> Elites = Flag.Int(
+            "combat.elites",
+            -1,
+            "Empowered enemies: a focused room's in its first wave, or the most alive at once in the horde (-1 keeps the mode's)"
+        );
+
+        public static readonly Flag<float> EliteEvery = Flag.Float(
+            "combat.elite-every",
+            0f,
+            "Seconds between the horde's Empowered enemies (0 keeps the mode's)"
+        );
+
+        public static readonly Flag<ArmorShatter> BreakShards = Flag.Enum(
+            "combat.armor-shatter",
+            ArmorShatter.Hue,
+            "What an armor break's outer outline shatters into: shards in the enemy's hue, or white"
         );
 
         public static readonly Flag<float> Hitstop = Flag.Float(

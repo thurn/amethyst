@@ -48,6 +48,10 @@ namespace Amethyst.Combat
         readonly List<Vector3> targets = new List<Vector3>();
         float clearedAt = -1f,
             diedAt = -1f;
+
+        /// <summary>The room being fought.</summary>
+        public CombatRoom Room => room;
+
         int freezeFrames,
             slowFrames;
         bool ended;
@@ -68,6 +72,13 @@ namespace Amethyst.Combat
                 tuning.Alive = CombatFlags.Alive.Value;
             if (CombatFlags.RoomSeconds.Value > 0f)
                 tuning.RoomSeconds = CombatFlags.RoomSeconds.Value;
+            if (CombatFlags.Elites.Value >= 0)
+            {
+                tuning.RoomElites = CombatFlags.Elites.Value;
+                tuning.ElitesAlive = CombatFlags.Elites.Value;
+            }
+            if (CombatFlags.EliteEvery.Value > 0f)
+                tuning.EliteEvery = CombatFlags.EliteEvery.Value;
 
             var palette = Palette.Default;
             var hero = Arena.Build(1, greybox: false, halfSize: tuning.ArenaHalfSize);
@@ -220,10 +231,12 @@ namespace Amethyst.Combat
                         }
                         break;
                     case RoomEventKind.ArmorBreak:
-                        // A big moment: a white flash and a short global hitstop.
+                        // The big moment: the body's held white flash, its outer outline
+                        // shattering (the view's), a white ring, a break and a global hitstop.
                         SwordEffects.Ring(at + Vector3.up * 0.05f, 1.6f * e.Enemy.Scale, 0.25f);
-                        sounds.Budget.Add(CombatSound.Break);
-                        Freeze(tuning.FreezeElite / 2);
+                        sounds.Budget.Add(CombatSound.Break, 2);
+                        Freeze(tuning.FreezeArmorBreak);
+                        Shake(0.45f);
                         break;
                     case RoomEventKind.HeroHit:
                         if (hero.Hurt(e.Amount, at, e.Telegraphed))

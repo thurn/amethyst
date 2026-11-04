@@ -48,6 +48,9 @@ namespace Amethyst.Action
         public float EliteEvery;
         public int ElitesAlive;
 
+        /// <summary>Focused: Empowered enemies a room brings, in its first wave.</summary>
+        public int RoomElites;
+
         /// <summary>A basic enemy's HP (a kind's is a multiple): 2-4 cleaves focused, 1-2 in the horde.</summary>
         public int BasicHp;
 
@@ -94,6 +97,9 @@ namespace Amethyst.Action
         public int FreezeClear,
             FreezeElite;
 
+        /// <summary>Global freeze, frames, when an enemy's armor breaks: the big moment.</summary>
+        public int FreezeArmorBreak;
+
         /// <summary>A Spike Vent's eruption: damage to the hero (a telegraphed hit) and to each
         /// enemy in it (enough to kill basic fodder in the horde).</summary>
         public int VentDamage,
@@ -133,6 +139,7 @@ namespace Amethyst.Action
             HitstopCap = 12,
             FreezeClear = 16,
             FreezeElite = 12,
+            FreezeArmorBreak = 12,
             VentDamage = 15,
             VentEnemyDamage = 20,
             ShardsPerKill = 1.5f,
@@ -165,6 +172,7 @@ namespace Amethyst.Action
             HitstopCap = 2,
             FreezeClear = 18,
             FreezeElite = 12,
+            FreezeArmorBreak = 12,
             VentDamage = 15,
             VentEnemyDamage = 24,
             ShardsPerKill = 1f / 3f,

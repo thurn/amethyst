@@ -11,8 +11,11 @@ namespace Amethyst.Combat
     /// crowd type in its palette family's hue: each state's clip (walk or idle, the attack up to its
     /// impact over the telegraph and on through its recovery, the hit clip for a stagger)
     /// crossfaded, a telegraph's flare, the hit flash, a hitstop's shiver along the blow and a kick
-    /// spring; and on its break the kill shatter. Ground shapes (spawn markers, telegraphs, the
-    /// Empowered's ring and armor bar) are <see cref="Shapes"/>'.
+    /// spring; and on its break the kill shatter. An Empowered one's lines burn brighter while its
+    /// armor holds (with its ring, its doubled outline); an armor break shatters a shell a little
+    /// larger than the body (<see cref="CombatFlags.BreakShards"/>), its outer outline. Ground
+    /// shapes (spawn markers, telegraphs, the Empowered's ring and armor bar) are
+    /// <see cref="Shapes"/>'.
     /// </summary>
     sealed class EnemyView : IDisposable
     {
@@ -21,6 +24,8 @@ namespace Amethyst.Combat
         const float DefaultHeight = 1.8f;
         const float LeapCrouch = 0.45f; // of the attack clip to its impact, played over a leap's wind-up
         const float LeapHeight = 1f; // a leap's arc's peak at scale 1, m
+        const float ShellScale = 1.12f; // an armor break's shattering outline, of the body's size
+        const float ShellForce = 2.6f; // its shards' launch, m (a sword blow's is 1.85)
 
         struct Pose
         {
@@ -58,6 +63,8 @@ namespace Amethyst.Combat
         readonly Dictionary<EnemyKind, Kind> kinds = new Dictionary<EnemyKind, Kind>();
         readonly Dictionary<int, Pose> poses = new Dictionary<int, Pose>();
         readonly List<Enemy> breaking = new List<Enemy>();
+        readonly HashSet<int> shells = new HashSet<int>(); // armor breaks this frame
+        readonly uint shellTint;
         int serial;
 
         EnemyView(MonsterLibrary lib, int capacity, Palette palette)
@@ -66,6 +73,10 @@ namespace Amethyst.Combat
             this.capacity = capacity;
             crowd = new MonsterCrowd(lib, capacity, palette);
             shatter = new MonsterShatter(crowd, palette);
+            shellTint =
+                CombatFlags.BreakShards.Value == ArmorShatter.White
+                    ? MonsterInstance.Pack(new Color32(255, 255, 255, 255))
+                    : 0u;
         }
 
         /// <summary>The enemies' view, with room for <paramref name="capacity"/> of each kind, or
@@ -139,6 +150,9 @@ namespace Amethyst.Combat
                 case RoomEventKind.Shatter:
                     breaking.Add(s);
                     break;
+                case RoomEventKind.ArmorBreak:
+                    shells.Add(s.Id);
+                    break;
             }
         }
 
@@ -161,6 +175,7 @@ namespace Amethyst.Combat
             foreach (var k in kinds.Values)
                 if (k != null && k.Drawn.Count > 0)
                     Draw(k, time, flash, shards);
+            shells.Clear();
             crowd.Present(time);
             shatter.Advance(time);
         }
@@ -189,6 +204,14 @@ namespace Amethyst.Combat
                         );
                     poses.Remove(s.Id);
                 }
+                else if (shards && shells.Contains(s.Id))
+                {
+                    // Its outer outline: a shell around the live body, broken outward.
+                    var shell = body;
+                    shell.Scale *= ShellScale;
+                    shell.Tint = shellTint;
+                    shatter.Break(k.Type, i, shell, serial++, time, Vector2.zero, ShellForce);
+                }
                 instances[i] = body;
                 motion[i] = Motion(s, k);
             }
@@ -201,8 +224,9 @@ namespace Amethyst.Combat
             p.LastWalked = s.Walked;
             int clip;
             float time;
-            // An Empowered enemy's lines burn brighter: with its ring, its doubled outline.
-            float flare = s.Empowered ? 0.35f : 0f;
+            // An Empowered enemy's lines burn brighter while its armor holds: with its ring, its
+            // doubled outline, which the armor break shatters.
+            float flare = s.Empowered && s.Armored ? 0.35f : 0f;
             float lift = 0f;
             switch (s.State)
             {
@@ -409,7 +433,7 @@ namespace Amethyst.Combat
                 if (s.State != EnemyState.Dying && (s.Empowered || s.MaxArmor > 0))
                 {
                     var hue = Hue(palette, s.Kind);
-                    if (s.Empowered)
+                    if (s.Empowered && s.Armored)
                         shapes.Ring(at, 0.75f * s.Scale, Alpha(hue, 0.9f), Flat.Markers);
                     if (s.MaxArmor > 0)
                     {

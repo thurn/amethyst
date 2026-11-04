@@ -184,37 +184,46 @@ in `Awake` or `Start`, or every frame.
 
 - `combat.alive` = `0` (int): Enemies alive at once in the horde (0 keeps the
   mode's).
-  [CombatFlags.cs:21](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L21)
+  [CombatFlags.cs:31](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L31)
+- `combat.armor-shatter` = `hue` (enum: hue | white): What an armor break's
+  outer outline shatters into: shards in the enemy's hue, or white.
+  [CombatFlags.cs:55](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L55)
+- `combat.elite-every` = `0` (float): Seconds between the horde's Empowered
+  enemies (0 keeps the mode's).
+  [CombatFlags.cs:49](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L49)
+- `combat.elites` = `-1` (int): Empowered enemies: a focused room's in its first
+  wave, or the most alive at once in the horde (-1 keeps the mode's).
+  [CombatFlags.cs:43](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L43)
 - `combat.hazards` = `none` (enum: none | pillars | vents): The room's hazards
   besides its walls: none, a ring of pillars with pylons, or a ring of Spike
   Vents.
-  [CombatFlags.cs:15](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L15)
+  [CombatFlags.cs:25](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L25)
 - `combat.mode` = `focused` (enum: focused | horde | blind): Focused: a few
   tough enemies that all telegraph; horde: a stream of contact-damage fodder;
   blind: one of the two at random each run.
-  [CombatFlags.cs:9](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L9)
+  [CombatFlags.cs:19](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L19)
 - `combat.room-seconds` = `0` (float): The horde room's timer, s, until its
   buzzer (0 keeps the mode's).
-  [CombatFlags.cs:27](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L27)
+  [CombatFlags.cs:37](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L37)
 - `feedback.flash` = `true` (bool): A struck enemy flashes white for 2 frames.
-  [CombatFlags.cs:39](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L39)
+  [CombatFlags.cs:67](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L67)
 - `feedback.freeze` = `true` (bool): Global hitstop with a slow-motion tail for
   a room's clear and Empowered kills.
-  [CombatFlags.cs:63](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L63)
+  [CombatFlags.cs:91](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L91)
 - `feedback.hitstop` = `1` (float): Per-target hitstop, times the mode's frames:
   0 turns it off.
-  [CombatFlags.cs:33](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L33)
+  [CombatFlags.cs:61](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L61)
 - `feedback.knockback` = `true` (bool): Hits push enemies along the attack.
-  [CombatFlags.cs:45](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L45)
+  [CombatFlags.cs:73](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L73)
 - `feedback.shake` = `true` (bool): Trauma-model screen shake for heavy hits and
   the hero's damage.
-  [CombatFlags.cs:57](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L57)
+  [CombatFlags.cs:85](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L85)
 - `feedback.shatter` = `true` (bool): Kills shatter in the enemy's hue (off: the
   body just goes).
-  [CombatFlags.cs:51](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L51)
+  [CombatFlags.cs:79](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L79)
 - `feedback.sound` = `true` (bool): Hit, kill and telegraph sounds through the
   voice budget.
-  [CombatFlags.cs:69](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L69)
+  [CombatFlags.cs:97](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L97)
 
 ### packages/com.amethyst.core
 
@@ -236,16 +245,39 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
-- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent | heavies): What
-  the room spawns: skeletons, the key family's fodder mixed, skeletons with the
-  accent family's goblins and mushrooms, or skeletons with the counter family's
-  big orks and trolls.
-  [ChainEntry.cs:27](testbeds/chain/Assets/Chain/ChainEntry.cs#L27)
+- `chain.break-at` = `0` (float): Room time, s, when every armored enemy's armor
+  breaks at once, for stills of the break (0: never).
+  [ChainEntry.cs:39](testbeds/chain/Assets/Chain/ChainEntry.cs#L39)
+
+- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent | heavies |
+  fodder-elites | special-elites): What the room spawns: skeletons, the key
+  family's fodder mixed, skeletons with the accent family's goblins and
+  mushrooms, skeletons with the counter family's big orks and trolls, or the
+  mixed fodder with Empowered fodder or Empowered specials and heavies.
+  [ChainEntry.cs:33](testbeds/chain/Assets/Chain/ChainEntry.cs#L33)
 
 - variant `focused-accent`: Focused, accent: goblins and mushrooms in the waves
   among the skeletons. Sets `combat.mode=focused`, `chain.crowd=accent`,
   `hero.aim=cursor`.
   [focused-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-accent.flags)
+
+- variant `focused-elites-special`: Focused, elites: an Empowered goblin,
+  mushroom, big ork and troll in the first wave; their armor breaks at 3 s. Sets
+  `combat.mode=focused`, `chain.crowd=special-elites`, `combat.elites=4`,
+  `chain.break-at=3`, `hero.aim=cursor`.
+  [focused-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites-special.flags)
+
+- variant `focused-elites-white`: Focused, elites, white break: as
+  focused-elites, but each armor break's outline shatters into white shards.
+  Sets `combat.mode=focused`, `chain.crowd=fodder-elites`, `combat.elites=4`,
+  `chain.break-at=3`, `combat.armor-shatter=white`, `hero.aim=cursor`.
+  [focused-elites-white.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites-white.flags)
+
+- variant `focused-elites`: Focused, elites: an Empowered skeleton, slime, demon
+  and bat in the first wave; their armor breaks at 3 s. Sets
+  `combat.mode=focused`, `chain.crowd=fodder-elites`, `combat.elites=4`,
+  `chain.break-at=3`, `hero.aim=cursor`.
+  [focused-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites.flags)
 
 - variant `focused-heavies`: Focused, heavies: big orks and trolls in the waves
   among the skeletons. Sets `combat.mode=focused`, `chain.crowd=heavies`,
@@ -275,6 +307,18 @@ in `Awake` or `Start`, or every frame.
   skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=accent`,
   `hero.aim=cursor`.
   [horde-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-accent.flags)
+
+- variant `horde-elites-special`: Horde, elites: an Empowered goblin, mushroom,
+  big ork and troll among the fodder; every armor breaks at 3 s. Sets
+  `combat.mode=horde`, `chain.crowd=special-elites`, `combat.elites=4`,
+  `combat.elite-every=0.5`, `chain.break-at=3`, `hero.aim=cursor`.
+  [horde-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-elites-special.flags)
+
+- variant `horde-elites`: Horde, elites: an Empowered skeleton, slime, demon and
+  bat among the fodder; every armor breaks at 3 s. Sets `combat.mode=horde`,
+  `chain.crowd=fodder-elites`, `combat.elites=4`, `combat.elite-every=0.5`,
+  `chain.break-at=3`, `hero.aim=cursor`.
+  [horde-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-elites.flags)
 
 - variant `horde-heavies`: Horde, heavies: a few big orks and trolls among the
   skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=heavies`,

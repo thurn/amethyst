@@ -20,6 +20,12 @@ namespace Amethyst.Chain
 
         /// <summary>Skeletons with the counter family's big orks and trolls among them.</summary>
         Heavies,
+
+        /// <summary>The key family's fodder mixed, with Empowered skeletons, slimes, demons and bats.</summary>
+        FodderElites,
+
+        /// <summary>The key family's fodder mixed, with Empowered goblins, mushrooms, big orks and trolls.</summary>
+        SpecialElites,
     }
 
     public static class ChainFlags
@@ -27,7 +33,13 @@ namespace Amethyst.Chain
         public static readonly Flag<ChainCrowd> Crowd = Flag.Enum(
             "chain.crowd",
             ChainCrowd.Skeletons,
-            "What the room spawns: skeletons, the key family's fodder mixed, skeletons with the accent family's goblins and mushrooms, or skeletons with the counter family's big orks and trolls"
+            "What the room spawns: skeletons, the key family's fodder mixed, skeletons with the accent family's goblins and mushrooms, skeletons with the counter family's big orks and trolls, or the mixed fodder with Empowered fodder or Empowered specials and heavies"
+        );
+
+        public static readonly Flag<float> BreakAt = Flag.Float(
+            "chain.break-at",
+            0f,
+            "Room time, s, when every armored enemy's armor breaks at once, for stills of the break (0: never)"
         );
     }
 
@@ -56,9 +68,29 @@ namespace Amethyst.Chain
                         ChainCrowd.Mixed => SpawnList.KeyFodder,
                         ChainCrowd.Accent => SpawnList.Accent,
                         ChainCrowd.Heavies => SpawnList.Heavies,
+                        ChainCrowd.FodderElites => SpawnList.FodderElites,
+                        ChainCrowd.SpecialElites => SpawnList.SpecialElites,
                         _ => SpawnList.Skeletons,
                     }
                 );
+            if (ChainFlags.BreakAt.Value > 0f)
+                new GameObject("Break").AddComponent<StagedBreak>();
+        }
+    }
+
+    /// <summary>Breaks every armored enemy's armor at <see cref="ChainFlags.BreakAt"/> in the first
+    /// room, so a still can catch the break.</summary>
+    sealed class StagedBreak : MonoBehaviour
+    {
+        void LateUpdate()
+        {
+            var room = Object.FindAnyObjectByType<Fight>()?.Room;
+            if (room == null || room.Time < ChainFlags.BreakAt.Value)
+                return;
+            foreach (var s in room.Enemies)
+                if (s.Fighting && s.Armored)
+                    room.BreakArmor(s, System.Numerics.Vector2.UnitY);
+            Destroy(gameObject);
         }
     }
 }
