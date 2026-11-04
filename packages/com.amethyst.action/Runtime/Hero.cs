@@ -17,6 +17,7 @@ namespace Amethyst.Action
     public sealed class Hero : MonoBehaviour
     {
         const float SnapRange = 10f;
+        const float Radius = 0.45f;
         const float Frame = 1f / 60f;
         public const int MaxHealth = 100;
 
@@ -235,12 +236,9 @@ namespace Amethyst.Action
                 p += Carry(frameStart, now);
             else if (!dash.Active(now))
                 p += input.Move * (ActionFlags.Speed.Value * dt);
-            var limit = Arena.HalfSize - 1f;
-            transform.position = new Vector3(
-                Mathf.Clamp(p.x, -limit, limit),
-                0f,
-                Mathf.Clamp(p.z, -limit, limit)
-            );
+            var at = new Num.Vector2(p.x, p.z);
+            Arena.Hazards.Collide(ref at, Radius, false);
+            transform.position = new Vector3(at.X, 0f, at.Y);
 
             if (playing == Move.None && !dash.Active(now))
             {

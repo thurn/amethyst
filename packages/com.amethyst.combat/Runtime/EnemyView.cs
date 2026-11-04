@@ -425,7 +425,7 @@ namespace Amethyst.Combat
         static Color Alpha(Color c, float a) => new Color(c.r, c.g, c.b, a);
 
         // Hazards and enemy attacks: filled red and orange shapes (docs/game-design.md, Look).
-        static Color Danger(Palette palette, float alpha) =>
+        internal static Color Danger(Palette palette, float alpha) =>
             Alpha(EdgeLook.Linear(palette.EnemyAttack) * 1.6f, alpha);
 
         public void Dispose()

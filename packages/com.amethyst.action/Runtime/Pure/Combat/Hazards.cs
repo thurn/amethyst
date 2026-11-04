@@ -96,10 +96,11 @@ namespace Amethyst.Action
             switch (set)
             {
                 case HazardSet.Pillars:
-                    // A ring of pillars around the hero's start splits the horde into lanes; a
-                    // pylon by the start, more out by the corners.
-                    layout.Pillars = Ring(8, half * 0.45f, MathF.PI / 8f, 0.9f);
-                    var pylons = Ring(4, half * 0.7f, MathF.PI / 4f, 0.55f);
+                    // A ring of pillars around the hero's start, one on each diagonal where the
+                    // packs from the corners stream in, splits the horde into lanes; a pylon by
+                    // the start, more out along the axes.
+                    layout.Pillars = Ring(8, half * 0.45f, 0f, 0.4f + half * 0.025f);
+                    var pylons = Ring(4, half * 0.7f, 0f, 0.55f);
                     layout.Pylons = new Post[pylons.Length + 1];
                     layout.Pylons[0] = new Post { Center = new Vector2(2.5f, 0f), Radius = 0.55f };
                     pylons.CopyTo(layout.Pylons, 1);

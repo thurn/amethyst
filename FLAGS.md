@@ -184,6 +184,10 @@ in `Awake` or `Start`, or every frame.
 
 - `combat.alive` = `0` (int): Enemies alive at once in the horde (0 keeps the
   mode's).
+  [CombatFlags.cs:21](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L21)
+- `combat.hazards` = `none` (enum: none | pillars | vents): The room's hazards
+  besides its walls: none, a ring of pillars with pylons, or a ring of Spike
+  Vents.
   [CombatFlags.cs:15](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L15)
 - `combat.mode` = `focused` (enum: focused | horde | blind): Focused: a few
   tough enemies that all telegraph; horde: a stream of contact-damage fodder;
@@ -191,26 +195,26 @@ in `Awake` or `Start`, or every frame.
   [CombatFlags.cs:9](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L9)
 - `combat.room-seconds` = `0` (float): The horde room's timer, s, until its
   buzzer (0 keeps the mode's).
-  [CombatFlags.cs:21](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L21)
+  [CombatFlags.cs:27](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L27)
 - `feedback.flash` = `true` (bool): A struck enemy flashes white for 2 frames.
-  [CombatFlags.cs:33](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L33)
+  [CombatFlags.cs:39](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L39)
 - `feedback.freeze` = `true` (bool): Global hitstop with a slow-motion tail for
   a room's clear and Empowered kills.
-  [CombatFlags.cs:57](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L57)
+  [CombatFlags.cs:63](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L63)
 - `feedback.hitstop` = `1` (float): Per-target hitstop, times the mode's frames:
   0 turns it off.
-  [CombatFlags.cs:27](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L27)
+  [CombatFlags.cs:33](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L33)
 - `feedback.knockback` = `true` (bool): Hits push enemies along the attack.
-  [CombatFlags.cs:39](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L39)
+  [CombatFlags.cs:45](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L45)
 - `feedback.shake` = `true` (bool): Trauma-model screen shake for heavy hits and
   the hero's damage.
-  [CombatFlags.cs:51](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L51)
+  [CombatFlags.cs:57](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L57)
 - `feedback.shatter` = `true` (bool): Kills shatter in the enemy's hue (off: the
   body just goes).
-  [CombatFlags.cs:45](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L45)
+  [CombatFlags.cs:51](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L51)
 - `feedback.sound` = `true` (bool): Hit, kill and telegraph sounds through the
   voice budget.
-  [CombatFlags.cs:63](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L63)
+  [CombatFlags.cs:69](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L69)
 
 ### packages/com.amethyst.core
 
@@ -247,6 +251,14 @@ in `Awake` or `Start`, or every frame.
   `hero.aim=cursor`, `chain.crowd=mixed`.
   [focused-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-mixed.flags)
 
+- variant `focused-pillars`: Focused with hazards: a ring of pillars splitting
+  the crowd into lanes, and pylons to burst. Sets `combat.mode=focused`,
+  `combat.hazards=pillars`, `hero.aim=cursor`.
+  [focused-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-pillars.flags)
+- variant `focused-vents`: Focused with hazards: a ring of Spike Vents erupting
+  in turn. Sets `combat.mode=focused`, `combat.hazards=vents`,
+  `hero.aim=cursor`.
+  [focused-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-vents.flags)
 - variant `focused`: Focused: waves of a few enemies that all telegraph, the
   camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
@@ -261,6 +273,13 @@ in `Awake` or `Start`, or every frame.
   `chain.crowd=mixed`.
   [horde-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-mixed.flags)
 
+- variant `horde-pillars`: Horde with hazards: a ring of pillars splitting the
+  crowd into lanes, and pylons to burst. Sets `combat.mode=horde`,
+  `combat.hazards=pillars`, `hero.aim=cursor`.
+  [horde-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-pillars.flags)
+- variant `horde-vents`: Horde with hazards: a ring of Spike Vents erupting in
+  turn. Sets `combat.mode=horde`, `combat.hazards=vents`, `hero.aim=cursor`.
+  [horde-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-vents.flags)
 - variant `horde`: Horde: a stream of ~100 contact-damage enemies for a 60 s
   room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
   [horde.flags](testbeds/chain/Assets/StreamingAssets/variants/horde.flags)

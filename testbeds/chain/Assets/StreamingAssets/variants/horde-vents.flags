@@ -1,0 +1,4 @@
+# Horde with hazards: a ring of Spike Vents erupting in turn
+combat.mode = horde
+combat.hazards = vents
+hero.aim = cursor

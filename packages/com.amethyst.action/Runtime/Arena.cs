@@ -9,6 +9,11 @@ namespace Amethyst.Action
         /// <summary>The hero's room is this far from the centre each way, m.</summary>
         public static float HalfSize { get; private set; } = 28f;
 
+        /// <summary>What blocks the hero: the room's walls and, in a fight, its pillars and pylons.
+        /// Whoever runs a room's <see cref="CombatRoom"/> sets its own.</summary>
+        public static Hazards Hazards { get; set; } =
+            new Hazards(HazardLayout.Open(new System.Numerics.Vector2(28f)));
+
         /// <summary>
         /// The arena <paramref name="halfSize"/> m each way with the hero and its camera, and with
         /// <paramref name="greybox"/> its greybox ground, sun and crystals (a project drawing its own
@@ -17,6 +22,7 @@ namespace Amethyst.Action
         public static Hero Build(ulong seed = 1, bool greybox = true, float halfSize = 28f)
         {
             HalfSize = halfSize;
+            Hazards = new Hazards(HazardLayout.Open(new System.Numerics.Vector2(halfSize)));
             if (greybox)
                 Greyboxed(seed);
             var hero = Hero.Create();

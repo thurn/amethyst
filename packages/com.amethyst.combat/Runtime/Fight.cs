@@ -14,8 +14,9 @@ namespace Amethyst.Combat
     /// reported through each feedback channel (feel §3: per-target hitstop, flash, knockback, the
     /// kill shatter, trauma shake for heavy hits and the hero's damage, global hitstop with a
     /// slow-motion tail for a room's clear and Empowered kills, sounds through the voice budget)
-    /// and feel §11.2's metrics per room in the run folder. The hero's death shatters it and
-    /// restarts the arena (the scene reloads; its entry begins the fight again).
+    /// and feel §11.2's metrics per room in the run folder; each room in its hazard layout
+    /// (<see cref="CombatFlags.Hazards"/>), drawn by <see cref="HazardView"/>. The hero's death
+    /// shatters it and restarts the arena (the scene reloads; its entry begins the fight again).
     /// </summary>
     public sealed class Fight : MonoBehaviour
     {
@@ -34,6 +35,8 @@ namespace Amethyst.Combat
         ModeTuning tuning;
         CombatMode mode;
         SpawnList spawns;
+        HazardLayout layout;
+        HazardView hazards;
         CombatRoom room;
         int seed;
         Palette palette;
@@ -95,12 +98,13 @@ namespace Amethyst.Combat
             seed = (int)(System.DateTime.UtcNow.Ticks & 0x7fffffff);
             if (Run.Args.FixedTime)
                 seed = 1;
+            layout = HazardLayout.Of(CombatFlags.Hazards.Value, tuning.ArenaHalfSize);
+            hazards = new HazardView(layout, palette, tuning.CameraDistance * 0.0015f);
             room = NewRoom();
             view = EnemyView.Create(Mathf.Max(64, tuning.Alive + 32), palette);
             shapes = new Shapes();
             sounds = new FightSounds(cam.gameObject, kit);
             metrics = new FeelMetrics(mode);
-            Walls();
             hero.Struck += OnStruck;
             hero.Died += OnDied;
             Debug.Log(
@@ -110,38 +114,14 @@ namespace Amethyst.Combat
 
         CombatRoom NewRoom()
         {
-            var r = new CombatRoom(tuning, seed++, spawns)
+            var r = new CombatRoom(tuning, seed++, spawns, layout)
             {
                 HitstopScale = Mathf.Max(0f, CombatFlags.Hitstop.Value),
                 KnockbackScale = CombatFlags.Knockback.Value ? 1f : 0f,
                 FlashFrames = 2,
             };
+            Arena.Hazards = r.Hazards;
             return r;
-        }
-
-        // The room's edge, in the walls' grey.
-        void Walls()
-        {
-            var grey = EdgeLook.Linear(palette.Wall);
-            grey.a = 1f;
-            var material = Flat.Make(grey, Flat.Effects - 10);
-            var h = tuning.ArenaHalfSize;
-            for (int i = 0; i < 4; i++)
-            {
-                var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Destroy(wall.GetComponent<Collider>());
-                wall.name = "Wall";
-                wall.transform.SetParent(transform, false);
-                var x = i < 2;
-                var side = i % 2 == 0 ? 1f : -1f;
-                wall.transform.position = x
-                    ? new Vector3(0f, 0.02f, side * h)
-                    : new Vector3(side * h, 0.02f, 0f);
-                wall.transform.localScale = x
-                    ? new Vector3(2f * h, 0.04f, 0.1f)
-                    : new Vector3(0.1f, 0.04f, 2f * h);
-                wall.GetComponent<Renderer>().sharedMaterial = material;
-            }
         }
 
         void OnStruck(Strike strike)
@@ -197,6 +177,7 @@ namespace Amethyst.Combat
 
             view?.Present(room, now, CombatFlags.Flash.Value, CombatFlags.Shatter.Value);
             shapes.Begin();
+            hazards.Present(shapes, room);
             EnemyView.Shapes(shapes, room, cam, palette, view);
             shapes.End();
             sounds.Flush(now, CombatFlags.Sound.Value);
@@ -220,6 +201,7 @@ namespace Amethyst.Combat
             foreach (var e in room.Events)
             {
                 view?.Note(e);
+                hazards.Note(e, room.Time);
                 var at = new Vector3(e.Position.X, 0f, e.Position.Y);
                 switch (e.Kind)
                 {
@@ -249,6 +231,13 @@ namespace Amethyst.Combat
                             metrics.HeroHit(e.Amount, e.Telegraphed);
                             Shake(e.Telegraphed ? 0.5f : 0.3f);
                         }
+                        break;
+                    case RoomEventKind.Burst:
+                        sounds.Budget.Add(CombatSound.Break, 3);
+                        Shake(0.4f);
+                        break;
+                    case RoomEventKind.Erupt:
+                        sounds.Budget.Add(CombatSound.Hit);
                         break;
                     case RoomEventKind.Buzzer:
                         SwordEffects.Ring(
@@ -353,6 +342,7 @@ namespace Amethyst.Combat
         {
             view?.Dispose();
             shapes?.Dispose();
+            hazards?.Dispose();
             if (hero != null)
             {
                 hero.Struck -= OnStruck;

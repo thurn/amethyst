@@ -12,6 +12,12 @@ namespace Amethyst.Combat
             "Focused: a few tough enemies that all telegraph; horde: a stream of contact-damage fodder; blind: one of the two at random each run"
         );
 
+        public static readonly Flag<HazardSet> Hazards = Flag.Enum(
+            "combat.hazards",
+            HazardSet.None,
+            "The room's hazards besides its walls: none, a ring of pillars with pylons, or a ring of Spike Vents"
+        );
+
         public static readonly Flag<int> Alive = Flag.Int(
             "combat.alive",
             0,
