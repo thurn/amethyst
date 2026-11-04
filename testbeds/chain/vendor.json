@@ -29,6 +29,13 @@
       "use": "hero: run"
     },
     {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Walk/A_Walk_F_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "eead3eb07cb89cb4eb25b3550df5e84b",
+      "use": "bigOrk, troll: walk"
+    },
+    {
       "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
       "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/HeavyStab01/A_Attack_HeavyStab01_Sword.fbx",
       "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
@@ -160,6 +167,34 @@
       "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
       "guid": "b94969b4c36c3c94284f72888ad9289d",
       "use": "hero: idle"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Characters/Character_BR_BigOrk_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "0d42bc61d684259409d481c6f5dd5d5c",
+      "use": "bigOrk"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Characters/Character_BR_Troll_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "2250a4a4fc528684c85ba955eb992ec6",
+      "use": "troll"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Weapons/SM_Wep_Slayer_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "404a923dea987c14498264bf7d13d458",
+      "use": "bigOrk: the Slayer"
+    },
+    {
+      "source": "synty:POLYGON_Fantasy_Rivals_Unity_2021_3_v1_3_1.unitypackage.gz",
+      "path": "Assets/PolygonFantasyRivals/Prefabs/Weapons/SM_Wep_Troll_01.prefab",
+      "sourceSha256": "f5b2197465eb4fcd0ce06cec1faa2790523a8a1ae8a669c1ef9a0b0316919e6c",
+      "guid": "39e0fb4b243ffb645a622d1945004ee5",
+      "use": "troll: its weapon"
     },
     {
       "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",

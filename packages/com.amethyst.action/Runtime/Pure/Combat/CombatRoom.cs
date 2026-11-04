@@ -15,6 +15,9 @@ namespace Amethyst.Action
 
         /// <summary>A lunge's dash along its lane.</summary>
         Lunging,
+
+        /// <summary>A leap through the air to its ring, landing at <see cref="CombatRoom.LeapSeconds"/>.</summary>
+        Leaping,
         Recovering,
         Staggered,
 
@@ -63,7 +66,8 @@ namespace Amethyst.Action
         public float Windup;
         public Vector2 AttackDirection;
 
-        /// <summary>Where the current attack aims: a lunge's lane starts there, a volley lands there.</summary>
+        /// <summary>Where the current attack aims: a lunge's lane starts there, a volley or a leap
+        /// lands there.</summary>
         public Vector2 Aim;
 
         /// <summary>Whether the current lunge has hit the hero.</summary>
@@ -207,6 +211,11 @@ namespace Amethyst.Action
         /// m: the hero's centre in them is hit.</summary>
         public const float LaneHalfWidth = 0.6f,
             VolleyRadius = 1.3f;
+
+        /// <summary>A leap's ring's radius at scale 1, m (the hero's centre in it is hit), and the
+        /// leap's time in the air, s.</summary>
+        public const float LeapRadius = 2.2f,
+            LeapSeconds = 0.4f;
 
         readonly Random rng;
         readonly List<Enemy> enemies = new List<Enemy>();
@@ -359,7 +368,12 @@ namespace Amethyst.Action
                                     + (float)rng.NextDouble()
                                         * (Mode.TelegraphMax - Mode.TelegraphMin);
                         s.AttackDirection = toward;
-                        s.Aim = s.Kind.Attack == AttackKind.Volley ? hero : s.Position;
+                        s.Aim = s.Kind.Attack switch
+                        {
+                            AttackKind.Volley => hero,
+                            AttackKind.Leap => s.Position + to * Math.Min(1f, Reach(s) / distance),
+                            _ => s.Position,
+                        };
                         Emit(RoomEventKind.Windup, s, s.Position, toward);
                     }
                     else if (
@@ -390,6 +404,10 @@ namespace Amethyst.Action
                 case EnemyState.Lunging:
                     face = s.AttackDirection;
                     Lunge(s, hero, dt, ref vulnerable);
+                    break;
+                case EnemyState.Leaping:
+                    face = s.AttackDirection;
+                    Leap(s, hero, dt, ref vulnerable);
                     break;
                 case EnemyState.Recovering:
                     face = s.AttackDirection;
@@ -440,13 +458,17 @@ namespace Amethyst.Action
                 case AttackKind.Volley:
                     Launch(s);
                     return EnemyState.Recovering;
+                case AttackKind.Leap:
+                    return EnemyState.Leaping;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(s), s.Kind.Attack, null);
             }
         }
 
-        // How near the hero an attacker starts its wind-up.
-        static float Range(Enemy s) => s.Kind.Reach * WindupReach * s.Scale;
+        // How near the hero an attacker starts its wind-up, and how far its attack reaches.
+        static float Range(Enemy s) => Reach(s) * WindupReach;
+
+        static float Reach(Enemy s) => s.Kind.Reach * s.Scale;
 
         // The attack kinds' other difference: how near the hero each keeps while it walks, centre
         // to centre: a volley's thrower backs off when nearer than `Near`.
@@ -483,6 +505,22 @@ namespace Amethyst.Action
             }
             if (s.Age >= duration)
                 Enter(s, EnemyState.Recovering);
+        }
+
+        // A leap to its ring, closing what is left of the way to it by the time it lands, which
+        // hurts the hero if it is in the ring then.
+        void Leap(Enemy s, Vector2 hero, float dt, ref bool vulnerable)
+        {
+            var left = LeapSeconds - s.Age;
+            if (left > 0f)
+            {
+                s.Position += (s.Aim - s.Position) * Math.Min(1f, dt / (left + dt));
+                return;
+            }
+            s.Position = s.Aim;
+            if (Vector2.Distance(hero, s.Aim) <= LeapRadius * s.Scale)
+                HurtHero(s, s.Aim, ref vulnerable);
+            Enter(s, EnemyState.Recovering);
         }
 
         // A volley's launch: its spores leave for their landings around its aim and land together,
@@ -560,7 +598,10 @@ namespace Amethyst.Action
                 strike.Move == Move.CleaveC || strike.Move == Move.LeapSlam
                     ? HitWeight.Finisher
                     : HitWeight.Light;
-            var result = Deal(strike, weight);
+            // The Lunge and the Leap Slam are the breaking tools: they chip armor faster.
+            var chip =
+                strike.Move == Move.Lunge || strike.Move == Move.LeapSlam ? Mode.ArmorBreakers : 1f;
+            var result = Deal(strike, weight, chip);
             var pylons = Hazards.Layout.Pylons;
             for (int i = 0; i < pylons.Length; i++)
                 if (!Hazards.Broken(i) && strike.Hits(pylons[i].Center, pylons[i].Radius))
@@ -568,8 +609,9 @@ namespace Amethyst.Action
             return result;
         }
 
-        // A blow on every enemy in the fight it reaches, from the hero's sword or a hazard.
-        (int Hits, int Kills) Deal(Strike strike, HitWeight weight)
+        // A blow on every enemy in the fight it reaches, from the hero's sword or a hazard, taking
+        // armor at `chip` times its damage.
+        (int Hits, int Kills) Deal(Strike strike, HitWeight weight, float chip = 1f)
         {
             int hits = 0,
                 kills = 0;
@@ -582,9 +624,10 @@ namespace Amethyst.Action
                 var wasArmored = s.Armored;
                 if (wasArmored)
                 {
-                    s.Armor -= damage;
-                    damage = Math.Max(0, -s.Armor);
-                    s.Armor = Math.Max(0, s.Armor);
+                    // Armor first, at the move's chip rate; what breaks through hurts at its own.
+                    var chipped = (int)MathF.Round(damage * chip);
+                    damage = chipped >= s.Armor ? (int)((chipped - s.Armor) / chip) : 0;
+                    s.Armor = Math.Max(0, s.Armor - chipped);
                     if (!s.Armored)
                         Emit(RoomEventKind.ArmorBreak, s, s.Position, strike.Direction);
                 }
@@ -829,20 +872,26 @@ namespace Amethyst.Action
                 for (int left = n; left > 0; )
                 {
                     var pack = Math.Min(left, 1 + rng.Next(3));
-                    Pack(hero, Spawns.Pick(rng, Mode.SpecialWeight), pack, false);
+                    var kind = Spawns.Pick(rng, Mode.SpecialWeight);
+                    if (kind.Role == EnemyRole.Heavy)
+                        pack = 1; // heavies come alone
+                    Pack(hero, kind, pack, false);
                     left -= pack;
                 }
             }
         }
 
-        // A horde pack's size by its kind's formation: rings and streams are bigger.
+        // A horde pack's size by its kind's formation: rings and streams are bigger; heavies come
+        // alone.
         int PackSize(EnemyKind kind) =>
-            kind.Formation switch
-            {
-                Formation.Ring => 7 + rng.Next(4),
-                Formation.Stream => 6 + rng.Next(5),
-                _ => 3 + rng.Next(4),
-            };
+            kind.Role == EnemyRole.Heavy
+                ? 1
+                : kind.Formation switch
+                {
+                    Formation.Ring => 7 + rng.Next(4),
+                    Formation.Stream => 6 + rng.Next(5),
+                    _ => 3 + rng.Next(4),
+                };
 
         // A pack of one kind arrives at one spot on the room's edge, at least MinSpawnDistance from
         // the hero; in the horde, as its kind's formation: bunched there, single file out of it,
@@ -1033,7 +1082,12 @@ namespace Amethyst.Action
                 var dh = off.Length();
                 if (dh < clear)
                     s.Position = hero + (dh > 1e-4f ? off / dh : Vector2.UnitY) * clear;
-                Hazards.Collide(ref s.Position, s.Radius, s.Kind.Flies);
+                // A leap passes over walls and pillars as a flier does.
+                Hazards.Collide(
+                    ref s.Position,
+                    s.Radius,
+                    s.Kind.Flies || s.State == EnemyState.Leaping
+                );
             }
         }
 

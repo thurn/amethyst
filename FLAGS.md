@@ -236,15 +236,21 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
-- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent): What the room
-  spawns: skeletons, the key family's fodder mixed, or skeletons with the accent
-  family's goblins and mushrooms.
-  [ChainEntry.cs:24](testbeds/chain/Assets/Chain/ChainEntry.cs#L24)
+- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent | heavies): What
+  the room spawns: skeletons, the key family's fodder mixed, skeletons with the
+  accent family's goblins and mushrooms, or skeletons with the counter family's
+  big orks and trolls.
+  [ChainEntry.cs:27](testbeds/chain/Assets/Chain/ChainEntry.cs#L27)
 
 - variant `focused-accent`: Focused, accent: goblins and mushrooms in the waves
   among the skeletons. Sets `combat.mode=focused`, `chain.crowd=accent`,
   `hero.aim=cursor`.
   [focused-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-accent.flags)
+
+- variant `focused-heavies`: Focused, heavies: big orks and trolls in the waves
+  among the skeletons. Sets `combat.mode=focused`, `chain.crowd=heavies`,
+  `hero.aim=cursor`.
+  [focused-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-heavies.flags)
 
 - variant `focused-mixed`: Focused, mixed: waves of skeletons, slimes, demons
   and bats, each telegraphing its own attack. Sets `combat.mode=focused`,
@@ -269,6 +275,11 @@ in `Awake` or `Start`, or every frame.
   skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=accent`,
   `hero.aim=cursor`.
   [horde-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-accent.flags)
+
+- variant `horde-heavies`: Horde, heavies: a few big orks and trolls among the
+  skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=heavies`,
+  `hero.aim=cursor`.
+  [horde-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-heavies.flags)
 
 - variant `horde-mixed`: Horde, mixed: slimes in rings, demons and skeletons in
   packs, bats in streams. Sets `combat.mode=horde`, `hero.aim=cursor`,

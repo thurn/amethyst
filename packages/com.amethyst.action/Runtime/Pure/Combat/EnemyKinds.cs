@@ -45,6 +45,10 @@ namespace Amethyst.Action
         /// <summary>Slow spores lofted at the hero's spot under a filling red circle, from
         /// <see cref="EnemyKind.Reach"/> away: the mushroom's.</summary>
         Volley,
+
+        /// <summary>A filling red ring at the hero's spot, at most <see cref="EnemyKind.Reach"/>
+        /// away, then a leap there whose landing hits whatever is in the ring: the troll's.</summary>
+        Leap,
     }
 
     /// <summary>How a horde pack arrives (the trailer's crowd shapes); focused waves come in packs.</summary>
@@ -176,6 +180,36 @@ namespace Amethyst.Action
             Reach = 9f,
         };
 
+        /// <summary>A heavy: winds up 500 ms behind a long lane, then lunges along it.</summary>
+        public static readonly EnemyKind BigOrk = new EnemyKind
+        {
+            Id = "bigOrk",
+            Family = EnemyFamily.Counter,
+            Role = EnemyRole.Heavy,
+            Hp = 3f,
+            Speed = 0.75f,
+            Radius = 0.6f,
+            Armored = true,
+            Attack = AttackKind.Lunge,
+            Windup = 0.5f,
+            Reach = 7f,
+        };
+
+        /// <summary>A heavy: marks a ring at the hero's spot for 800 ms, then leaps into it.</summary>
+        public static readonly EnemyKind Troll = new EnemyKind
+        {
+            Id = "troll",
+            Family = EnemyFamily.Counter,
+            Role = EnemyRole.Heavy,
+            Hp = 4f,
+            Speed = 0.65f,
+            Radius = 0.7f,
+            Armored = true,
+            Attack = AttackKind.Leap,
+            Windup = 0.8f,
+            Reach = 7f,
+        };
+
         public static readonly IReadOnlyList<EnemyKind> All = new[]
         {
             Skeleton,
@@ -184,6 +218,8 @@ namespace Amethyst.Action
             Bat,
             Goblin,
             Mushroom,
+            BigOrk,
+            Troll,
         };
 
         public static EnemyKind Of(string id)
@@ -234,6 +270,11 @@ namespace Amethyst.Action
         /// <summary>Skeletons with the accent family's specials, goblins and mushrooms, among them.</summary>
         public static readonly SpawnList Accent = new SpawnList(
             new[] { (EnemyKinds.Skeleton, 2f), (EnemyKinds.Goblin, 1f), (EnemyKinds.Mushroom, 1f) }
+        );
+
+        /// <summary>Skeletons with the counter family's heavies, big orks and trolls, among them.</summary>
+        public static readonly SpawnList Heavies = new SpawnList(
+            new[] { (EnemyKinds.Skeleton, 1.5f), (EnemyKinds.BigOrk, 1f), (EnemyKinds.Troll, 1f) }
         );
 
         /// <summary>A pack's kind, with specials' and heavies' weights times

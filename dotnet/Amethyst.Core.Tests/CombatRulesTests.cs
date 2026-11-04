@@ -103,6 +103,88 @@ namespace Amethyst.Tests
             Assert.That(struck, Is.EqualTo(hit));
         }
 
+        // A room with one enemy of `kind`, stepped until it is in the fight.
+        static (CombatRoom Room, Enemy Enemy) One(CombatMode mode, EnemyKind kind, int seed = 5)
+        {
+            var tuning = ModeTuning.For(mode).Copy();
+            tuning.WaveMin = tuning.WaveMax = tuning.Waves = 1;
+            tuning.Alive = 1;
+            tuning.EliteEvery = 0f;
+            var room = new CombatRoom(tuning, seed, new SpawnList(new[] { (kind, 1f) }));
+            for (int f = 0; f < 60 * 10 && !room.Enemies.Any(e => e.Fighting); f++)
+                room.Step(1f / 60f, new Vector2(0f, -30f), false);
+            return (room, room.Enemies.Single(e => e.Fighting));
+        }
+
+        // A move's hit on `enemy`, from a metre away.
+        static void HitWith(CombatRoom room, Enemy enemy, Move move)
+        {
+            var strike = Strike.Of(move);
+            strike.Origin = enemy.Position - Vector2.UnitY;
+            strike.Direction = Vector2.UnitY;
+            room.Hit(strike);
+        }
+
+        [TestCase(CombatMode.Focused)]
+        [TestCase(CombatMode.Horde)]
+        public void AnArmoredHeavyLosesArmorFirstAndHoldsItsGround(CombatMode mode)
+        {
+            foreach (var kind in new[] { EnemyKinds.BigOrk, EnemyKinds.Troll })
+            {
+                var (room, heavy) = One(mode, kind);
+                Assert.That(heavy.Armored, Is.True, kind.Id);
+                HitWith(room, heavy, Move.CleaveA);
+                Assert.That(heavy.Hp, Is.EqualTo(heavy.MaxHp), kind.Id);
+                Assert.That(heavy.Armor, Is.LessThan(heavy.MaxArmor), kind.Id);
+                Assert.That(heavy.State, Is.Not.EqualTo(EnemyState.Staggered), kind.Id);
+                Assert.That(heavy.Knock, Is.EqualTo(Vector2.Zero), kind.Id);
+                while (heavy.Armored)
+                    HitWith(room, heavy, Move.CleaveA);
+                HitWith(room, heavy, Move.CleaveA);
+                Assert.That(heavy.Hp, Is.LessThan(heavy.MaxHp), kind.Id);
+                Assert.That(heavy.Knock, Is.Not.EqualTo(Vector2.Zero), kind.Id);
+                if (room.Mode.Stagger)
+                    Assert.That(heavy.State, Is.EqualTo(EnemyState.Staggered), kind.Id);
+            }
+        }
+
+        [TestCase(Move.Lunge)]
+        [TestCase(Move.LeapSlam)]
+        public void TheLungeAndTheLeapSlamBreakArmorFasterThanACleave(Move breaker)
+        {
+            float ChippedPerDamage(Move move)
+            {
+                var (room, heavy) = One(CombatMode.Focused, EnemyKinds.BigOrk);
+                heavy.MaxArmor = heavy.Armor = 1000;
+                HitWith(room, heavy, move);
+                return (heavy.MaxArmor - heavy.Armor) / (float)Strike.Of(move).Damage;
+            }
+            Assert.That(ChippedPerDamage(breaker), Is.GreaterThan(ChippedPerDamage(Move.CleaveA)));
+        }
+
+        [TestCase(0f, true)]
+        [TestCase(4f, false)]
+        public void ATrollsLandingHitsOnlyAHeroInsideItsRing(float sidestep, bool hit)
+        {
+            var (room, troll) = One(CombatMode.Focused, EnemyKinds.Troll);
+            var hero = Vector2.Zero;
+            for (int f = 0; f < 60 * 20 && troll.State != EnemyState.WindingUp; f++)
+                room.Step(1f / 60f, hero, false);
+            Assert.That(troll.State, Is.EqualTo(EnemyState.WindingUp), "the troll marks its ring");
+            hero += new Vector2(-troll.AttackDirection.Y, troll.AttackDirection.X) * sidestep;
+            bool leapt = false,
+                struck = false;
+            for (int f = 0; f < 60 * 3 && troll.State != EnemyState.Recovering; f++)
+            {
+                room.Step(1f / 60f, hero, true);
+                leapt |= troll.State == EnemyState.Leaping;
+                struck |= room.Events.Any(e => e.Kind == RoomEventKind.HeroHit && e.Telegraphed);
+                room.Events.Clear();
+            }
+            Assert.That(leapt, Is.True);
+            Assert.That(struck, Is.EqualTo(hit));
+        }
+
         [TestCase(CombatMode.Focused)]
         [TestCase(CombatMode.Horde)]
         public void SporesNeverOutpaceHalfTheDash(CombatMode mode)

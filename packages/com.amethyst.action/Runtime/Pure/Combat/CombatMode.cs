@@ -75,6 +75,10 @@ namespace Amethyst.Action
         /// focused wave, a few among the horde's fodder.</summary>
         public float SpecialWeight;
 
+        /// <summary>How much faster than a Cleave the Lunge and the Leap Slam chip armor, per point
+        /// of damage: the breaking tools.</summary>
+        public float ArmorBreakers;
+
         /// <summary>Enemies winding up at once at most (feel §6.4).</summary>
         public int AggressionTokens;
 
@@ -120,6 +124,7 @@ namespace Amethyst.Action
             TelegraphMax = 0.55f,
             Stagger = true,
             SpecialWeight = 1f,
+            ArmorBreakers = 2f,
             AggressionTokens = 2,
             HitstopLight = 3,
             HitstopFinisher = 6,
@@ -152,6 +157,7 @@ namespace Amethyst.Action
             TelegraphMin = 0.5f,
             TelegraphMax = 0.6f,
             SpecialWeight = 0.1f,
+            ArmorBreakers = 2f,
             AggressionTokens = 3,
             HitstopLight = 1,
             HitstopFinisher = 2,

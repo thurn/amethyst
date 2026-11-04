@@ -1,0 +1,4 @@
+# Horde, heavies: a few big orks and trolls among the skeleton fodder
+combat.mode = horde
+chain.crowd = heavies
+hero.aim = cursor

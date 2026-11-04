@@ -19,6 +19,8 @@ namespace Amethyst.Combat
         const float Fade = 0.1f;
         const float Shiver = 0.05f;
         const float DefaultHeight = 1.8f;
+        const float LeapCrouch = 0.45f; // of the attack clip to its impact, played over a leap's wind-up
+        const float LeapHeight = 1f; // a leap's arc's peak at scale 1, m
 
         struct Pose
         {
@@ -201,13 +203,22 @@ namespace Amethyst.Combat
             float time;
             // An Empowered enemy's lines burn brighter: with its ring, its doubled outline.
             float flare = s.Empowered ? 0.35f : 0f;
+            float lift = 0f;
             switch (s.State)
             {
                 case EnemyState.WindingUp:
                     clip = k.Attack;
                     var f = Mathf.Clamp01(s.Age / Mathf.Max(s.Windup, 1e-3f));
-                    time = f * k.Impact;
+                    // A leap's wind-up is its crouch; the leap plays the rest up to the impact.
+                    time = f * k.Impact * (s.Kind.Attack == AttackKind.Leap ? LeapCrouch : 1f);
                     flare = Mathf.Max(flare, 0.3f + 0.7f * f);
+                    break;
+                case EnemyState.Leaping:
+                    clip = k.Attack;
+                    var air = Mathf.Clamp01(s.Age / CombatRoom.LeapSeconds);
+                    time = k.Impact * (LeapCrouch + (1f - LeapCrouch) * air);
+                    lift = 4f * LeapHeight * s.Scale * air * (1f - air);
+                    flare = Mathf.Max(flare, 1f);
                     break;
                 case EnemyState.Lunging:
                     // The strike's pose held through the dash, burning.
@@ -240,7 +251,11 @@ namespace Amethyst.Combat
             }
             poses[s.Id] = p;
             var blend = Mathf.Clamp01((s.Clock - p.Since) / Fade);
-            var position = new Vector3(s.Position.X, k.Monster.HoverM * s.Scale, s.Position.Y);
+            var position = new Vector3(
+                s.Position.X,
+                k.Monster.HoverM * s.Scale + lift,
+                s.Position.Y
+            );
             if (s.Frozen > 0f)
             {
                 // Feel §3.1: the struck body shivers along the blow, decaying through its freeze.
@@ -296,8 +311,8 @@ namespace Amethyst.Combat
         /// <summary>
         /// The enemies' ground shapes, each in its kind's hue: each spawn marker filling over its
         /// time, each telegraph a red shape filling toward its impact (above the hero's effects; a
-        /// cone's a wedge, a lunge's its lane, a volley's the circle it lands in, filling on through
-        /// the spores' flight), the spores in the air, an Empowered one's ring and an armored one's
+        /// cone's a wedge, a lunge's its lane, a volley's or a leap's the circle it lands in, filling
+        /// on through the spores' flight or the leap), the spores in the air, an Empowered one's ring and an armored one's
         /// armor bar. <paramref name="view"/> sets the bars' heights; without one they float at a
         /// skeleton's.
         /// </summary>
@@ -366,10 +381,29 @@ namespace Amethyst.Combat
                                     palette
                                 );
                                 break;
+                            case AttackKind.Leap:
+                                Landing(
+                                    shapes,
+                                    s.Aim,
+                                    CombatRoom.LeapRadius * s.Scale,
+                                    0.75f * fill,
+                                    palette
+                                );
+                                break;
                         }
                         break;
                     case EnemyState.Lunging:
                         Lane(shapes, s, 1f, telegraph, telegraphFill);
+                        break;
+                    case EnemyState.Leaping:
+                        var air = Mathf.Clamp01(s.Age / CombatRoom.LeapSeconds);
+                        Landing(
+                            shapes,
+                            s.Aim,
+                            CombatRoom.LeapRadius * s.Scale,
+                            0.75f + 0.25f * air,
+                            palette
+                        );
                         break;
                 }
                 if (s.State != EnemyState.Dying && (s.Empowered || s.MaxArmor > 0))

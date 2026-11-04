@@ -1,0 +1,4 @@
+# Focused, heavies: big orks and trolls in the waves among the skeletons
+combat.mode = focused
+chain.crowd = heavies
+hero.aim = cursor
