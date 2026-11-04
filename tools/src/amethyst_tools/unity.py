@@ -32,7 +32,9 @@ from . import metrics, native, paths, proc, vendor, worktree
 ACCELERATOR = "127.0.0.1:10080"
 # The player's own informational lines (Run.cs, RunDriver.cs); any other `amethyst:` line is
 # an error it logged.
-PLAYER_INFO: re.Pattern[str] = re.compile(r"amethyst: (flags|captured|quitting with 0)")
+PLAYER_INFO: re.Pattern[str] = re.compile(
+    r"amethyst: (flags|captured|music playing|quitting with 0)"
+)
 KEEP_RUNS = 20
 
 

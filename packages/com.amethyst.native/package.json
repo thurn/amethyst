@@ -2,6 +2,6 @@
   "name": "com.amethyst.native",
   "version": "0.1.0",
   "displayName": "Amethyst Native",
-  "description": "C# bindings for the Rust plugin (native/), built into Plugins/ by `just native`.",
+  "description": "C# bindings for the Rust plugin (native/), built into Plugins/ by `just native`, and the music player built on them.",
   "unity": "6000.0"
 }

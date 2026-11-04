@@ -1,0 +1,5 @@
+{
+  "name": "Amethyst.Native.Pure",
+  "rootNamespace": "Amethyst.Native",
+  "noEngineReferences": true
+}

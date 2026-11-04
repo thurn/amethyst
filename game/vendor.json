@@ -1,0 +1,68 @@
+{
+  "assets": [
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Combat/Barren Boss.wav",
+      "sourceSha256": "9810b7147519495c339821521d0d9f9b5c5bdb4a9d8cb379efc8a518ebf3b711",
+      "metaSha256": "c2e1e24f93b5d2af1dbf0e2183f662fb883993cccbe03640e2ce4011142bf2d2",
+      "guid": "699375ab52b9d4d1191e41214b6dbc2a",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Combat/Enemies.wav",
+      "sourceSha256": "22d07831a264400ea8fa0f50664545ceb7efc5c06f1c68966bd6249b7607b0cd",
+      "metaSha256": "4add1964f26ddfb3d90640f2efb15ead21d433b29c41798d09ef4e7b992db0a6",
+      "guid": "6eeeb46a73cc74d70a49341c9b9c1cca",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Combat/Frantic Battle.wav",
+      "sourceSha256": "09d7636919865224c00db4e34727f0ab4e0ab777a20cad1dd8d70d5cb35897ad",
+      "metaSha256": "9a663c33dfdc66a41c2a2956b1531654bbbbf8cc7761605dd39c4c2caccf3b50",
+      "guid": "b27684bd966e1405bb8b5f05e48952ee",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Combat/Outlaw Battle.wav",
+      "sourceSha256": "8fe5a01e0b5393e9a25c443df1e5171a25e3d52d63df4193f3825c2503fe202f",
+      "metaSha256": "b7bead908099e429c72b25601afb9eca03414039c85b329ac92a9c29d9e8dac8",
+      "guid": "c741026331ed74fe2a3747f323bb18c8",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Combat/Tribal Chase.wav",
+      "sourceSha256": "21394fc1e1de9789c98eed605815d4b3a59f06b78108b9641168012ce6c32e13",
+      "metaSha256": "2dbee4b8e4bb78512f00c34c1aad932fa7fecbc0afa316f4d836b3be7b6a9256",
+      "guid": "97d60c6969645428ea855a2878636ec4",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Dungeons/Dark Cave.wav",
+      "sourceSha256": "395d5561c173341e1dc923882dfa7922035fceee934f1f7456757a3565ff3bbe",
+      "metaSha256": "db80eb1fd123048bfc63eeee23afcdfe477b4771215474bd24f92aed400dbb1f",
+      "guid": "60baa0d997e354655a1cbf215a3cc093",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Space/Planet Surface (combat) - Main Full.wav",
+      "sourceSha256": "a702987577305919431d748b650722204c390f093bb357e848b3aad0e1eedd96",
+      "metaSha256": "29875f36fb11ce591330dd2698a55a9ffb632b2804c6c991c813e9fbb1f92f32",
+      "guid": "82b1077e26b8a4bd9883a09b13876db7",
+      "use": "music: the default soundtrack"
+    },
+    {
+      "source": "local:unity_assets",
+      "path": "Assets/Ultimate Game Music Collection/Space/Planet Surface (unsafe) - Main Full.wav",
+      "sourceSha256": "ef7483c34609845d1670a39b916b4c45b6921f62ebe7fedef48f59af3186b816",
+      "metaSha256": "a625138cad778f2ee31953e821a95cd90e89563bf3e4319ff627820fbec06f9b",
+      "guid": "c9ce796fdb24b453d87fa5ab4f708d08",
+      "use": "music: the default soundtrack"
+    }
+  ]
+}

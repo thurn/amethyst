@@ -14,6 +14,8 @@ namespace Amethyst
     /// <c>--capture-variants</c> does it for every variant in turn; <c>--size WxH</c></item>
     /// <item><c>--fixed-time</c>: exactly 1/60 s per frame</item>
     /// <item><c>--data-dir DIR</c>: where the run saves, instead of the shared persistent path</item>
+    /// <item><c>--file PATH</c>: the music, an M3U playlist or an audio file, instead of the
+    /// soundtrack; <c>--shuffle</c> shuffles it</item>
     /// </list>
     /// <c>AMETHYST_FLAGS</c> holds whitespace-separated <c>NAME=VALUE</c> pairs below
     /// <c>--flag</c>'s.
@@ -35,6 +37,8 @@ namespace Amethyst
         public int CaptureHeight = 720;
         public bool FixedTime;
         public string DataDir;
+        public string MusicFile;
+        public bool Shuffle;
 
         public bool Captures => CaptureDir != null;
 
@@ -106,6 +110,12 @@ namespace Amethyst
                         break;
                     case "--data-dir":
                         result.DataDir = Next();
+                        break;
+                    case "--file":
+                        result.MusicFile = Next();
+                        break;
+                    case "--shuffle":
+                        result.Shuffle = true;
                         break;
                     default:
                         result.Errors.Add($"unknown argument {arg}");

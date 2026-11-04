@@ -118,6 +118,17 @@ in `Awake` or `Start`, or every frame.
 - `preview.overlay` = `true` (bool): Show the variant switcher where a project
   has variants. [Run.cs:20](packages/com.amethyst.core/Runtime/Unity/Run.cs#L20)
 
+### packages/com.amethyst.native
+
+- `music.duck` = `8` (float): How far a full-strength MusicPlayer.Duck lowers
+  the music, dB.
+  [MusicPlayer.cs:18](packages/com.amethyst.native/Runtime/MusicPlayer.cs#L18)
+- `music.duck-release` = `0.45` (float): How long the music takes to come back
+  from a duck, s.
+  [MusicPlayer.cs:24](packages/com.amethyst.native/Runtime/MusicPlayer.cs#L24)
+- `music.volume` = `0.7` (float): The music's level, 0 to 1.
+  [MusicPlayer.cs:12](packages/com.amethyst.native/Runtime/MusicPlayer.cs#L12)
+
 ### testbeds/sandbox
 
 - variant `floaty-orb`: Floaty orb: slow to start and stop, chase camera. Sets
