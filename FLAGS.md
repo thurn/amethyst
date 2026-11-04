@@ -94,36 +94,88 @@ in `Awake` or `Start`, or every frame.
 ### packages/com.amethyst.action
 
 - `arena.props` = `40` (int): Crystals the native hash scatters over the arena.
-  [ActionFlags.cs:79](packages/com.amethyst.action/Runtime/ActionFlags.cs#L79)
+  [ActionFlags.cs:199](packages/com.amethyst.action/Runtime/ActionFlags.cs#L199)
+- `attack.blend-in` = `0` (int): Frames an attack clip fades in over: 0 snaps,
+  so the first frame is the strike.
+  [ActionFlags.cs:157](packages/com.amethyst.action/Runtime/ActionFlags.cs#L157)
+- `attack.blend-out` = `6` (int): Frames an ended attack fades back into the run
+  cycles over.
+  [ActionFlags.cs:163](packages/com.amethyst.action/Runtime/ActionFlags.cs#L163)
+- `attack.hitbox` = `1.15` (float): Attack hitboxes over the size their effects
+  draw (feel §4.2).
+  [ActionFlags.cs:175](packages/com.amethyst.action/Runtime/ActionFlags.cs#L175)
+- `attack.run-cancel` = `true` (bool): Running ends an attack's recovery, as the
+  dash does.
+  [ActionFlags.cs:169](packages/com.amethyst.action/Runtime/ActionFlags.cs#L169)
 - `camera.distance` = `14` (float): The camera's distance from the hero, m:
   closer for focused fights, pulled back for the horde.
-  [ActionFlags.cs:61](packages/com.amethyst.action/Runtime/ActionFlags.cs#L61)
+  [ActionFlags.cs:181](packages/com.amethyst.action/Runtime/ActionFlags.cs#L181)
 - `camera.lean` = `1.5` (float): How far the camera leans toward the cursor at
   most, m.
+  [ActionFlags.cs:187](packages/com.amethyst.action/Runtime/ActionFlags.cs#L187)
+- `cleave.cadence` = `15` (int): Frames from one Cleave's start to the next's at
+  the earliest.
+  [ActionFlags.cs:85](packages/com.amethyst.action/Runtime/ActionFlags.cs#L85)
+- `cleave.recovery` = `14` (int): Frames a Cleave plays after its contact before
+  it ends; the dash cancels them.
+  [ActionFlags.cs:79](packages/com.amethyst.action/Runtime/ActionFlags.cs#L79)
+- `cleave.speed` = `1.3` (float): Playback speed of the Cleave clips
+  (LightCombo01 A, B, C).
+  [ActionFlags.cs:73](packages/com.amethyst.action/Runtime/ActionFlags.cs#L73)
+- `cleave.startup` = `3` (int): Frames from the press to a Cleave's contact:
+  each clip starts that far before its contact frame.
   [ActionFlags.cs:67](packages/com.amethyst.action/Runtime/ActionFlags.cs#L67)
 - `dash.clip-speed` = `2.2` (float): Playback speed of the Dodge clips.
-  [ActionFlags.cs:55](packages/com.amethyst.action/Runtime/ActionFlags.cs#L55)
+  [ActionFlags.cs:61](packages/com.amethyst.action/Runtime/ActionFlags.cs#L61)
 - `dash.cooldown` = `0.35` (float): Seconds after a dash ends before the next.
-  [ActionFlags.cs:49](packages/com.amethyst.action/Runtime/ActionFlags.cs#L49)
+  [ActionFlags.cs:55](packages/com.amethyst.action/Runtime/ActionFlags.cs#L55)
 - `dash.distance` = `3.5` (float): How far the dash goes, m.
-  [ActionFlags.cs:37](packages/com.amethyst.action/Runtime/ActionFlags.cs#L37)
-- `dash.frames` = `10` (int): How long the dash takes, frames at 60 Hz.
   [ActionFlags.cs:43](packages/com.amethyst.action/Runtime/ActionFlags.cs#L43)
+- `dash.frames` = `10` (int): How long the dash takes, frames at 60 Hz.
+  [ActionFlags.cs:49](packages/com.amethyst.action/Runtime/ActionFlags.cs#L49)
 - `hero.aim` = `cursor` (enum: cursor | movement): Cursor: face and aim at the
   mouse, snapping to enemies; movement: aim where the hero runs.
-  [ActionFlags.cs:19](packages/com.amethyst.action/Runtime/ActionFlags.cs#L19)
+  [ActionFlags.cs:25](packages/com.amethyst.action/Runtime/ActionFlags.cs#L25)
 - `hero.aim-snap` = `25` (float): Cursor aim snaps to the nearest enemy within
   this many degrees.
-  [ActionFlags.cs:25](packages/com.amethyst.action/Runtime/ActionFlags.cs#L25)
+  [ActionFlags.cs:31](packages/com.amethyst.action/Runtime/ActionFlags.cs#L31)
 - `hero.buffer` = `9` (int): Frames (60 Hz) an early press waits to become
   legal; the last press wins.
-  [ActionFlags.cs:31](packages/com.amethyst.action/Runtime/ActionFlags.cs#L31)
+  [ActionFlags.cs:37](packages/com.amethyst.action/Runtime/ActionFlags.cs#L37)
 - `hero.demo` = `false` (bool): Scripted input instead of the keyboard and
-  mouse: runs a loop and dashes (headless checks).
-  [ActionFlags.cs:73](packages/com.amethyst.action/Runtime/ActionFlags.cs#L73)
+  mouse: every move, then a loop with dashes (headless checks).
+  [ActionFlags.cs:193](packages/com.amethyst.action/Runtime/ActionFlags.cs#L193)
 - `hero.speed` = `7` (float): The hero's run speed, m/s: faster than every
   enemy.
-  [ActionFlags.cs:13](packages/com.amethyst.action/Runtime/ActionFlags.cs#L13)
+  [ActionFlags.cs:19](packages/com.amethyst.action/Runtime/ActionFlags.cs#L19)
+- `lunge.clip` = `fencing` (enum: fencing | stab): The Lunge's clip: Sword
+  Combat's LightFencing01 or HeavyStab01.
+  [ActionFlags.cs:91](packages/com.amethyst.action/Runtime/ActionFlags.cs#L91)
+- `lunge.recovery` = `16` (int): Frames the Lunge plays after its contact.
+  [ActionFlags.cs:109](packages/com.amethyst.action/Runtime/ActionFlags.cs#L109)
+- `lunge.speed` = `1.3` (float): Playback speed of the Lunge's clip.
+  [ActionFlags.cs:103](packages/com.amethyst.action/Runtime/ActionFlags.cs#L103)
+- `lunge.startup` = `5` (int): Frames from the press to the Lunge's contact.
+  [ActionFlags.cs:97](packages/com.amethyst.action/Runtime/ActionFlags.cs#L97)
+- `lunge.travel` = `1.5` (float): How far the Lunge carries the hero along the
+  dash line before contact, m.
+  [ActionFlags.cs:121](packages/com.amethyst.action/Runtime/ActionFlags.cs#L121)
+- `lunge.window` = `9` (int): Frames after a dash ends in which an attack is
+  still the Lunge.
+  [ActionFlags.cs:115](packages/com.amethyst.action/Runtime/ActionFlags.cs#L115)
+- `slam.cooldown` = `2` (float): Seconds from one Leap Slam to the next.
+  [ActionFlags.cs:151](packages/com.amethyst.action/Runtime/ActionFlags.cs#L151)
+- `slam.range` = `4` (float): The Leap Slam's longest leap toward the aim point,
+  m.
+  [ActionFlags.cs:145](packages/com.amethyst.action/Runtime/ActionFlags.cs#L145)
+- `slam.recovery` = `18` (int): Frames the Leap Slam plays after it lands.
+  [ActionFlags.cs:139](packages/com.amethyst.action/Runtime/ActionFlags.cs#L139)
+- `slam.speed` = `1` (float): Playback speed of the Leap Slam's clip
+  (LightLeaping01).
+  [ActionFlags.cs:133](packages/com.amethyst.action/Runtime/ActionFlags.cs#L133)
+- `slam.startup` = `12` (int): Frames from the press to the Leap Slam's landing:
+  the leap's airtime.
+  [ActionFlags.cs:127](packages/com.amethyst.action/Runtime/ActionFlags.cs#L127)
 
 ### packages/com.amethyst.core
 
@@ -151,6 +203,10 @@ in `Awake` or `Start`, or every frame.
 - variant `cursor-horde`: Cursor aim, horde camera: pulled back as in the neon
   edge trailer. Sets `hero.aim=cursor`, `camera.distance=34`.
   [cursor-horde.flags](testbeds/feel/Assets/StreamingAssets/variants/cursor-horde.flags)
+- variant `lunge-stab`: Cursor aim, focused camera, the Lunge on HeavyStab01
+  instead of LightFencing01. Sets `hero.aim=cursor`, `camera.distance=14`,
+  `lunge.clip=stab`.
+  [lunge-stab.flags](testbeds/feel/Assets/StreamingAssets/variants/lunge-stab.flags)
 - variant `movement-focused`: Movement aim, focused camera: face where you run,
   as Hades on a controller. Sets `hero.aim=movement`, `camera.distance=14`.
   [movement-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/movement-focused.flags)

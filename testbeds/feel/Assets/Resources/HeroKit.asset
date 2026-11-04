@@ -24,3 +24,31 @@ MonoBehaviour:
   DodgeB: {fileID: -377892130397285394, guid: b3ac7f325a7e6a843be780efd40ca046, type: 3}
   DodgeL: {fileID: 8020556318125480424, guid: e8bce1554d1659347aae4f4f75892c21, type: 3}
   DodgeR: {fileID: 6279025081173566251, guid: ced228295807f164e9c82db85cc29c88, type: 3}
+  CleaveA:
+    Clip: {fileID: -7717634560727564301, guid: 9f773338b2a96174ebe9b63870034ca3, type: 3}
+    Contact: 0.35000002
+  CleaveB:
+    Clip: {fileID: 5800342443961765143, guid: 95697c3218923dd43aa160c110bfbc79, type: 3}
+    Contact: 0.26666668
+  CleaveC:
+    Clip: {fileID: -8890989884591690541, guid: c9e0b6900401fcb42980df96b84db76c, type: 3}
+    Contact: 0.4166667
+  Fencing:
+    Clip: {fileID: 1767946901908681430, guid: f1b706a7569d3564c871c395216c5dbd, type: 3}
+    Contact: 0.5166667
+  Stab:
+    Clip: {fileID: 8332939666779294377, guid: b963d0c4e093a9c4ea792b8095e51ba2, type: 3}
+    Contact: 0.8833334
+  Leap:
+    Clip: {fileID: -7914165499043647036, guid: 72f114cf4075d3b4db5ce63cb994a704, type: 3}
+    Contact: 1.1
+  Swings:
+  - {fileID: 8300000, guid: 641482022e65d08458cfc46d0da318cd, type: 3}
+  - {fileID: 8300000, guid: d0d42bc8c98476646a7b88be93b1948f, type: 3}
+  - {fileID: 8300000, guid: 02981d1f2ba873b468dcd08522e34ced, type: 3}
+  - {fileID: 8300000, guid: 389ca9a16fa6dc745ac9f5c66e2fcaed, type: 3}
+  Finishers:
+  - {fileID: 8300000, guid: f58c815c99aa8fc46aab6d4397f8e9a8, type: 3}
+  - {fileID: 8300000, guid: e6b2a5fc2aa49ce47a945e3d7bc93a60, type: 3}
+  - {fileID: 8300000, guid: 13efcb7de4eb710438cb958974848dd4, type: 3}
+  Slam: {fileID: 8300000, guid: c80677557ff6efc4181829cafab845de, type: 3}

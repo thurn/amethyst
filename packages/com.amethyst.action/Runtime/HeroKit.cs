@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Amethyst.Action
@@ -22,6 +23,26 @@ namespace Amethyst.Action
         public AnimationClip DodgeB;
         public AnimationClip DodgeL;
         public AnimationClip DodgeR;
+
+        public Attack CleaveA;
+        public Attack CleaveB;
+        public Attack CleaveC;
+        public Attack Fencing;
+        public Attack Stab;
+        public Attack Leap;
+
+        public AudioClip[] Swings;
+        public AudioClip[] Finishers;
+        public AudioClip Slam;
+
+        /// <summary>An attack clip and its contact: seconds from its start to the peak speed of
+        /// the sword hand, which the bake measures.</summary>
+        [Serializable]
+        public struct Attack
+        {
+            public AnimationClip Clip;
+            public float Contact;
+        }
 
         public static HeroKit Load()
         {

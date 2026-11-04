@@ -1,10 +1,12 @@
 namespace Amethyst.Action
 {
-    /// <summary>What the player can ask the hero to do; attacks join as they arrive.</summary>
+    /// <summary>What the player can ask the hero to do.</summary>
     public enum HeroAction
     {
         None,
         Dash,
+        Attack,
+        Special,
     }
 
     /// <summary>
@@ -27,10 +29,13 @@ namespace Amethyst.Action
             pressedAt = now;
         }
 
+        /// <summary>The held press if it is still fresh, else None.</summary>
+        public HeroAction Peek(float now) => now - pressedAt > Window ? HeroAction.None : held;
+
         /// <summary>True, once, if <paramref name="action"/> is held and still fresh.</summary>
         public bool Take(HeroAction action, float now)
         {
-            if (held != action || now - pressedAt > Window)
+            if (action == HeroAction.None || Peek(now) != action)
                 return false;
             held = HeroAction.None;
             return true;
