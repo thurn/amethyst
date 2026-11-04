@@ -8,7 +8,8 @@ namespace Amethyst.Action
     /// <summary>
     /// Dresses and animates the knight from a <see cref="HeroKit"/> with a playable mixer, no
     /// animator controller: idle and four run cycles blended by the run's direction relative to
-    /// facing, the attack clips over them, and the four Dodge clips over everything during a dash.
+    /// facing, the attack clips (and the hit reactions, played as attacks) over them, and the four
+    /// Dodge clips over everything during a dash.
     /// </summary>
     sealed class HeroAnimator : IDisposable
     {
@@ -16,7 +17,8 @@ namespace Amethyst.Action
             RunSlot = 1,
             DodgeSlot = 5,
             AttackSlot = 9,
-            Count = 15;
+            ReactSlot = 15,
+            Count = 23;
 
         // The in-place run cycles' ground speed at speed 1, m/s, so the feet keep up.
         const float RunClipSpeed = 4.2f;
@@ -32,6 +34,7 @@ namespace Amethyst.Action
         int attack = -1;
         float blendIn;
         float blendOut = 0.1f;
+        float frozen;
 
         HeroAnimator(Animator animator, HeroKit kit)
         {
@@ -56,6 +59,12 @@ namespace Amethyst.Action
                 kit.Stab.Clip,
                 kit.Leap.Clip,
             };
+            Array.Resize(ref sources, Count);
+            for (int i = 0; i < 4; i++)
+            {
+                sources[ReactSlot + i] = Way(kit.HitReacts, i) ?? kit.Idle;
+                sources[ReactSlot + 4 + i] = Way(kit.Staggers, i) ?? kit.Idle;
+            }
             for (int i = 0; i < Count; i++)
             {
                 clips[i] = AnimationClipPlayable.Create(graph, sources[i]);
@@ -138,6 +147,28 @@ namespace Amethyst.Action
                 weights[i] = i == attack ? 1f : 0f;
         }
 
+        static AnimationClip Way(AnimationClip[] clips, int i) =>
+            clips != null && i < clips.Length ? clips[i] : null;
+
+        /// <summary>
+        /// Plays Hit React, or Stagger when <paramref name="stagger"/>, for a blow from
+        /// <paramref name="from"/> (a direction in the hero's frame) over whatever plays; it ends
+        /// as an attack does, with <see cref="EndAttack"/>. Returns the clip's length.
+        /// </summary>
+        public float React(Vector3 from, bool stagger)
+        {
+            int way =
+                Mathf.Abs(from.z) >= Mathf.Abs(from.x)
+                    ? (from.z >= 0f ? 0 : 1)
+                    : (from.x < 0f ? 2 : 3);
+            dodgeWeight = 0f;
+            Attack(ReactSlot - AttackSlot + (stagger ? 4 : 0) + way, 0f, 1f, 0f);
+            return clips[attack].GetAnimationClip().length;
+        }
+
+        /// <summary>Holds the pose for <paramref name="seconds"/> (the hero's hitstop).</summary>
+        public void Freeze(float seconds) => frozen = Mathf.Max(frozen, seconds);
+
         /// <summary>Fades the attack back into the run cycles over <paramref name="fadeOut"/> s.</summary>
         public void EndAttack(float fadeOut)
         {
@@ -149,6 +180,8 @@ namespace Amethyst.Action
         /// frame, m/s.</summary>
         public void Tick(Vector3 run, bool dashing, float dt)
         {
+            frozen = Mathf.Max(0f, frozen - dt);
+            mixer.SetSpeed(frozen > 0f ? 0.0 : 1.0);
             var speed = run.magnitude;
             var amount = Mathf.Clamp01(speed / 0.5f);
             var dir = speed > 1e-3f ? run / speed : Vector3.forward;

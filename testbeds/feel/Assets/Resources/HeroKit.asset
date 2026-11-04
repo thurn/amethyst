@@ -42,6 +42,16 @@ MonoBehaviour:
   Leap:
     Clip: {fileID: -7914165499043647036, guid: 72f114cf4075d3b4db5ce63cb994a704, type: 3}
     Contact: 1.1
+  HitReacts:
+  - {fileID: -5694488986427802680, guid: adc1feaf8563f6247989bffd0737b6ad, type: 3}
+  - {fileID: 5410598297907043000, guid: 646e411aff9e6a3409589c9eebc68c3a, type: 3}
+  - {fileID: 8990611995264232770, guid: 202a1ac9f04ce2a419bc2bdd6b148b2a, type: 3}
+  - {fileID: -8134992637236915294, guid: 881ed1a8905746f4d9b1def6f9e773dd, type: 3}
+  Staggers:
+  - {fileID: 8724492062134716513, guid: 3af9f677619822043a708e52c79ba040, type: 3}
+  - {fileID: 8724492062134716513, guid: 2c9d421561b7c9941bd5d9942e4dcaa5, type: 3}
+  - {fileID: -5950831409251336622, guid: ec81d250c60b03d47b70b65309c588ee, type: 3}
+  - {fileID: -5950831409251336622, guid: bb9255eddd5619c4e9398d076eb337fd, type: 3}
   Swings:
   - {fileID: 8300000, guid: 641482022e65d08458cfc46d0da318cd, type: 3}
   - {fileID: 8300000, guid: d0d42bc8c98476646a7b88be93b1948f, type: 3}
@@ -52,3 +62,28 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e6b2a5fc2aa49ce47a945e3d7bc93a60, type: 3}
   - {fileID: 8300000, guid: 13efcb7de4eb710438cb958974848dd4, type: 3}
   Slam: {fileID: 8300000, guid: c80677557ff6efc4181829cafab845de, type: 3}
+  Impacts:
+  - {fileID: 8300000, guid: be419f016e79f467fafc6c84b38191e5, type: 3}
+  - {fileID: 8300000, guid: 9baeac61653f1437e9fe612f16393a62, type: 3}
+  - {fileID: 8300000, guid: 70b2bb3a6976a4841a533cd821a9bbaa, type: 3}
+  Chops:
+  - {fileID: 8300000, guid: 5de35d095a26a5042a71af599850b917, type: 3}
+  Breaks:
+  - {fileID: 8300000, guid: 07121959d141245fdb59a0f76ddfd68c, type: 3}
+  - {fileID: 8300000, guid: d2c7d1053b14a4eea9752fa2b8ed9e18, type: 3}
+  - {fileID: 8300000, guid: 178c7e977140a49ffa008796ed052174, type: 3}
+  Fragments:
+  - {fileID: 8300000, guid: 03f23d0405c383c49a96f0eaa5eca358, type: 3}
+  - {fileID: 8300000, guid: ad7754b166594dd48a2a9a20c5a47ea3, type: 3}
+  - {fileID: 8300000, guid: c7db23fc2f331dd4a9d1c8ef2b26a5c1, type: 3}
+  - {fileID: 8300000, guid: c87cb6bc22baef84287f38b148cb56ba, type: 3}
+  Hurts:
+  - {fileID: 8300000, guid: 2e80eeaa8ad78e74a9a4052b5a1f5bfb, type: 3}
+  - {fileID: 8300000, guid: bc583673a9bd96b4691d1755c8e17e13, type: 3}
+  - {fileID: 8300000, guid: f4077baec940f1445ac8e4adf02b7624, type: 3}
+  Telegraphs:
+  - {fileID: 8300000, guid: 6f2b3d1a138b68f45834531ef4d97948, type: 3}
+  - {fileID: 8300000, guid: 72dd03210eefc3340a7c97cbb17491cd, type: 3}
+  Shatters:
+  - {fileID: 8300000, guid: ae0cc068ff742d14cac7a33ade36cc24, type: 3}
+  - {fileID: 8300000, guid: 33b35cbf7033a064b9132e746885b030, type: 3}

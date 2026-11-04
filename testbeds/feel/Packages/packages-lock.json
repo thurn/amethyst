@@ -15,6 +15,15 @@
       "source": "local",
       "dependencies": {}
     },
+    "com.amethyst.look": {
+      "version": "file:../../../packages/com.amethyst.look",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.amethyst.core": "0.1.0",
+        "com.unity.render-pipelines.universal": "17.6.0"
+      }
+    },
     "com.amethyst.native": {
       "version": "file:../../../packages/com.amethyst.native",
       "depth": 0,

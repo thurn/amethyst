@@ -1,0 +1,3 @@
+# Focused: two waves of 4-6 skeletons that all telegraph, the camera close
+combat.mode = focused
+hero.aim = cursor

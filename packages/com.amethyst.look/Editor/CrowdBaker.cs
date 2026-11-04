@@ -14,13 +14,14 @@ namespace Amethyst.Look.Editor
 {
     /// <summary>
     /// The crowd baker: Playlist Survivors' monster baker, which made the neon edge trailer's
-    /// crowd, without its shards. Before every player build it bakes each roster
+    /// crowd. Before every player build it bakes each roster
     /// entry (roster.json beside this file) whose vendor files the project has, unless its key
     /// (the entry and this code) is unchanged, writing only under the ignored Assets/Baked/Look/:
     /// - a crowd type: the combined vendor mesh's three LODs as style meshes (every active skinned
     ///   mesh plus its rigid attachments and held weapons, in root space at the type's height; LOD1
     ///   and LOD2 by Unity's MeshLodUtility), one float texture of skinning matrices (every clip
-    ///   at 30 Hz) and Resources/AmethystLook/Types/ID.asset (<see cref="MonsterType"/>);
+    ///   at 30 Hz), its shatter's chunks (<see cref="MonsterShardBaker"/>) and
+    ///   Resources/AmethystLook/Types/ID.asset (<see cref="MonsterType"/>);
     /// - a figure (the hero): its renderers' style meshes and
     ///   Resources/AmethystLook/Figures/ID.asset (<see cref="LookFigure"/>).
     /// An entry with a wireframe mesh recipe (CrowdBaker.Recipes.cs) also bakes the recipe's mesh:
@@ -43,6 +44,9 @@ namespace Amethyst.Look.Editor
             public bool figure;
             public string recipe; // tools/recipes/RECIPE.py builds its wireframe mesh
             public string[] hide = Array.Empty<string>();
+
+            /// <summary>Children that are carried things (a sword, a shield): their shards fly as the struck part does.</summary>
+            public string[] carried = Array.Empty<string>();
             public Weapon[] weapons = Array.Empty<Weapon>();
             public Clip[] clips = Array.Empty<Clip>();
         }
@@ -94,6 +98,9 @@ namespace Amethyst.Look.Editor
             public readonly List<Vector4> BoneWeights = new List<Vector4>();
             public readonly List<int> Indices = new List<int>();
             public readonly List<Part> Parts = new List<Part>();
+
+            /// <summary>Per triangle: of a carried thing or a held weapon.</summary>
+            public readonly List<bool> Carried = new List<bool>();
         }
 
         static string PackageDir =>
@@ -462,6 +469,15 @@ namespace Amethyst.Look.Editor
                 vendorLods = lods;
                 lods = new[] { style, style, style };
             }
+            // The shatter cuts the mesh the type draws; only the vendor's knows what is carried.
+            var (shardMesh, shards) = MonsterShardBaker.Bake(
+                e.id,
+                standing,
+                lods[0],
+                seed,
+                recipe == null ? g.Carried.ToArray() : new bool[lods[0].GetIndexCount(0) / 3]
+            );
+            Replace(shardMesh, $"{dir}/{e.id}_shards.mesh");
 
             var t = ScriptableObject.CreateInstance<MonsterType>();
             t.name = e.id;
@@ -475,13 +491,16 @@ namespace Amethyst.Look.Editor
             t.Radius = radius;
             t.HeightM = standing;
             t.HoverM = e.hoverM;
+            t.ShardMesh = shardMesh;
+            t.Shards = shards;
             Replace(t, asset);
             string tris(Mesh[] ms) => string.Join("/", ms.Select(m => m.GetIndexCount(0) / 3));
             return (
                     recipe != null
                         ? $"recipe {tris(lods.Take(1).ToArray())} triangles (vendor LODs {tris(vendorLods)}), "
                         : $"LOD triangles {tris(lods)}, "
-                ) + $"{bones.Count} bones, {height} frames, height {standing:F2} m";
+                )
+                + $"{bones.Count} bones, {height} frames, height {standing:F2} m, {shards.Length} shards";
         }
 
         static int BoneIndex(List<Bone> bones, Transform t, Matrix4x4 bind)
@@ -621,9 +640,15 @@ namespace Amethyst.Look.Editor
                     g.BoneIndices.Add(idx);
                     g.BoneWeights.Add(wt);
                 }
+                var carried = rigid || e.carried.Contains(r.name);
                 for (int s = 0; s < mesh.subMeshCount; s++)
-                    foreach (var i in mesh.GetTriangles(s))
+                {
+                    var tris = mesh.GetTriangles(s);
+                    foreach (var i in tris)
                         g.Indices.Add(baseVertex + i);
+                    for (int t = 0; t < tris.Length / 3; t++)
+                        g.Carried.Add(carried);
+                }
                 g.Parts.Add(
                     new Part
                     {

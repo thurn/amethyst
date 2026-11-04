@@ -1,0 +1,4 @@
+# Focused, the Lunge on HeavyStab01 instead of LightFencing01
+combat.mode = focused
+hero.aim = cursor
+lunge.clip = stab

@@ -1,3 +1,0 @@
-# Movement aim, focused camera: face where you run, as Hades on a controller
-hero.aim = movement
-camera.distance = 14

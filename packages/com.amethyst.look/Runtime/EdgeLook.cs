@@ -65,6 +65,26 @@ namespace Amethyst.Look
             return m;
         }
 
+        /// <summary>A new material for a crowd type's kill shatter (<see cref="MonsterShatter"/>), at
+        /// the trailer's shard gains.</summary>
+        public static Material Shards(MonsterType type, Palette palette)
+        {
+            var m = new Material(MonsterLibrary.Load<Shader>("AmethystLook/MonsterEdgeShard"))
+            {
+                name = type.Id + "_shards",
+                enableInstancing = false,
+            };
+            m.SetColor("_Tint", Hue(type, palette));
+            m.SetColor("_Core", Linear(palette.Glass));
+            m.SetColor("_Flash", Color.white);
+            m.SetFloat("_Rim", Rim);
+            m.SetFloat("_RimPower", RimPower);
+            m.SetFloat("_Edge", 1.4f);
+            m.SetFloat("_EdgePx", EdgePx);
+            m.SetFloat("_Fresh", 0.6f);
+            return m;
+        }
+
         /// <summary>A new material for the hero (<see cref="HeroLook"/>), in the palette's white.</summary>
         public static Material Hero(Palette palette)
         {

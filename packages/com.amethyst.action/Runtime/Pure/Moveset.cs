@@ -85,6 +85,7 @@ namespace Amethyst.Action
         {
             if (Current != Move.None && now >= EndsAt - Slop)
                 Current = Move.None;
+            Buffer.Expire(now);
             var held = Buffer.Peek(now);
             switch (held)
             {
@@ -126,6 +127,19 @@ namespace Amethyst.Action
         public bool Contacts(float from, float to) =>
             Current != Move.None && ContactAt > from + Slop && ContactAt <= to + Slop;
 
+        /// <summary>
+        /// Whether every press made now would be dropped (feel §2.4's lockout): neither a dash nor
+        /// an attack could start within the buffer's window.
+        /// </summary>
+        public bool Locked(float now)
+        {
+            var committed = Current != Move.None && !Recovering(now) ? ContactAt - now : 0f;
+            var dash = Math.Max(committed, Dash.ReadyIn(now));
+            var attack =
+                Dash.Active(now) || Current == Move.None ? 0f : Started + Gate(Current) - now;
+            return Math.Min(dash, attack) > Buffer.Window + Slop;
+        }
+
         /// <summary>Ends the move if it is recovering, as running out of it does.</summary>
         public bool CancelRecovery(float now)
         {
@@ -145,13 +159,12 @@ namespace Amethyst.Action
 
         bool CanChain(float now)
         {
-            if (Current == Move.None)
-                return true;
-            var gate = startup[(int)Current];
-            if (IsCleave(Current))
-                gate = Math.Max(gate, Cadence);
-            return now >= Started + gate - Slop;
+            return Current == Move.None || now >= Started + Gate(Current) - Slop;
         }
+
+        // How long after a move starts the next attack or special may.
+        float Gate(Move move) =>
+            IsCleave(move) ? Math.Max(startup[(int)move], Cadence) : startup[(int)move];
 
         void Begin(Move move, float now)
         {

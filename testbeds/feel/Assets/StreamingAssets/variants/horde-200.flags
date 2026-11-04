@@ -1,0 +1,4 @@
+# Horde at ~200 alive, the densest
+combat.mode = horde
+combat.alive = 200
+hero.aim = cursor

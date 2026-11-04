@@ -8,7 +8,7 @@ namespace Amethyst.Action
     /// streak down the Lunge's lane and a ring where the Leap Slam lands, each flat, large but thin,
     /// sweeping in over the move's startup and thinning away within a few frames of contact; and
     /// the Leap Slam's cooldown as an arc under the hero. Hovl's Sword slash shapes, redrawn as
-    /// meshes in the greybox white.
+    /// meshes in flat white (<see cref="Flat"/>).
     /// </summary>
     public sealed class SwordEffects : MonoBehaviour
     {
@@ -102,14 +102,7 @@ namespace Amethyst.Action
         static Mesh Surface(GameObject go, Vector3[] vertices)
         {
             if (white == null)
-            {
-                white = new Material(Resources.Load<Material>("AmethystGreybox"))
-                {
-                    color = Color.white,
-                };
-                // The strips wind either way with the swing's side.
-                white.SetFloat("_Cull", (float)CullMode.Off);
-            }
+                white = Flat.Make(new Color(1.2f, 1.2f, 1.25f, 0.9f), Flat.Effects);
             var mesh = new Mesh { name = go.name };
             mesh.MarkDynamic();
             var triangles = new int[Segments * 6];

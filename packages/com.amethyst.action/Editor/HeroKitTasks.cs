@@ -49,6 +49,18 @@ namespace Amethyst.Editor
                 .Select(i => Audio($"WHOOSH_Air_Super_Fast_RR{i}_mono"))
                 .ToArray();
             kit.Slam = Audio("SWORD_Swing_Hit_Solid_Metal_Deep_mono");
+            var ways = new[] { "F", "B", "L", "R" };
+            kit.HitReacts = ways.Select(w => Clip($"A_Hit_{w}_React_Sword")).ToArray();
+            kit.Staggers = ways.Select(w => Clip($"A_Hit_{w}_Stagger_Sword")).ToArray();
+            kit.Impacts = Sounds("RPG3_GenericPunch_Impact0{0}", 1, 3);
+            kit.Chops = new[] { Audio("GORE_Blade_Chop_mono") };
+            kit.Breaks = Sounds("RPG3_IceMagic2_IceBreak0{0}", 1, 3);
+            kit.Fragments = Sounds("SHATTER_Glass_Fragment_RR{0}_mono", 1, 4);
+            kit.Hurts = new[] { 1, 6, 7 }
+                .Select(i => Audio($"IMPACT_Medieval_Armor_Hit_0{i}_mono"))
+                .ToArray();
+            kit.Telegraphs = Sounds("MONSTER_Growl_Short_{0}_mono", 16, 17);
+            kit.Shatters = Sounds("SHATTER_Glass_Big_0{0}_mono", 1, 2);
             if (created)
             {
                 Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path));
@@ -114,6 +126,12 @@ namespace Amethyst.Editor
                 UnityEngine.Object.DestroyImmediate(knight);
             }
         }
+
+        static AudioClip[] Sounds(string pattern, int first, int last) =>
+            Enumerable
+                .Range(first, last - first + 1)
+                .Select(i => Audio(string.Format(pattern, i)))
+                .ToArray();
 
         static AudioClip Audio(string name) =>
             AssetDatabase.LoadAssetAtPath<AudioClip>(Find(name, "AudioClip"));

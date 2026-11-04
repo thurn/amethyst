@@ -94,45 +94,45 @@ in `Awake` or `Start`, or every frame.
 ### packages/com.amethyst.action
 
 - `arena.props` = `40` (int): Crystals the native hash scatters over the arena.
-  [ActionFlags.cs:199](packages/com.amethyst.action/Runtime/ActionFlags.cs#L199)
+  [ActionFlags.cs:205](packages/com.amethyst.action/Runtime/ActionFlags.cs#L205)
 - `attack.blend-in` = `0` (int): Frames an attack clip fades in over: 0 snaps,
   so the first frame is the strike.
-  [ActionFlags.cs:157](packages/com.amethyst.action/Runtime/ActionFlags.cs#L157)
+  [ActionFlags.cs:163](packages/com.amethyst.action/Runtime/ActionFlags.cs#L163)
 - `attack.blend-out` = `6` (int): Frames an ended attack fades back into the run
   cycles over.
-  [ActionFlags.cs:163](packages/com.amethyst.action/Runtime/ActionFlags.cs#L163)
+  [ActionFlags.cs:169](packages/com.amethyst.action/Runtime/ActionFlags.cs#L169)
 - `attack.hitbox` = `1.15` (float): Attack hitboxes over the size their effects
   draw (feel §4.2).
-  [ActionFlags.cs:175](packages/com.amethyst.action/Runtime/ActionFlags.cs#L175)
+  [ActionFlags.cs:181](packages/com.amethyst.action/Runtime/ActionFlags.cs#L181)
 - `attack.run-cancel` = `true` (bool): Running ends an attack's recovery, as the
   dash does.
-  [ActionFlags.cs:169](packages/com.amethyst.action/Runtime/ActionFlags.cs#L169)
-- `camera.distance` = `14` (float): The camera's distance from the hero, m:
-  closer for focused fights, pulled back for the horde.
-  [ActionFlags.cs:181](packages/com.amethyst.action/Runtime/ActionFlags.cs#L181)
+  [ActionFlags.cs:175](packages/com.amethyst.action/Runtime/ActionFlags.cs#L175)
+- `camera.distance` = `14` (float): The camera's distance from the hero, m (a
+  combat mode sets its own).
+  [ActionFlags.cs:187](packages/com.amethyst.action/Runtime/ActionFlags.cs#L187)
 - `camera.lean` = `1.5` (float): How far the camera leans toward the cursor at
   most, m.
-  [ActionFlags.cs:187](packages/com.amethyst.action/Runtime/ActionFlags.cs#L187)
+  [ActionFlags.cs:193](packages/com.amethyst.action/Runtime/ActionFlags.cs#L193)
 - `cleave.cadence` = `15` (int): Frames from one Cleave's start to the next's at
   the earliest.
-  [ActionFlags.cs:85](packages/com.amethyst.action/Runtime/ActionFlags.cs#L85)
+  [ActionFlags.cs:91](packages/com.amethyst.action/Runtime/ActionFlags.cs#L91)
 - `cleave.recovery` = `14` (int): Frames a Cleave plays after its contact before
   it ends; the dash cancels them.
-  [ActionFlags.cs:79](packages/com.amethyst.action/Runtime/ActionFlags.cs#L79)
+  [ActionFlags.cs:85](packages/com.amethyst.action/Runtime/ActionFlags.cs#L85)
 - `cleave.speed` = `1.3` (float): Playback speed of the Cleave clips
   (LightCombo01 A, B, C).
-  [ActionFlags.cs:73](packages/com.amethyst.action/Runtime/ActionFlags.cs#L73)
+  [ActionFlags.cs:79](packages/com.amethyst.action/Runtime/ActionFlags.cs#L79)
 - `cleave.startup` = `3` (int): Frames from the press to a Cleave's contact:
   each clip starts that far before its contact frame.
-  [ActionFlags.cs:67](packages/com.amethyst.action/Runtime/ActionFlags.cs#L67)
+  [ActionFlags.cs:73](packages/com.amethyst.action/Runtime/ActionFlags.cs#L73)
 - `dash.clip-speed` = `2.2` (float): Playback speed of the Dodge clips.
-  [ActionFlags.cs:61](packages/com.amethyst.action/Runtime/ActionFlags.cs#L61)
+  [ActionFlags.cs:67](packages/com.amethyst.action/Runtime/ActionFlags.cs#L67)
 - `dash.cooldown` = `0.35` (float): Seconds after a dash ends before the next.
-  [ActionFlags.cs:55](packages/com.amethyst.action/Runtime/ActionFlags.cs#L55)
+  [ActionFlags.cs:61](packages/com.amethyst.action/Runtime/ActionFlags.cs#L61)
 - `dash.distance` = `3.5` (float): How far the dash goes, m.
-  [ActionFlags.cs:43](packages/com.amethyst.action/Runtime/ActionFlags.cs#L43)
-- `dash.frames` = `10` (int): How long the dash takes, frames at 60 Hz.
   [ActionFlags.cs:49](packages/com.amethyst.action/Runtime/ActionFlags.cs#L49)
+- `dash.frames` = `10` (int): How long the dash takes, frames at 60 Hz.
+  [ActionFlags.cs:55](packages/com.amethyst.action/Runtime/ActionFlags.cs#L55)
 - `hero.aim` = `cursor` (enum: cursor | movement): Cursor: face and aim at the
   mouse, snapping to enemies; movement: aim where the hero runs.
   [ActionFlags.cs:25](packages/com.amethyst.action/Runtime/ActionFlags.cs#L25)
@@ -144,38 +144,41 @@ in `Awake` or `Start`, or every frame.
   [ActionFlags.cs:37](packages/com.amethyst.action/Runtime/ActionFlags.cs#L37)
 - `hero.demo` = `false` (bool): Scripted input instead of the keyboard and
   mouse: every move, then a loop with dashes (headless checks).
-  [ActionFlags.cs:193](packages/com.amethyst.action/Runtime/ActionFlags.cs#L193)
+  [ActionFlags.cs:199](packages/com.amethyst.action/Runtime/ActionFlags.cs#L199)
+- `hero.hurt-invulnerable` = `0.8` (float): Seconds the hero can't be hit again
+  after any hit.
+  [ActionFlags.cs:43](packages/com.amethyst.action/Runtime/ActionFlags.cs#L43)
 - `hero.speed` = `7` (float): The hero's run speed, m/s: faster than every
   enemy.
   [ActionFlags.cs:19](packages/com.amethyst.action/Runtime/ActionFlags.cs#L19)
 - `lunge.clip` = `fencing` (enum: fencing | stab): The Lunge's clip: Sword
   Combat's LightFencing01 or HeavyStab01.
-  [ActionFlags.cs:91](packages/com.amethyst.action/Runtime/ActionFlags.cs#L91)
-- `lunge.recovery` = `16` (int): Frames the Lunge plays after its contact.
-  [ActionFlags.cs:109](packages/com.amethyst.action/Runtime/ActionFlags.cs#L109)
-- `lunge.speed` = `1.3` (float): Playback speed of the Lunge's clip.
-  [ActionFlags.cs:103](packages/com.amethyst.action/Runtime/ActionFlags.cs#L103)
-- `lunge.startup` = `5` (int): Frames from the press to the Lunge's contact.
   [ActionFlags.cs:97](packages/com.amethyst.action/Runtime/ActionFlags.cs#L97)
+- `lunge.recovery` = `16` (int): Frames the Lunge plays after its contact.
+  [ActionFlags.cs:115](packages/com.amethyst.action/Runtime/ActionFlags.cs#L115)
+- `lunge.speed` = `1.3` (float): Playback speed of the Lunge's clip.
+  [ActionFlags.cs:109](packages/com.amethyst.action/Runtime/ActionFlags.cs#L109)
+- `lunge.startup` = `5` (int): Frames from the press to the Lunge's contact.
+  [ActionFlags.cs:103](packages/com.amethyst.action/Runtime/ActionFlags.cs#L103)
 - `lunge.travel` = `1.5` (float): How far the Lunge carries the hero along the
   dash line before contact, m.
-  [ActionFlags.cs:121](packages/com.amethyst.action/Runtime/ActionFlags.cs#L121)
+  [ActionFlags.cs:127](packages/com.amethyst.action/Runtime/ActionFlags.cs#L127)
 - `lunge.window` = `9` (int): Frames after a dash ends in which an attack is
   still the Lunge.
-  [ActionFlags.cs:115](packages/com.amethyst.action/Runtime/ActionFlags.cs#L115)
+  [ActionFlags.cs:121](packages/com.amethyst.action/Runtime/ActionFlags.cs#L121)
 - `slam.cooldown` = `2` (float): Seconds from one Leap Slam to the next.
-  [ActionFlags.cs:151](packages/com.amethyst.action/Runtime/ActionFlags.cs#L151)
+  [ActionFlags.cs:157](packages/com.amethyst.action/Runtime/ActionFlags.cs#L157)
 - `slam.range` = `4` (float): The Leap Slam's longest leap toward the aim point,
   m.
-  [ActionFlags.cs:145](packages/com.amethyst.action/Runtime/ActionFlags.cs#L145)
+  [ActionFlags.cs:151](packages/com.amethyst.action/Runtime/ActionFlags.cs#L151)
 - `slam.recovery` = `18` (int): Frames the Leap Slam plays after it lands.
-  [ActionFlags.cs:139](packages/com.amethyst.action/Runtime/ActionFlags.cs#L139)
+  [ActionFlags.cs:145](packages/com.amethyst.action/Runtime/ActionFlags.cs#L145)
 - `slam.speed` = `1` (float): Playback speed of the Leap Slam's clip
   (LightLeaping01).
-  [ActionFlags.cs:133](packages/com.amethyst.action/Runtime/ActionFlags.cs#L133)
+  [ActionFlags.cs:139](packages/com.amethyst.action/Runtime/ActionFlags.cs#L139)
 - `slam.startup` = `12` (int): Frames from the press to the Leap Slam's landing:
   the leap's airtime.
-  [ActionFlags.cs:127](packages/com.amethyst.action/Runtime/ActionFlags.cs#L127)
+  [ActionFlags.cs:133](packages/com.amethyst.action/Runtime/ActionFlags.cs#L133)
 
 ### packages/com.amethyst.core
 
@@ -197,19 +200,71 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/feel
 
-- variant `cursor-focused`: Cursor aim, focused camera: face the mouse, strafe,
-  the camera close. Sets `hero.aim=cursor`, `camera.distance=14`.
-  [cursor-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/cursor-focused.flags)
-- variant `cursor-horde`: Cursor aim, horde camera: pulled back as in the neon
-  edge trailer. Sets `hero.aim=cursor`, `camera.distance=34`.
-  [cursor-horde.flags](testbeds/feel/Assets/StreamingAssets/variants/cursor-horde.flags)
-- variant `lunge-stab`: Cursor aim, focused camera, the Lunge on HeavyStab01
-  instead of LightFencing01. Sets `hero.aim=cursor`, `camera.distance=14`,
+- `combat.alive` = `0` (int): Skeletons alive at once in the horde (0 keeps the
+  mode's). [FeelFlags.cs:15](testbeds/feel/Assets/Feel/FeelFlags.cs#L15)
+
+- `combat.mode` = `focused` (enum: focused | horde | blind): Focused: a few
+  tough skeletons that all telegraph; horde: a stream of contact-damage fodder;
+  blind: one of the two at random each run.
+  [FeelFlags.cs:9](testbeds/feel/Assets/Feel/FeelFlags.cs#L9)
+
+- `combat.room-seconds` = `0` (float): The horde room's timer, s, until its
+  buzzer (0 keeps the mode's).
+  [FeelFlags.cs:21](testbeds/feel/Assets/Feel/FeelFlags.cs#L21)
+
+- `feedback.flash` = `true` (bool): A struck skeleton flashes white for 2
+  frames. [FeelFlags.cs:33](testbeds/feel/Assets/Feel/FeelFlags.cs#L33)
+
+- `feedback.freeze` = `true` (bool): Global hitstop with a slow-motion tail for
+  a room's clear and Empowered kills.
+  [FeelFlags.cs:57](testbeds/feel/Assets/Feel/FeelFlags.cs#L57)
+
+- `feedback.hitstop` = `1` (float): Per-target hitstop, times the mode's frames:
+  0 turns it off. [FeelFlags.cs:27](testbeds/feel/Assets/Feel/FeelFlags.cs#L27)
+
+- `feedback.knockback` = `true` (bool): Hits push skeletons along the attack.
+  [FeelFlags.cs:39](testbeds/feel/Assets/Feel/FeelFlags.cs#L39)
+
+- `feedback.shake` = `true` (bool): Trauma-model screen shake for heavy hits and
+  the hero's damage.
+  [FeelFlags.cs:51](testbeds/feel/Assets/Feel/FeelFlags.cs#L51)
+
+- `feedback.shatter` = `true` (bool): Kills shatter in the skeleton's hue (off:
+  the body just goes).
+  [FeelFlags.cs:45](testbeds/feel/Assets/Feel/FeelFlags.cs#L45)
+
+- `feedback.sound` = `true` (bool): Hit, kill and telegraph sounds through the
+  voice budget. [FeelFlags.cs:63](testbeds/feel/Assets/Feel/FeelFlags.cs#L63)
+
+- variant `focused-cursor`: Focused: two waves of 4-6 skeletons that all
+  telegraph, the camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
+  [focused-cursor.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-cursor.flags)
+
+- variant `focused-movement`: Movement aim, focused: face where you run, as
+  Hades on a controller. Sets `combat.mode=focused`, `hero.aim=movement`.
+  [focused-movement.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-movement.flags)
+
+- variant `focused-stab`: Focused, the Lunge on HeavyStab01 instead of
+  LightFencing01. Sets `combat.mode=focused`, `hero.aim=cursor`,
   `lunge.clip=stab`.
-  [lunge-stab.flags](testbeds/feel/Assets/StreamingAssets/variants/lunge-stab.flags)
-- variant `movement-focused`: Movement aim, focused camera: face where you run,
-  as Hades on a controller. Sets `hero.aim=movement`, `camera.distance=14`.
-  [movement-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/movement-focused.flags)
+  [focused-stab.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-stab.flags)
+
+- variant `horde-060`: Horde at ~60 alive. Sets `combat.mode=horde`,
+  `combat.alive=60`, `hero.aim=cursor`.
+  [horde-060.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-060.flags)
+
+- variant `horde-100`: Horde: a stream of ~100 contact-damage skeletons for a 60
+  s room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
+  [horde-100.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-100.flags)
+
+- variant `horde-200`: Horde at ~200 alive, the densest. Sets
+  `combat.mode=horde`, `combat.alive=200`, `hero.aim=cursor`.
+  [horde-200.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-200.flags)
+
+- variant `pick-blind`: Blind: each run picks focused or horde at random, so the
+  comparison isn't shaped by choice. Sets `combat.mode=blind`,
+  `hero.aim=cursor`.
+  [pick-blind.flags](testbeds/feel/Assets/StreamingAssets/variants/pick-blind.flags)
 
 ### testbeds/look
 

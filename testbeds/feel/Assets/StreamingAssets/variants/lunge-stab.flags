@@ -1,4 +1,0 @@
-# Cursor aim, focused camera, the Lunge on HeavyStab01 instead of LightFencing01
-hero.aim = cursor
-camera.distance = 14
-lunge.clip = stab

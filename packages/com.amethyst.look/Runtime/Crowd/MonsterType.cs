@@ -37,6 +37,11 @@ namespace Amethyst.Look
         /// <summary>A flyer's height over the ground at scale 1 (the bat), for its presenter.</summary>
         public float HoverM;
 
+        /// <summary>Its kill shatter's chunks (<see cref="MonsterShatter"/>): LOD0 on the rest pose
+        /// cut into 20 to 40, joined into one mesh, and each chunk's pivot.</summary>
+        public Mesh ShardMesh;
+        public MonsterShard[] Shards = Array.Empty<MonsterShard>();
+
         /// <summary>The clip with this role ("idle", "walk", "attack", "hit"), or -1.</summary>
         public int Clip(string role)
         {
@@ -45,6 +50,25 @@ namespace Amethyst.Look
                     return i;
             return -1;
         }
+    }
+
+    /// <summary>
+    /// One chunk of a type's shatter at rest: its pivot (root space, scale 1) skinned by up to four
+    /// bones, its size and whether it is of a weapon or shield. 64 bytes, matching MonsterShards.hlsl.
+    /// </summary>
+    [Serializable]
+    public struct MonsterShard
+    {
+        public Vector3 Pivot;
+        public float Size;
+        public Vector4 Bones,
+            Weights;
+        public float Carried,
+            Pad0,
+            Pad1,
+            Pad2;
+
+        public const int Stride = 64;
     }
 
     /// <summary>One clip in a type's bone texture.</summary>

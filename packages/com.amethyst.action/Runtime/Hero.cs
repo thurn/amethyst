@@ -9,6 +9,8 @@ namespace Amethyst.Action
     /// The player character (docs/game-design.md, Controls and camera; The hero's kit): WASD runs,
     /// Space dodges, left click or F attacks (Cleave, or the Lunge out of a dash), right click or Q
     /// is the Leap Slam, and <see cref="ActionFlags.Aim"/> decides where the hero faces and aims.
+    /// It has 100 HP and is invulnerable for a while after any hit, which interrupts it with a Hit
+    /// React or, for a heavy one, a Stagger (docs/game-design.md, Health and death).
     /// <see cref="Moveset"/> holds the rules; this plays them. The Synty knight when the project
     /// has a <see cref="HeroKit"/>, else a capsule.
     /// </summary>
@@ -16,6 +18,7 @@ namespace Amethyst.Action
     {
         const float SnapRange = 10f;
         const float Frame = 1f / 60f;
+        public const int MaxHealth = 100;
 
         readonly Moveset moves = new Moveset(0.15f);
         HeroAnimator animator;
@@ -29,6 +32,10 @@ namespace Amethyst.Action
         int pressFrame;
         Vector3 moveFrom,
             moveTo;
+        float hurtUntil = -1f,
+            stunUntil = -1f,
+            reactUntil = -1f;
+        Vector3 knock;
 
         /// <summary>Raised on each move's contact frame with what it hits.</summary>
         public event System.Action<Strike> Struck;
@@ -49,6 +56,23 @@ namespace Amethyst.Action
 
         /// <summary>The sword move playing, or None.</summary>
         public Move Attacking => playing;
+
+        public int Health { get; private set; } = MaxHealth;
+
+        public bool Dead => Health <= 0;
+
+        /// <summary>Whether a blow would land now: not dashing through it, not just hit, alive.</summary>
+        public bool Vulnerable => !Dead && !Invulnerable && Time.time >= hurtUntil;
+
+        /// <summary>Whether every press made now would be dropped (feel §2.4's lockout): committed
+        /// to a move, or stunned by a hit.</summary>
+        public bool Locked => Time.time < stunUntil || moves.Locked(Time.time);
+
+        /// <summary>What became of every press so far (feel §11.2).</summary>
+        public InputBuffer Presses => moves.Buffer;
+
+        /// <summary>Raised when a blow takes the hero's last HP.</summary>
+        public event System.Action Died;
 
         /// <summary>The share of the Leap Slam's cooldown still to run, 0 when it is ready.</summary>
         public float SlamCooldown =>
@@ -106,11 +130,55 @@ namespace Amethyst.Action
             return aim.LengthSquared() > 1e-6f ? Ground(aim) : facing;
         }
 
+        /// <summary>
+        /// A blow of <paramref name="damage"/> from <paramref name="from"/>, if it lands
+        /// (<see cref="Vulnerable"/>): it interrupts whatever the hero does, pushes it away, plays
+        /// Hit React (or Stagger when <paramref name="heavy"/>) and makes it invulnerable for
+        /// <see cref="ActionFlags.HurtInvulnerable"/> s. False when it didn't land.
+        /// </summary>
+        public bool Hurt(int damage, Vector3 from, bool heavy)
+        {
+            if (!Vulnerable)
+                return false;
+            var now = Time.time;
+            Health = Mathf.Max(0, Health - damage);
+            hurtUntil = now + ActionFlags.HurtInvulnerable.Value;
+            stunUntil = now + (heavy ? 0.35f : 0.15f);
+            moves.Interrupt();
+            if (playing != Move.None)
+                End();
+            var away = transform.position - from;
+            away.y = 0f;
+            knock = away.sqrMagnitude > 1e-4f ? away.normalized * (heavy ? 7f : 4f) : Vector3.zero;
+            if (animator != null)
+            {
+                var length = animator.React(transform.InverseTransformDirection(-away), heavy);
+                reactUntil = now + Mathf.Min(length, heavy ? 0.6f : 0.45f);
+            }
+            Play(kit?.Hurts);
+            if (Dead)
+                Died?.Invoke();
+            return true;
+        }
+
+        /// <summary>Holds the hero's pose for <paramref name="frames"/> (its share of a hit's hitstop).</summary>
+        public void Freeze(int frames)
+        {
+            if (frames > 0)
+                animator?.Freeze(frames * Frame);
+        }
+
         void Update()
         {
             var now = Time.time;
             var dt = Time.deltaTime;
-            var input = ActionFlags.Demo.Value ? Demo(now - born) : Devices();
+            if (Dead)
+                return;
+            var stunned = now < stunUntil;
+            var input =
+                stunned ? new Intent { Cursor = Cursor }
+                : ActionFlags.Demo.Value ? Demo(now - born)
+                : Devices();
             Cursor = input.Cursor;
             var cursorAim = ActionFlags.Aim.Value == AimMode.Cursor;
             Configure();
@@ -134,6 +202,8 @@ namespace Amethyst.Action
             if (toward.sqrMagnitude < 0.01f)
                 toward = cursorAim && Cursor != null ? Cursor.Value - transform.position : facing;
             var started = moves.Step(frameStart, Flat(toward));
+            if (started != HeroAction.None)
+                reactUntil = -1f;
             if (started == HeroAction.Dash)
             {
                 playing = Move.None;
@@ -147,8 +217,20 @@ namespace Amethyst.Action
             else if (playing != Move.None && moves.Current == Move.None)
                 End();
 
+            if (
+                reactUntil > 0f
+                && now >= reactUntil
+                && playing == Move.None
+                && !moves.Dash.Active(now)
+            )
+            {
+                reactUntil = -1f;
+                animator?.EndAttack(ActionFlags.BlendOut.Value * Frame);
+            }
+
             var dash = moves.Dash;
-            var p = transform.position + Ground(dash.Step(frameStart, now));
+            var p = transform.position + Ground(dash.Step(frameStart, now)) + knock * dt;
+            knock *= Mathf.Exp(-12f * dt);
             if (playing != Move.None)
                 p += Carry(frameStart, now);
             else if (!dash.Active(now))
@@ -432,7 +514,8 @@ namespace Amethyst.Action
         // A deterministic script for headless runs and shots, in seconds since the hero appeared:
         // still for a second, every move once with the cursor 5 m to the right (Cleave A, B, C at
         // 1.0 s, a dash and Lunge at 2.2 s, the Leap Slam at 3.2 s), then a run in a circle with
-        // the cursor orbiting the other way, dashing into a Lunge and cleaving every 1.25 s.
+        // the cursor on the nearest target (else orbiting the other way), dashing into a Lunge and
+        // cleaving every 1.25 s.
         static readonly (float At, HeroAction Action)[] Script =
         {
             (1f, HeroAction.Attack),
@@ -465,7 +548,8 @@ namespace Amethyst.Action
             }
             var spin = t * 0.6f;
             intent.Cursor =
-                transform.position + new Vector3(Mathf.Cos(-spin), 0f, Mathf.Sin(-spin)) * 5f;
+                Nearest()
+                ?? transform.position + new Vector3(Mathf.Cos(-spin), 0f, Mathf.Sin(-spin)) * 5f;
             var angle = (t - Loop) * 1.4f;
             intent.Move = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
             var phase = (t - Loop) % 1.25f;
@@ -474,6 +558,23 @@ namespace Amethyst.Action
             intent.Dash = At(0f);
             intent.Attack = At(0.08f) || At(0.6f) || At(0.85f);
             return intent;
+        }
+
+        // The nearest target within 8 m, for the demo's loop to fight it.
+        Vector3? Nearest()
+        {
+            Vector3? best = null;
+            var bestDistance = 64f;
+            foreach (var target in Targets)
+            {
+                var d = (target - transform.position).sqrMagnitude;
+                if (d < bestDistance)
+                {
+                    bestDistance = d;
+                    best = target;
+                }
+            }
+            return best;
         }
 
         static Num.Vector2 Flat(Vector3 v) => new Num.Vector2(v.x, v.z);

@@ -29,6 +29,9 @@ namespace Amethyst.Action
 
         public bool Ready(float now) => now >= end + Cooldown;
 
+        /// <summary>Seconds until the next dash may start, 0 when it may now.</summary>
+        public float ReadyIn(float now) => Math.Max(0f, end + Cooldown - now);
+
         /// <summary>Seconds since the current or last dash ended, negative while it runs.</summary>
         public float SinceEnd(float now) => now - end;
 

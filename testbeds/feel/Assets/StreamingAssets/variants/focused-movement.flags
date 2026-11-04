@@ -1,0 +1,3 @@
+# Movement aim, focused: face where you run, as Hades on a controller
+combat.mode = focused
+hero.aim = movement

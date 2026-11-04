@@ -1,0 +1,4 @@
+# Horde at ~60 alive
+combat.mode = horde
+combat.alive = 60
+hero.aim = cursor

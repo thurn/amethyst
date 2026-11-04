@@ -1,0 +1,3 @@
+# Blind: each run picks focused or horde at random, so the comparison isn't shaped by choice
+combat.mode = blind
+hero.aim = cursor

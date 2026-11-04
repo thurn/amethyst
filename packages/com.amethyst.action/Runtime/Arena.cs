@@ -6,9 +6,25 @@ namespace Amethyst.Action
     /// <summary>The baseline world, built in code: ground, light, crystals, the hero and its camera.</summary>
     public static class Arena
     {
-        public const float HalfSize = 28f;
+        /// <summary>The hero's room is this far from the centre each way, m.</summary>
+        public static float HalfSize { get; private set; } = 28f;
 
-        public static Hero Build(ulong seed = 1)
+        /// <summary>
+        /// The arena <paramref name="halfSize"/> m each way with the hero and its camera, and with
+        /// <paramref name="greybox"/> its greybox ground, sun and crystals (a project drawing its own
+        /// world, as the edge look does, leaves them out).
+        /// </summary>
+        public static Hero Build(ulong seed = 1, bool greybox = true, float halfSize = 28f)
+        {
+            HalfSize = halfSize;
+            if (greybox)
+                Greyboxed(seed);
+            var hero = Hero.Create();
+            FollowCamera.Create(hero);
+            return hero;
+        }
+
+        static void Greyboxed(ulong seed)
         {
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Ground";
@@ -47,10 +63,6 @@ namespace Amethyst.Action
                     )
                 );
             }
-
-            var hero = Hero.Create();
-            FollowCamera.Create(hero);
-            return hero;
         }
 
         static Material greybox;

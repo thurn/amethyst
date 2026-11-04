@@ -134,6 +134,10 @@ namespace Amethyst.Look
 
         public int TypeCount => _types.Length;
 
+        /// <summary>A type's blended bones, slot-major, 3 rows per bone, as its latest render left
+        /// them (Dying figures included): what the shatter seeds from.</summary>
+        public GraphicsBuffer PaletteOf(int type) => _types[type].Palette;
+
         TypeState Create(MonsterType t, Palette palette, bool vendorMeshes)
         {
             var s = new TypeState { Type = t, Lods = t.LodsOf(vendorMeshes) };

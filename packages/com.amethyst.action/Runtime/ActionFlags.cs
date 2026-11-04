@@ -40,6 +40,12 @@ namespace Amethyst.Action
             "Frames (60 Hz) an early press waits to become legal; the last press wins"
         );
 
+        public static readonly Flag<float> HurtInvulnerable = Flag.Float(
+            "hero.hurt-invulnerable",
+            0.8f,
+            "Seconds the hero can't be hit again after any hit"
+        );
+
         public static readonly Flag<float> DashDistance = Flag.Float(
             "dash.distance",
             3.5f,
@@ -181,7 +187,7 @@ namespace Amethyst.Action
         public static readonly Flag<float> Distance = Flag.Float(
             "camera.distance",
             14f,
-            "The camera's distance from the hero, m: closer for focused fights, pulled back for the horde"
+            "The camera's distance from the hero, m (a combat mode sets its own)"
         );
 
         public static readonly Flag<float> Lean = Flag.Float(
