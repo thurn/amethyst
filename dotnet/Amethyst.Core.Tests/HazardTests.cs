@@ -10,14 +10,6 @@ namespace Amethyst.Tests
     {
         const float Dt = 1f / 60f;
 
-        static readonly EnemyKind Bat = new EnemyKind
-        {
-            Id = "bat",
-            Role = EnemyRole.Fodder,
-            Flies = true,
-            Attack = AttackKind.Cone,
-        };
-
         [Test]
         public void WallsKeepTheHeroAndEveryEnemyIn()
         {
@@ -54,7 +46,7 @@ namespace Amethyst.Tests
             var bats = new CombatRoom(
                 ModeTuning.Horde,
                 5,
-                new SpawnList(new[] { (Bat, 1f) }),
+                new SpawnList(new[] { (EnemyKinds.Bat, 1f) }),
                 layout
             );
             bool batOver = false;

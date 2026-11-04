@@ -255,10 +255,12 @@ in `Awake` or `Start`, or every frame.
   the crowd into lanes, and pylons to burst. Sets `combat.mode=focused`,
   `combat.hazards=pillars`, `hero.aim=cursor`.
   [focused-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-pillars.flags)
+
 - variant `focused-vents`: Focused with hazards: a ring of Spike Vents erupting
   in turn. Sets `combat.mode=focused`, `combat.hazards=vents`,
   `hero.aim=cursor`.
   [focused-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-vents.flags)
+
 - variant `focused`: Focused: waves of a few enemies that all telegraph, the
   camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
@@ -277,9 +279,11 @@ in `Awake` or `Start`, or every frame.
   crowd into lanes, and pylons to burst. Sets `combat.mode=horde`,
   `combat.hazards=pillars`, `hero.aim=cursor`.
   [horde-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-pillars.flags)
+
 - variant `horde-vents`: Horde with hazards: a ring of Spike Vents erupting in
   turn. Sets `combat.mode=horde`, `combat.hazards=vents`, `hero.aim=cursor`.
   [horde-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-vents.flags)
+
 - variant `horde`: Horde: a stream of ~100 contact-damage enemies for a 60 s
   room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
   [horde.flags](testbeds/chain/Assets/StreamingAssets/variants/horde.flags)
