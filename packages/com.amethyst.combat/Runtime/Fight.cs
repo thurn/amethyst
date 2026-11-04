@@ -35,6 +35,7 @@ namespace Amethyst.Combat
         ModeTuning tuning;
         CombatMode mode;
         SpawnList spawns;
+        int row;
         HazardLayout layout;
         HazardView hazards;
         CombatRoom room;
@@ -60,8 +61,10 @@ namespace Amethyst.Combat
             logAt = 2f;
 
         /// <summary>Builds the room for a new run of <paramref name="spawns"/> (M1's skeletons by
-        /// default): picks its mode and makes its world.</summary>
-        public static void Begin(SpawnList spawns = null)
+        /// default) by the mode's own numbers, or with <paramref name="row"/> 0 or more each room
+        /// a schedule drawn from that row of the mode's Escalation table: picks its mode and makes
+        /// its world.</summary>
+        public static void Begin(SpawnList spawns = null, int row = -1)
         {
             var picked = CombatModes.Pick(
                 CombatFlags.Mode.Value,
@@ -91,6 +94,7 @@ namespace Amethyst.Combat
                 HeroLook.Dress(knight.gameObject, palette, LookFigure.Load("hero"));
 
             var fight = new GameObject("Fight").AddComponent<Fight>();
+            fight.row = row;
             fight.Init(hero, cam, picked, tuning, palette, spawns ?? SpawnList.Skeletons);
         }
 
@@ -112,26 +116,33 @@ namespace Amethyst.Combat
             layout = HazardLayout.Of(CombatFlags.Hazards.Value, tuning.ArenaHalfSize);
             hazards = new HazardView(layout, palette, tuning.CameraDistance * 0.0015f);
             room = NewRoom();
-            view = EnemyView.Create(Mathf.Max(64, tuning.Alive + 32), palette);
+            view = EnemyView.Create(Mathf.Max(64, room.Schedule.Alive + 32), palette);
             shapes = new Shapes();
             sounds = new FightSounds(cam.gameObject, kit);
             metrics = new FeelMetrics(mode);
             hero.Struck += OnStruck;
             hero.Died += OnDied;
             Debug.Log(
-                $"fight: {mode} mode (combat.mode is {CombatFlags.Mode.Value}), {tuning.Alive} alive, metrics to {metrics.Path}"
+                $"fight: {mode} mode (combat.mode is {CombatFlags.Mode.Value}), {room.Schedule.Alive} alive, metrics to {metrics.Path}"
             );
         }
 
         CombatRoom NewRoom()
         {
-            var r = new CombatRoom(tuning, seed++, spawns, layout)
+            var s = seed++;
+            var r = new CombatRoom(
+                row >= 0 ? SpawnSchedule.Draw(tuning, row, s) : SpawnSchedule.Of(tuning, spawns, s),
+                s,
+                layout
+            )
             {
                 HitstopScale = Mathf.Max(0f, CombatFlags.Hitstop.Value),
                 KnockbackScale = CombatFlags.Knockback.Value ? 1f : 0f,
                 FlashFrames = 2,
             };
             Arena.Hazards = r.Hazards;
+            if (row >= 0)
+                Debug.Log($"fight: {r.Schedule}");
             return r;
         }
 
@@ -331,7 +342,7 @@ namespace Amethyst.Combat
             if (Application.isBatchMode)
                 return;
             var timer = float.IsInfinity(room.TimeLeft)
-                ? $"wave {room.Wave}/{tuning.Waves}"
+                ? $"wave {room.Wave}/{room.Waves}"
                 : $"{room.TimeLeft:F0} s";
             var text =
                 $"{mode}   HP {hero.Health}/{Hero.MaxHealth}   {timer}   {room.Alive} enemies";

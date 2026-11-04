@@ -249,17 +249,15 @@ in `Awake` or `Start`, or every frame.
   breaks at once, for stills of the break (0: never).
   [ChainEntry.cs:39](testbeds/chain/Assets/Chain/ChainEntry.cs#L39)
 
-- `chain.crowd` = `skeletons` (enum: skeletons | mixed | accent | heavies |
-  fodder-elites | special-elites): What the room spawns: skeletons, the key
-  family's fodder mixed, skeletons with the accent family's goblins and
-  mushrooms, skeletons with the counter family's big orks and trolls, or the
-  mixed fodder with Empowered fodder or Empowered specials and heavies.
-  [ChainEntry.cs:33](testbeds/chain/Assets/Chain/ChainEntry.cs#L33)
+- `chain.crowd` = `skeletons` (enum: skeletons | heavies | fodder-elites |
+  special-elites): What the room spawns without chain.room: skeletons, skeletons
+  with the counter family's big orks and trolls, or the key family's fodder
+  mixed with Empowered fodder or Empowered specials and heavies.
+  [ChainEntry.cs:27](testbeds/chain/Assets/Chain/ChainEntry.cs#L27)
 
-- variant `focused-accent`: Focused, accent: goblins and mushrooms in the waves
-  among the skeletons. Sets `combat.mode=focused`, `chain.crowd=accent`,
-  `hero.aim=cursor`.
-  [focused-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-accent.flags)
+- `chain.room` = `-1` (int): The Escalation row (0-4) each room's spawn schedule
+  is drawn from, in the mode's table; -1 plays chain.crowd by the mode's own
+  numbers. [ChainEntry.cs:33](testbeds/chain/Assets/Chain/ChainEntry.cs#L33)
 
 - variant `focused-elites-special`: Focused, elites: an Empowered goblin,
   mushroom, big ork and troll in the first wave; their armor breaks at 3 s. Sets
@@ -284,15 +282,20 @@ in `Awake` or `Start`, or every frame.
   `hero.aim=cursor`.
   [focused-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-heavies.flags)
 
-- variant `focused-mixed`: Focused, mixed: waves of skeletons, slimes, demons
-  and bats, each telegraphing its own attack. Sets `combat.mode=focused`,
-  `hero.aim=cursor`, `chain.crowd=mixed`.
-  [focused-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-mixed.flags)
-
 - variant `focused-pillars`: Focused with hazards: a ring of pillars splitting
   the crowd into lanes, and pylons to burst. Sets `combat.mode=focused`,
   `combat.hazards=pillars`, `hero.aim=cursor`.
   [focused-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-pillars.flags)
+
+- variant `focused-room2`: Focused, room 2: two waves of 8 from its Escalation
+  row: skeletons, slimes, bats, demons and goblins. Sets `combat.mode=focused`,
+  `chain.room=2`, `hero.aim=cursor`.
+  [focused-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-room2.flags)
+
+- variant `focused-room4`: Focused, room 4: three waves of 12, at most 7 alive,
+  from its Escalation row: every early kind, big orks and 1-2 elites. Sets
+  `combat.mode=focused`, `chain.room=4`, `hero.aim=cursor`.
+  [focused-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-room4.flags)
 
 - variant `focused-vents`: Focused with hazards: a ring of Spike Vents erupting
   in turn. Sets `combat.mode=focused`, `combat.hazards=vents`,
@@ -302,11 +305,6 @@ in `Awake` or `Start`, or every frame.
 - variant `focused`: Focused: waves of a few enemies that all telegraph, the
   camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
-
-- variant `horde-accent`: Horde, accent: a few goblins and mushrooms among the
-  skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=accent`,
-  `hero.aim=cursor`.
-  [horde-accent.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-accent.flags)
 
 - variant `horde-elites-special`: Horde, elites: an Empowered goblin, mushroom,
   big ork and troll among the fodder; every armor breaks at 3 s. Sets
@@ -325,15 +323,20 @@ in `Awake` or `Start`, or every frame.
   `hero.aim=cursor`.
   [horde-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-heavies.flags)
 
-- variant `horde-mixed`: Horde, mixed: slimes in rings, demons and skeletons in
-  packs, bats in streams. Sets `combat.mode=horde`, `hero.aim=cursor`,
-  `chain.crowd=mixed`.
-  [horde-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-mixed.flags)
-
 - variant `horde-pillars`: Horde with hazards: a ring of pillars splitting the
   crowd into lanes, and pylons to burst. Sets `combat.mode=horde`,
   `combat.hazards=pillars`, `hero.aim=cursor`.
   [horde-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-pillars.flags)
+
+- variant `horde-room2`: Horde, room 2: a 50 s stream building to ~80 from its
+  Escalation row, a few goblins and one elite. Sets `combat.mode=horde`,
+  `chain.room=2`, `hero.aim=cursor`.
+  [horde-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-room2.flags)
+
+- variant `horde-room4`: Horde, room 4: a 60 s stream building to ~120 from its
+  Escalation row: fodder, a few specials, rare big orks and two elites. Sets
+  `combat.mode=horde`, `chain.room=4`, `hero.aim=cursor`.
+  [horde-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-room4.flags)
 
 - variant `horde-vents`: Horde with hazards: a ring of Spike Vents erupting in
   turn. Sets `combat.mode=horde`, `combat.hazards=vents`, `hero.aim=cursor`.

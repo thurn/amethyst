@@ -100,6 +100,10 @@ namespace Amethyst.Action
         /// <summary>How its horde packs arrive.</summary>
         public Formation Formation;
 
+        /// <summary>Its share of a drawn schedule's mix, before the mode's
+        /// <see cref="ModeTuning.SpecialWeight"/>.</summary>
+        public float Weight = 1f;
+
         public override string ToString() => Id;
     }
 
@@ -118,6 +122,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Slime = new EnemyKind
         {
             Id = "slime",
+            Weight = 0.6f,
             Family = EnemyFamily.Key,
             Role = EnemyRole.Fodder,
             Hp = 2f,
@@ -132,6 +137,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Demon = new EnemyKind
         {
             Id = "demon",
+            Weight = 0.8f,
             Family = EnemyFamily.Key,
             Role = EnemyRole.Fodder,
             Speed = 1.6f,
@@ -143,6 +149,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Bat = new EnemyKind
         {
             Id = "bat",
+            Weight = 0.8f,
             Family = EnemyFamily.Key,
             Role = EnemyRole.Fodder,
             Hp = 0.5f,
@@ -158,6 +165,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Goblin = new EnemyKind
         {
             Id = "goblin",
+            Weight = 0.6f,
             Family = EnemyFamily.Accent,
             Role = EnemyRole.Special,
             Speed = 1.3f,
@@ -171,6 +179,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Mushroom = new EnemyKind
         {
             Id = "mushroom",
+            Weight = 0.5f,
             Family = EnemyFamily.Accent,
             Role = EnemyRole.Special,
             Speed = 0.8f,
@@ -184,6 +193,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind BigOrk = new EnemyKind
         {
             Id = "bigOrk",
+            Weight = 0.4f,
             Family = EnemyFamily.Counter,
             Role = EnemyRole.Heavy,
             Hp = 3f,
@@ -199,6 +209,7 @@ namespace Amethyst.Action
         public static readonly EnemyKind Troll = new EnemyKind
         {
             Id = "troll",
+            Weight = 0.4f,
             Family = EnemyFamily.Counter,
             Role = EnemyRole.Heavy,
             Hp = 4f,
@@ -265,11 +276,6 @@ namespace Amethyst.Action
             EnemyKinds.Skeleton,
             EnemyKinds.Slime,
             EnemyKinds.Demon
-        );
-
-        /// <summary>Skeletons with the accent family's specials, goblins and mushrooms, among them.</summary>
-        public static readonly SpawnList Accent = new SpawnList(
-            new[] { (EnemyKinds.Skeleton, 2f), (EnemyKinds.Goblin, 1f), (EnemyKinds.Mushroom, 1f) }
         );
 
         /// <summary>Skeletons with the counter family's heavies, big orks and trolls, among them.</summary>

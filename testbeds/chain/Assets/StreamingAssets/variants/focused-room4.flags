@@ -1,0 +1,4 @@
+# Focused, room 4: three waves of 12, at most 7 alive, from its Escalation row: every early kind, big orks and 1-2 elites
+combat.mode = focused
+chain.room = 4
+hero.aim = cursor

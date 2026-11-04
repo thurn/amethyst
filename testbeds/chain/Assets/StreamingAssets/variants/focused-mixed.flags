@@ -1,4 +1,0 @@
-# Focused, mixed: waves of skeletons, slimes, demons and bats, each telegraphing its own attack
-combat.mode = focused
-hero.aim = cursor
-chain.crowd = mixed

@@ -1,0 +1,4 @@
+# Horde, room 2: a 50 s stream building to ~80 from its Escalation row, a few goblins and one elite
+combat.mode = horde
+chain.room = 2
+hero.aim = cursor

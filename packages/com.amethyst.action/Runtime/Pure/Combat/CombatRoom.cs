@@ -182,7 +182,7 @@ namespace Amethyst.Action
 
     /// <summary>
     /// One room of a fight in either combat mode (docs/game-design.md, Two combat modes; Enemies):
-    /// its <see cref="SpawnList"/>'s enemies arriving from the room's edges behind spawn markers,
+    /// its <see cref="SpawnSchedule"/>'s enemies arriving from the room's edges behind spawn markers,
     /// never near the hero, walking at it with small gaps between bodies; the horde's contact
     /// damage and Empowered elites, the focused mode's waves and telegraphs; aggression tokens,
     /// stagger, knockback and per-target hitstop; the horde's timer and buzzer wave; its
@@ -236,32 +236,48 @@ namespace Amethyst.Action
         int nextCount;
         float nextElite;
         int nextId;
-        int elites; // Empowered ones spawned, for the elites' turns
+        int elites; // Empowered ones' turns
+        int elitesSpawned;
+        readonly List<int> edges = new List<int>(); // the sides enemies arrive from
         readonly int[] erupted;
 
-        /// <summary>A room of <paramref name="spawns"/> (M1's skeletons by default) in
-        /// <paramref name="layout"/> (by default the mode's square room, walled in).</summary>
+        /// <summary>A room of <paramref name="spawns"/> (M1's skeletons by default) by the mode's
+        /// own numbers in <paramref name="layout"/> (by default the mode's square room, walled in).</summary>
         public CombatRoom(
             ModeTuning mode,
             int seed,
             SpawnList spawns = null,
             HazardLayout layout = null
         )
+            : this(SpawnSchedule.Of(mode, spawns ?? SpawnList.Skeletons, seed), seed, layout) { }
+
+        /// <summary>A room playing <paramref name="schedule"/> in <paramref name="layout"/>.</summary>
+        public CombatRoom(SpawnSchedule schedule, int seed, HazardLayout layout = null)
         {
+            var mode = schedule.Mode;
             Mode = mode;
-            Spawns = spawns ?? SpawnList.Skeletons;
+            Schedule = schedule;
+            for (int side = 0; side < 4; side++)
+                if ((schedule.Edges & 1 << side) != 0)
+                    edges.Add(side);
+            if (edges.Count == 0)
+                throw new ArgumentException("CombatRoom: a schedule with no edges");
             Hazards = new Hazards(layout ?? HazardLayout.Open(new Vector2(mode.ArenaHalfSize)));
             erupted = new int[Hazards.Layout.Vents.Length];
             for (int i = 0; i < erupted.Length; i++)
                 erupted[i] = Hazards.Eruption(i, 0f);
             rng = new Random(seed);
             Tokens = new AggressionTokens(mode.AggressionTokens);
-            nextElite = mode.EliteEvery * 0.5f;
+            nextElite = schedule.EliteFirst;
             elites = seed & 0xffff;
         }
 
         public ModeTuning Mode { get; }
-        public SpawnList Spawns { get; }
+        public SpawnSchedule Schedule { get; }
+        public SpawnList Spawns => Schedule.Spawns;
+
+        /// <summary>Focused: the room's waves.</summary>
+        public int Waves => Schedule.Waves;
         public AggressionTokens Tokens { get; }
         public Hazards Hazards { get; }
         public readonly List<RoomEvent> Events = new List<RoomEvent>();
@@ -276,7 +292,7 @@ namespace Amethyst.Action
 
         /// <summary>The horde's timer, s; infinite without one.</summary>
         public float TimeLeft =>
-            Mode.RoomSeconds > 0f ? Math.Max(0f, Mode.RoomSeconds - Time) : float.PositiveInfinity;
+            Schedule.Seconds > 0f ? Math.Max(0f, Schedule.Seconds - Time) : float.PositiveInfinity;
 
         /// <summary>Feel §11.1's toggles and scales: hitstop frames, flash frames, knockback.</summary>
         public float HitstopScale { get; set; } = 1f;
@@ -846,71 +862,117 @@ namespace Amethyst.Action
             enemies.RemoveAt(index);
         }
 
-        // Spawning: the horde's stream toward its target and its elites, the focused mode's waves.
+        // Spawning: the horde's stream toward its building target and its elites, the focused
+        // mode's waves.
         void Spawn(Vector2 hero, float dt)
         {
             if (Phase != RoomPhase.Fighting)
                 return;
+            var plan = Schedule;
             if (Mode.Mode == CombatMode.Horde)
             {
-                if (Mode.RoomSeconds > 0f && Time >= Mode.RoomSeconds)
+                if (plan.Seconds > 0f && Time >= plan.Seconds)
                 {
                     Buzzer(hero);
                     return;
                 }
                 // The stream saves up for its next pack, so each arrives whole, in its formation.
-                var deficit = Mode.Alive - Alive;
-                spawnBudget = Math.Min(spawnBudget + Mode.Alive / 2.5f * dt, deficit);
+                var deficit = (int)(plan.Alive * Pressure()) - Alive;
+                spawnBudget = Math.Min(spawnBudget + plan.Alive / 2.5f * dt, deficit);
                 while (true)
                 {
                     if (nextKind == null)
                     {
-                        nextKind = Spawns.Pick(rng, Mode.SpecialWeight);
-                        nextCount = Math.Min(Mode.Alive, PackSize(nextKind));
+                        nextKind = PickKind();
+                        nextCount = Math.Min(
+                            Math.Min(plan.Alive, PackSize(nextKind)),
+                            RoleRoom(nextKind)
+                        );
                     }
+                    if (nextCount < 1)
+                        nextKind = null; // its role is full: draw again next step
                     if (nextCount < 1 || spawnBudget < nextCount)
                         break;
                     Pack(hero, nextKind, nextCount, false);
                     spawnBudget -= nextCount;
                     nextKind = null;
                 }
-                if (Mode.EliteEvery > 0f && Time >= nextElite)
+                if (plan.EliteEvery > 0f && Time >= nextElite && elitesSpawned < plan.EliteTotal)
                 {
-                    nextElite = Time + Mode.EliteEvery;
+                    nextElite = Time + plan.EliteEvery;
                     int alive = 0;
                     foreach (var s in enemies)
                         if (s.Empowered && s.State != EnemyState.Dying)
                             alive++;
-                    if (alive < Mode.ElitesAlive)
-                        Pack(hero, Spawns.PickElite(elites++), 1, true);
+                    if (alive < plan.ElitesAlive)
+                        Elite(hero);
                 }
                 return;
             }
-            if (Wave < Mode.Waves && (Wave == 0 || Alive <= Mode.WaveCallAt))
+            if (Wave < plan.Waves && (Wave == 0 || Alive <= Mode.WaveCallAt))
             {
+                var n = Math.Min(plan.Alive, plan.WaveSizes[Wave]);
                 Wave++;
                 Emit(RoomEventKind.Wave, null, hero, Vector2.Zero);
-                var n = Math.Min(
-                    Mode.Alive,
-                    Mode.WaveMin + rng.Next(Mode.WaveMax - Mode.WaveMin + 1)
-                );
                 // The room's elites come with its first wave, each alone, as part of it.
                 if (Wave == 1)
-                    for (int e = 0; e < Mode.RoomElites; e++)
+                    for (int e = 0; e < plan.Elites; e++)
                     {
-                        Pack(hero, Spawns.PickElite(elites++), 1, true);
+                        Elite(hero);
                         n = Math.Max(0, n - 1);
                     }
                 for (int left = n; left > 0; )
                 {
                     var pack = Math.Min(left, 1 + rng.Next(3));
-                    var kind = Spawns.Pick(rng, Mode.SpecialWeight);
+                    var kind = PickKind();
                     if (kind.Role == EnemyRole.Heavy)
                         pack = 1; // heavies come alone
+                    pack = Math.Max(1, Math.Min(pack, RoleRoom(kind)));
                     Pack(hero, kind, pack, false);
                     left -= pack;
                 }
             }
+        }
+
+        void Elite(Vector2 hero)
+        {
+            Pack(hero, Spawns.PickElite(elites++), 1, true);
+            elitesSpawned++;
+        }
+
+        // The share of its target the horde's stream aims at now: building through the timer.
+        float Pressure()
+        {
+            var plan = Schedule;
+            if (plan.PressureFull <= 0f || plan.Seconds <= 0f)
+                return 1f;
+            var t = Math.Min(1f, Time / (plan.Seconds * plan.PressureFull));
+            return plan.PressureStart + (1f - plan.PressureStart) * t;
+        }
+
+        // A pack's kind by the mix; plain fodder instead when its role is at its cap.
+        EnemyKind PickKind()
+        {
+            var kind = Spawns.Pick(rng, Mode.SpecialWeight);
+            return RoleRoom(kind) > 0 ? kind : Spawns.Pick(rng, 0f);
+        }
+
+        // How many more plain enemies of `kind`'s role the schedule lets in now.
+        int RoleRoom(EnemyKind kind)
+        {
+            var cap = kind.Role switch
+            {
+                EnemyRole.Special => Schedule.SpecialsAlive,
+                EnemyRole.Heavy => Schedule.HeaviesAlive,
+                _ => int.MaxValue,
+            };
+            if (cap == int.MaxValue)
+                return cap;
+            int n = 0;
+            foreach (var s in enemies)
+                if (!s.Empowered && s.State != EnemyState.Dying && s.Kind.Role == kind.Role)
+                    n++;
+            return cap - n;
         }
 
         // A horde pack's size by its kind's formation: rings and streams are bigger; heavies come
@@ -918,7 +980,7 @@ namespace Amethyst.Action
         int PackSize(EnemyKind kind) =>
             kind.Role == EnemyRole.Heavy
                 ? 1
-                : kind.Formation switch
+                : Schedule.FormationOf(kind) switch
                 {
                     Formation.Ring => 7 + rng.Next(4),
                     Formation.Stream => 6 + rng.Next(5),
@@ -937,7 +999,7 @@ namespace Amethyst.Action
             {
                 var along = (float)rng.NextDouble() * 2f - 1f;
                 var inset = 0.8f + (float)rng.NextDouble() * 1.5f;
-                var side = rng.Next(4);
+                var side = edges[rng.Next(edges.Count)];
                 var p = side switch
                 {
                     0 => new Vector2(along * (half.X - 1f), half.Y - inset),
@@ -957,7 +1019,9 @@ namespace Amethyst.Action
             var marker = 0.5f + (float)rng.NextDouble() * 0.5f;
             var hp = Math.Max(1, (int)MathF.Round(Mode.BasicHp * kind.Hp));
             var formation =
-                Mode.Mode == CombatMode.Horde && !empowered ? kind.Formation : Formation.Pack;
+                Mode.Mode == CombatMode.Horde && !empowered
+                    ? Schedule.FormationOf(kind)
+                    : Formation.Pack;
             float ringRadius = 0f,
                 ringFrom = 0f;
             if (formation == Formation.Ring)
@@ -1049,7 +1113,7 @@ namespace Amethyst.Action
             var done =
                 Mode.Mode == CombatMode.Horde
                     ? Phase == RoomPhase.Buzzer && Alive == 0
-                    : Wave >= Mode.Waves && Alive == 0;
+                    : Wave >= Waves && Alive == 0;
             if (!done)
                 return;
             Phase = RoomPhase.Cleared;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Amethyst.Action
 {
@@ -112,6 +113,41 @@ namespace Amethyst.Action
         public float UpgradeCounts,
             UpgradeRanges;
 
+        /// <summary>A drawn schedule's specials and heavies alive at once at most (Elites aside):
+        /// in the horde no more specials than the aggression tokens keep readable, heavies rare.</summary>
+        public int SpecialsAlive,
+            HeaviesAlive;
+
+        /// <summary>Horde: a drawn schedule's stream targets this share of its row's alive at
+        /// first, building to all of it by <see cref="PressureFull"/> of the timer.</summary>
+        public float PressureStart,
+            PressureFull;
+
+        /// <summary>The Escalation table (docs/game-design.md, Enemies &gt; Escalation), one row
+        /// per room index; null where a room has no fight of its own (the Warden, the Respite).
+        /// Read through <see cref="Room"/>.</summary>
+        public EscalationRow[] Rooms;
+
+        /// <summary>Room <paramref name="index"/>'s Escalation row.</summary>
+        public EscalationRow Room(int index) =>
+            index >= 0 && index < Rooms.Length && Rooms[index] != null
+                ? Rooms[index]
+                : throw new ArgumentException($"{Mode}: no Escalation row for room {index}");
+
+        /// <summary>The kinds room <paramref name="index"/> may spawn: its row's and every earlier
+        /// row's, in the order the rows bring them in.</summary>
+        public List<EnemyKind> KindsBy(int index)
+        {
+            Room(index);
+            var kinds = new List<EnemyKind>();
+            for (int i = 0; i <= index; i++)
+                if (Rooms[i] != null)
+                    foreach (var k in Rooms[i].Adds)
+                        if (!kinds.Contains(k))
+                            kinds.Add(k);
+            return kinds;
+        }
+
         public static readonly ModeTuning Focused = new ModeTuning
         {
             Mode = CombatMode.Focused,
@@ -145,6 +181,16 @@ namespace Amethyst.Action
             ShardsPerKill = 1.5f,
             UpgradeCounts = 0.5f,
             UpgradeRanges = 0.7f,
+            SpecialsAlive = 3,
+            HeaviesAlive = 1,
+            Rooms = new[]
+            {
+                EscalationRow.Waves(1, 1, 4, 4, 4, 0, 0, EnemyKinds.Skeleton),
+                EscalationRow.Waves(2, 2, 6, 8, 5, 0, 0, EnemyKinds.Slime, EnemyKinds.Bat),
+                EscalationRow.Waves(2, 2, 8, 8, 6, 0, 0, EnemyKinds.Demon, EnemyKinds.Goblin),
+                EscalationRow.Waves(2, 3, 10, 10, 6, 1, 1, EnemyKinds.Mushroom),
+                EscalationRow.Waves(3, 3, 12, 12, 7, 1, 2, EnemyKinds.BigOrk),
+            },
         };
 
         public static readonly ModeTuning Horde = new ModeTuning
@@ -178,6 +224,18 @@ namespace Amethyst.Action
             ShardsPerKill = 1f / 3f,
             UpgradeCounts = 1f,
             UpgradeRanges = 1f,
+            SpecialsAlive = 6,
+            HeaviesAlive = 2,
+            PressureStart = 0.35f,
+            PressureFull = 0.6f,
+            Rooms = new[]
+            {
+                EscalationRow.Timed(30f, 40, 0, 0, EnemyKinds.Skeleton),
+                EscalationRow.Timed(45f, 60, 0, 0, EnemyKinds.Slime, EnemyKinds.Bat),
+                EscalationRow.Timed(50f, 80, 1, 1, EnemyKinds.Demon, EnemyKinds.Goblin),
+                EscalationRow.Timed(60f, 100, 1, 2, EnemyKinds.Mushroom),
+                EscalationRow.Timed(60f, 120, 2, 2, EnemyKinds.BigOrk),
+            },
         };
 
         /// <summary>The row of a picked mode; pick <see cref="CombatMode.Blind"/> first.</summary>
@@ -191,6 +249,70 @@ namespace Amethyst.Action
 
         /// <summary>A copy, for a run that overrides a field from a flag.</summary>
         public ModeTuning Copy() => (ModeTuning)MemberwiseClone();
+    }
+
+    /// <summary>One room's row of a mode's Escalation table (docs/game-design.md, Enemies &gt;
+    /// Escalation); <see cref="SpawnSchedule.Draw"/> draws a room's schedule from it.</summary>
+    public sealed class EscalationRow
+    {
+        /// <summary>The kinds this row brings in; a room spawns these and every earlier row's.</summary>
+        public EnemyKind[] Adds;
+
+        /// <summary>Enemies alive at once: focused, the most; horde, the stream's target.</summary>
+        public int Alive;
+
+        /// <summary>Focused: waves, and enemies over all of them, at least and at most.</summary>
+        public int WavesMin,
+            WavesMax,
+            EnemiesMin,
+            EnemiesMax;
+
+        /// <summary>Horde: the room's timer, s.</summary>
+        public float Seconds;
+
+        /// <summary>Empowered enemies the room brings, at least and at most.</summary>
+        public int ElitesMin,
+            ElitesMax;
+
+        /// <summary>A focused row.</summary>
+        public static EscalationRow Waves(
+            int wavesMin,
+            int wavesMax,
+            int enemiesMin,
+            int enemiesMax,
+            int alive,
+            int elitesMin,
+            int elitesMax,
+            params EnemyKind[] adds
+        ) =>
+            new EscalationRow
+            {
+                WavesMin = wavesMin,
+                WavesMax = wavesMax,
+                EnemiesMin = enemiesMin,
+                EnemiesMax = enemiesMax,
+                Alive = alive,
+                ElitesMin = elitesMin,
+                ElitesMax = elitesMax,
+                Adds = adds,
+            };
+
+        /// <summary>A horde row.</summary>
+        public static EscalationRow Timed(
+            float seconds,
+            int alive,
+            int elitesMin,
+            int elitesMax,
+            params EnemyKind[] adds
+        ) =>
+            new EscalationRow
+            {
+                Seconds = seconds,
+                Alive = alive,
+                ElitesMin = elitesMin,
+                ElitesMax = elitesMax,
+                Adds = adds,
+            };
     }
 
     public static class CombatModes
