@@ -184,6 +184,34 @@
     },
     {
       "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Bats/_Prefabs/Bats LP.prefab",
+      "sourceSha256": "dcb6e090ea21acaad3efd3cf9264c2fedd7f543b5a767cecb7c5a38c6dd39611",
+      "guid": "4f9257d4aec394d59be5f34d00fa97e8",
+      "use": "crowd: bat"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Bats/Meshes/Bats LP.fbx",
+      "sourceSha256": "e06900ac2ca26a8d9a4af69398069851eb8821d6af68f3bcad4594b57e0160ec",
+      "guid": "eec0bfdad45f34788ba93083b71f06dc",
+      "use": "crowd: bat clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Demons/_Prefabs/Demons_LP.prefab",
+      "sourceSha256": "3bc3d9c5819bb19c9352f6a6bbf4e03cff20da3de84f3542582abac37d19de13",
+      "guid": "97be6194801464926b2c78020bf4eb32",
+      "use": "crowd: demon"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Demons/Models/Demons_LP.fbx",
+      "sourceSha256": "e3c7dfd3827edcc7948e42e097727077e7911d8119c2568b9dfe21be97ba10dd",
+      "guid": "bebd353bcd71a47dabd72141665125c1",
+      "use": "crowd: demon clips"
+    },
+    {
+      "source": "unity_assets",
       "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Skeleton Warrior/_Prefabs/SkeletonWarriorLP.prefab",
       "sourceSha256": "a722c1da9a55f88a871f956f53a4838bf294cb1af5298047afb2a469904f6c94",
       "guid": "6e3f218b742294893ad834f61c027945",
@@ -195,6 +223,20 @@
       "sourceSha256": "de8f13673aade336a5d2ef08ed843e2966d2148d0ce00bc5138bed2198d8644a",
       "guid": "d6688b4afa37b4b15b476037d756982c",
       "use": "crowd: skeleton clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Slime/_Prefabs/Slime_LP.prefab",
+      "sourceSha256": "b288527883abb23512cb8f31d5206d11f025527683d52b657ae63ad7bf1ac92d",
+      "guid": "fe5eb242a632a47529d5bfc2a09bccda",
+      "use": "crowd: slime"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Slime/Models/Slime_LP.fbx",
+      "sourceSha256": "41162a2653ba20e6a65565640b3c51a475df2c69387b9bb5f113c66ad4830d2e",
+      "guid": "7fec430887d724867a2483827db438a9",
+      "use": "crowd: slime clips"
     },
     {
       "source": "unity_assets",

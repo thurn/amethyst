@@ -18,6 +18,10 @@ namespace Amethyst.Action
     /// </summary>
     public sealed class ModeTuning
     {
+        /// <summary>The hero's run speed in both modes, m/s, as hero.speed's default sets it: faster
+        /// than every kind walks (docs/game-design.md, Starting values).</summary>
+        public const float HeroRunSpeed = 7f;
+
         public CombatMode Mode;
 
         /// <summary>The room's half width: enemies arrive from its edges.</summary>

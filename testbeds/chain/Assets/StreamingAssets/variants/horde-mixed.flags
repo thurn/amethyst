@@ -1,0 +1,4 @@
+# Horde, mixed: slimes in rings, demons and skeletons in packs, bats in streams
+combat.mode = horde
+hero.aim = cursor
+chain.crowd = mixed

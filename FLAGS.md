@@ -232,9 +232,24 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
+- `chain.crowd` = `skeletons` (enum): What the room spawns: skeletons, or the
+  key family's fodder mixed.
+  [ChainEntry.cs:21](testbeds/chain/Assets/Chain/ChainEntry.cs#L21)
+
+- variant `focused-mixed`: Focused, mixed: waves of skeletons, slimes, demons
+  and bats, each telegraphing its own attack. Sets `combat.mode=focused`,
+  `hero.aim=cursor`, `chain.crowd=mixed`.
+  [focused-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-mixed.flags)
+
 - variant `focused`: Focused: waves of a few enemies that all telegraph, the
   camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
+
+- variant `horde-mixed`: Horde, mixed: slimes in rings, demons and skeletons in
+  packs, bats in streams. Sets `combat.mode=horde`, `hero.aim=cursor`,
+  `chain.crowd=mixed`.
+  [horde-mixed.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-mixed.flags)
+
 - variant `horde`: Horde: a stream of ~100 contact-damage enemies for a 60 s
   room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
   [horde.flags](testbeds/chain/Assets/StreamingAssets/variants/horde.flags)

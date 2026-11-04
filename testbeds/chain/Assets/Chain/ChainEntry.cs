@@ -1,10 +1,30 @@
+using Amethyst.Action;
 using Amethyst.Combat;
+using Amethyst.Flags;
 using Amethyst.Look;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Amethyst.Chain
 {
+    public enum ChainCrowd
+    {
+        /// <summary>M1's rooms: skeletons only.</summary>
+        Skeletons,
+
+        /// <summary>The key family's fodder mixed: skeletons, slimes, demons and bats.</summary>
+        Mixed,
+    }
+
+    public static class ChainFlags
+    {
+        public static readonly Flag<ChainCrowd> Crowd = Flag.Enum(
+            "chain.crowd",
+            ChainCrowd.Skeletons,
+            "What the room spawns: skeletons, or the key family's fodder mixed"
+        );
+    }
+
     /// <summary>
     /// The chain (docs/game-design.md, Build order step 2): the roster, elites, hazards and
     /// connected rooms as M2 builds them, on the combat package's fight, with a variant per
@@ -24,7 +44,11 @@ namespace Amethyst.Chain
         static void Build(Scene scene, LoadSceneMode mode)
         {
             if (Object.FindAnyObjectByType<Fight>() == null)
-                Fight.Begin();
+                Fight.Begin(
+                    ChainFlags.Crowd.Value == ChainCrowd.Mixed
+                        ? SpawnList.KeyFodder
+                        : SpawnList.Skeletons
+                );
         }
     }
 }

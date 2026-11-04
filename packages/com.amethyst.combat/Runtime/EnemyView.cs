@@ -83,8 +83,9 @@ namespace Amethyst.Combat
 
         public int Shards => shatter.LiveDeaths;
 
-        /// <summary>A kind's figure height, m.</summary>
-        public float HeightOf(EnemyKind kind) => Of(kind)?.Monster.HeightM ?? DefaultHeight;
+        /// <summary>A kind's figure's top above the ground, m: its height over its hover.</summary>
+        public float HeightOf(EnemyKind kind) =>
+            Of(kind) is Kind k ? k.Monster.HeightM + k.Monster.HoverM : DefaultHeight;
 
         // A kind's crowd type, or null (warned once) when it isn't baked.
         Kind Of(EnemyKind enemy)
@@ -233,7 +234,7 @@ namespace Amethyst.Combat
             }
             poses[s.Id] = p;
             var blend = Mathf.Clamp01((s.Clock - p.Since) / Fade);
-            var position = new Vector3(s.Position.X, 0f, s.Position.Y);
+            var position = new Vector3(s.Position.X, k.Monster.HoverM * s.Scale, s.Position.Y);
             if (s.Frozen > 0f)
             {
                 // Feel §3.1: the struck body shivers along the blow, decaying through its freeze.
@@ -323,7 +324,7 @@ namespace Amethyst.Combat
                                     0f,
                                     s.AttackDirection.Y
                                 );
-                                var reach = 2.2f * s.Scale;
+                                var reach = (s.Kind.Reach + 0.2f) * s.Scale;
                                 shapes.Wedge(at, toward, reach, 130, telegraph, Flat.Telegraphs);
                                 shapes.Wedge(
                                     at,

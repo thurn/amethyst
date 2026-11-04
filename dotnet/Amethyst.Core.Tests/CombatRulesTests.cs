@@ -110,6 +110,18 @@ namespace Amethyst.Tests
         }
 
         [Test]
+        public void TheHeroOutrunsEveryKindInBothModes()
+        {
+            foreach (var mode in new[] { ModeTuning.Focused, ModeTuning.Horde })
+            foreach (var kind in EnemyKinds.All)
+                Assert.That(
+                    mode.WalkSpeed * kind.Speed,
+                    Is.LessThan(ModeTuning.HeroRunSpeed),
+                    $"{kind.Id} {mode.Mode}"
+                );
+        }
+
+        [Test]
         public void ManyKillsOnOneFramePlayOneGrowingVoice()
         {
             var budget = new VoiceBudget();

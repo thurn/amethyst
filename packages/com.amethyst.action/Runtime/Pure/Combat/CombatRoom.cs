@@ -137,8 +137,7 @@ namespace Amethyst.Action
         const float Gap = 0.3f;
         const float HeroRadius = 0.45f;
         const float MinSpawnDistance = 7f;
-        const float ConeRange = 1.6f;
-        const float ConeReach = 2f;
+        const float WindupReach = 0.8f; // of an attack's reach, where its wind-up starts
         const float ConeHalfAngle = 1.2f; // radians
         const float StaggerSeconds = 0.4f;
         const float RecoverSeconds = 0.6f;
@@ -146,11 +145,14 @@ namespace Amethyst.Action
         const float TurnRate = 9f;
         const float WaveSpeed = 40f;
         const float Cell = 1.2f;
+        const float StreamGap = 0.3f; // s between a stream's arrivals
 
         readonly Random rng;
         readonly List<Enemy> enemies = new List<Enemy>();
         readonly Dictionary<long, List<Enemy>> grid = new Dictionary<long, List<Enemy>>();
         float spawnBudget;
+        EnemyKind nextKind; // the horde's next pack, once drawn
+        int nextCount;
         float nextElite;
         int nextId;
 
@@ -330,7 +332,7 @@ namespace Amethyst.Action
                                 Math.Clamp(Vector2.Dot(to / distance, s.AttackDirection), -1f, 1f)
                             )
                             : 0f;
-                    if (distance <= ConeReach * s.Scale + HeroRadius && angle <= ConeHalfAngle)
+                    if (distance <= s.Kind.Reach * s.Scale + HeroRadius && angle <= ConeHalfAngle)
                         HurtHero(s, ref vulnerable);
                     break;
             }
@@ -340,7 +342,7 @@ namespace Amethyst.Action
         static float Range(Enemy s) =>
             s.Kind.Attack switch
             {
-                AttackKind.Cone => ConeRange * s.Scale,
+                AttackKind.Cone => s.Kind.Reach * WindupReach * s.Scale,
                 _ => throw new ArgumentOutOfRangeException(nameof(s), s.Kind.Attack, null),
             };
 
@@ -459,13 +461,21 @@ namespace Amethyst.Action
                     Buzzer(hero);
                     return;
                 }
+                // The stream saves up for its next pack, so each arrives whole, in its formation.
                 var deficit = Mode.Alive - Alive;
                 spawnBudget = Math.Min(spawnBudget + Mode.Alive / 2.5f * dt, deficit);
-                while (spawnBudget >= 1f)
+                while (true)
                 {
-                    var pack = Math.Min((int)spawnBudget, 3 + rng.Next(4));
-                    Pack(hero, pack, false);
-                    spawnBudget -= pack;
+                    if (nextKind == null)
+                    {
+                        nextKind = Spawns.Pick(rng);
+                        nextCount = Math.Min(Mode.Alive, PackSize(nextKind));
+                    }
+                    if (nextCount < 1 || spawnBudget < nextCount)
+                        break;
+                    Pack(hero, nextKind, nextCount, false);
+                    spawnBudget -= nextCount;
+                    nextKind = null;
                 }
                 if (Mode.EliteEvery > 0f && Time >= nextElite)
                 {
@@ -475,7 +485,7 @@ namespace Amethyst.Action
                         if (s.Empowered && s.State != EnemyState.Dying)
                             elites++;
                     if (elites < Mode.ElitesAlive)
-                        Pack(hero, 1, true);
+                        Pack(hero, Spawns.PickElite(rng), 1, true);
                 }
                 return;
             }
@@ -490,14 +500,25 @@ namespace Amethyst.Action
                 for (int left = n; left > 0; )
                 {
                     var pack = Math.Min(left, 1 + rng.Next(3));
-                    Pack(hero, pack, false);
+                    Pack(hero, Spawns.Pick(rng), pack, false);
                     left -= pack;
                 }
             }
         }
 
-        // A pack of one kind arrives together at one spot on the room's edge, at least MinSpawnDistance from the hero.
-        void Pack(Vector2 hero, int count, bool empowered)
+        // A horde pack's size by its kind's formation: rings and streams are bigger.
+        int PackSize(EnemyKind kind) =>
+            kind.Formation switch
+            {
+                Formation.Ring => 7 + rng.Next(4),
+                Formation.Stream => 6 + rng.Next(5),
+                _ => 3 + rng.Next(4),
+            };
+
+        // A pack of one kind arrives at one spot on the room's edge, at least MinSpawnDistance from
+        // the hero; in the horde, as its kind's formation: bunched there, single file out of it,
+        // or in a ring around the hero instead.
+        void Pack(Vector2 hero, EnemyKind kind, int count, bool empowered)
         {
             var half = Mode.ArenaHalfSize;
             var at = Vector2.Zero;
@@ -524,13 +545,42 @@ namespace Amethyst.Action
                     break;
             }
             var marker = 0.5f + (float)rng.NextDouble() * 0.5f;
-            var kind = empowered ? Spawns.PickElite(rng) : Spawns.Pick(rng);
             var hp = Math.Max(1, (int)MathF.Round(Mode.BasicHp * kind.Hp));
+            var formation =
+                Mode.Mode == CombatMode.Horde && !empowered ? kind.Formation : Formation.Pack;
+            float ringRadius = 0f,
+                ringFrom = 0f;
+            if (formation == Formation.Ring)
+            {
+                ringRadius = MinSpawnDistance + 3f + (float)rng.NextDouble() * 3f;
+                ringFrom = (float)rng.NextDouble() * MathF.PI * 2f;
+            }
+            var inward = hero - at;
+            var across =
+                inward.LengthSquared() > 1e-6f
+                    ? Vector2.Normalize(new Vector2(-inward.Y, inward.X))
+                    : Vector2.UnitX;
             for (int k = 0; k < count; k++)
             {
-                var angle = (float)rng.NextDouble() * MathF.PI * 2f;
-                var spread = k == 0 ? 0f : 0.9f + (float)rng.NextDouble() * 1.2f;
-                var p = at + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
+                var delay = 0f;
+                Vector2 p;
+                switch (formation)
+                {
+                    case Formation.Ring:
+                        var around =
+                            ringFrom + (k + 0.3f * (float)rng.NextDouble()) * MathF.PI * 2f / count;
+                        p = hero + new Vector2(MathF.Cos(around), MathF.Sin(around)) * ringRadius;
+                        break;
+                    case Formation.Stream:
+                        delay = k * StreamGap;
+                        p = at + across * (((float)rng.NextDouble() - 0.5f) * 0.5f);
+                        break;
+                    default:
+                        var angle = (float)rng.NextDouble() * MathF.PI * 2f;
+                        var spread = k == 0 ? 0f : 0.9f + (float)rng.NextDouble() * 1.2f;
+                        p = at + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
+                        break;
+                }
                 p = Vector2.Clamp(p, new Vector2(-half + 0.5f), new Vector2(half - 0.5f));
                 var to = hero - p;
                 var s = new Enemy
@@ -544,8 +594,8 @@ namespace Amethyst.Action
                     MaxHp = empowered ? hp * 5 / 2 : hp,
                     MaxArmor = empowered || kind.Armored ? 30 : 0,
                     State = EnemyState.Arriving,
-                    MarkerSeconds = marker,
-                    ArriveAt = Time + marker,
+                    MarkerSeconds = marker + delay,
+                    ArriveAt = Time + marker + delay,
                     Seed = (uint)rng.Next(),
                 };
                 s.Hp = s.MaxHp;
@@ -627,7 +677,8 @@ namespace Amethyst.Action
                         continue;
                     foreach (var o in list)
                     {
-                        if (o.Id <= s.Id || !o.Fighting)
+                        // Fliers keep apart from fliers, walkers from walkers: bats pass over a crowd.
+                        if (o.Id <= s.Id || !o.Fighting || o.Kind.Flies != s.Kind.Flies)
                             continue;
                         var apart = s.Position - o.Position;
                         var want = s.Radius + o.Radius + Gap;

@@ -2,8 +2,10 @@
   "name": "Chain",
   "rootNamespace": "Amethyst.Chain",
   "references": [
+    "Amethyst.Action",
     "Amethyst.Action.Pure",
     "Amethyst.Combat",
+    "Amethyst.Core",
     "Amethyst.Look"
   ]
 }

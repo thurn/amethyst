@@ -34,8 +34,22 @@ namespace Amethyst.Action
     /// </summary>
     public enum AttackKind
     {
-        /// <summary>A melee cone in front of it at the clip's impact: the skeleton's Attack 1.</summary>
+        /// <summary>A cone in front of it, <see cref="EnemyKind.Reach"/> deep, at the clip's impact:
+        /// the skeleton's Attack 1, the slime's Spit Attack.</summary>
         Cone,
+    }
+
+    /// <summary>How a horde pack arrives (the trailer's crowd shapes); focused waves come in packs.</summary>
+    public enum Formation
+    {
+        /// <summary>Bunched together at one spot on the room's edge.</summary>
+        Pack,
+
+        /// <summary>Spread around the hero, closing in from every side.</summary>
+        Ring,
+
+        /// <summary>Single file out of one spot on the edge, one after another.</summary>
+        Stream,
     }
 
     /// <summary>One roster type's numbers; mode-dependent ones are multiples of <see cref="ModeTuning"/>'s.</summary>
@@ -62,6 +76,12 @@ namespace Amethyst.Action
         public bool Armored;
         public AttackKind Attack;
 
+        /// <summary>Its attack's reach at scale 1, m; its wind-up starts from 0.8 of it.</summary>
+        public float Reach = 2f;
+
+        /// <summary>How its horde packs arrive.</summary>
+        public Formation Formation;
+
         public override string ToString() => Id;
     }
 
@@ -76,7 +96,47 @@ namespace Amethyst.Action
             Attack = AttackKind.Cone,
         };
 
-        public static readonly IReadOnlyList<EnemyKind> All = new[] { Skeleton };
+        /// <summary>Slow, tough fodder: soaks hits; spits a short cone.</summary>
+        public static readonly EnemyKind Slime = new EnemyKind
+        {
+            Id = "slime",
+            Family = EnemyFamily.Key,
+            Role = EnemyRole.Fodder,
+            Hp = 2f,
+            Speed = 0.6f,
+            Radius = 0.7f,
+            Attack = AttackKind.Cone,
+            Reach = 3f,
+            Formation = Formation.Ring,
+        };
+
+        /// <summary>Fast fodder: closes in quickly.</summary>
+        public static readonly EnemyKind Demon = new EnemyKind
+        {
+            Id = "demon",
+            Family = EnemyFamily.Key,
+            Role = EnemyRole.Fodder,
+            Speed = 1.6f,
+            Radius = 0.4f,
+            Attack = AttackKind.Cone,
+        };
+
+        /// <summary>A flying swarm: frail, arriving in streams that pass over pillars.</summary>
+        public static readonly EnemyKind Bat = new EnemyKind
+        {
+            Id = "bat",
+            Family = EnemyFamily.Key,
+            Role = EnemyRole.Fodder,
+            Hp = 0.5f,
+            Speed = 1.3f,
+            Radius = 0.3f,
+            Flies = true,
+            Attack = AttackKind.Cone,
+            Reach = 1.5f,
+            Formation = Formation.Stream,
+        };
+
+        public static readonly IReadOnlyList<EnemyKind> All = new[] { Skeleton, Slime, Demon, Bat };
 
         public static EnemyKind Of(string id)
         {
@@ -107,6 +167,20 @@ namespace Amethyst.Action
         /// <summary>M1's rooms: skeletons, and Empowered skeletons.</summary>
         public static readonly SpawnList Skeletons = new SpawnList(
             new[] { (EnemyKinds.Skeleton, 1f) }
+        );
+
+        /// <summary>The key family's fodder, mixed: skeletons, slimes, demons and bats.</summary>
+        public static readonly SpawnList KeyFodder = new SpawnList(
+            new[]
+            {
+                (EnemyKinds.Skeleton, 1f),
+                (EnemyKinds.Slime, 0.5f),
+                (EnemyKinds.Demon, 1f),
+                (EnemyKinds.Bat, 0.8f),
+            },
+            EnemyKinds.Skeleton,
+            EnemyKinds.Slime,
+            EnemyKinds.Demon
         );
 
         /// <summary>A pack's kind; a list of one kind draws nothing from <paramref name="rng"/>.</summary>
