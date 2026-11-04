@@ -1,0 +1,3 @@
+# Cursor aim, focused camera: face the mouse, strafe, the camera close
+hero.aim = cursor
+camera.distance = 14

@@ -1,0 +1,88 @@
+{
+  "assets": [
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_BckStrafeB_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "b28d41dc2454f694fac9ab766e54323a",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_F_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "6c670ea8c84cf324980a21b4b9b927a0",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_FwdStrafeL_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "d294a4226e928db4fbbd933c19ccf5a1",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_FwdStrafeR_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "4699ac7f1156bfc4dba616d9b3a05234",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_B_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b3ac7f325a7e6a843be780efd40ca046",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_F_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "80f9aad568ebdbf4f9fd28c054c27a20",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_L_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "e8bce1554d1659347aae4f4f75892c21",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_R_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "ced228295807f164e9c82db85cc29c88",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Idle/Base/A_Idle_Base_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b94969b4c36c3c94284f72888ad9289d",
+      "use": "hero: idle"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Characters/Character_Knight_01_Orange.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "360c73b9bf9a34d4c84bc0581d0499eb",
+      "use": "hero: the knight"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Broadsword_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "f61def225eac3e247985f6679965a655",
+      "use": "hero: sword"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Shield_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "a7b97d24ba2370040ba159577de7b931",
+      "use": "hero: shield"
+    }
+  ]
+}

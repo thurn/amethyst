@@ -1,4 +1,2 @@
-# Snappy crystal: instant top speed, short dash
-hero.move = snappy
-hero.look = crystal
-hero.speed = 7
+# Close camera, cursor aim
+camera.distance = 12

@@ -1,0 +1,5 @@
+{
+  "name": "Feel",
+  "rootNamespace": "Amethyst.Feel",
+  "references": ["Amethyst.Core", "Amethyst.Core.Unity", "Amethyst.Action"]
+}

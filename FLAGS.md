@@ -37,7 +37,7 @@ Each layer overrides the ones before it:
    path), later ones winning;
 3. the variant, `--variant NAME|N` (`Assets/StreamingAssets/variants/`); a
    project with variants starts on the first;
-4. `AMETHYST_FLAGS="hero.speed=8 camera.view=chase"`;
+4. `AMETHYST_FLAGS="hero.speed=8 hero.aim=movement"`;
 5. `--flag NAME=VALUE`, and `--mute` / `--audio` for `audio.mute`;
 6. live changes: the variant switcher, tests' overrides.
 
@@ -45,9 +45,9 @@ A `.flags` file holds `name = value` lines; its leading `#` comment describes
 it, and the variant switcher shows that description:
 
 ```
-# Floaty orb: slow to start and stop, chase camera
-hero.move = floaty
-hero.look = orb
+# Movement aim, focused camera: face where you run, as Hades on a controller
+hero.aim = movement
+camera.distance = 14
 ```
 
 Unknown flags and bad values are errors: a batch run exits 2, and
@@ -94,22 +94,36 @@ in `Awake` or `Start`, or every frame.
 ### packages/com.amethyst.action
 
 - `arena.props` = `40` (int): Crystals the native hash scatters over the arena.
-  [ActionFlags.cs:64](packages/com.amethyst.action/Runtime/ActionFlags.cs#L64)
-- `camera.distance` = `14` (float): The camera's distance from the hero, m.
-  [ActionFlags.cs:58](packages/com.amethyst.action/Runtime/ActionFlags.cs#L58)
-- `camera.view` = `high` (enum: high | chase | side): Where the camera follows
-  from.
-  [ActionFlags.cs:52](packages/com.amethyst.action/Runtime/ActionFlags.cs#L52)
-- `hero.dash` = `true` (bool): Space dashes in the move direction.
-  [ActionFlags.cs:40](packages/com.amethyst.action/Runtime/ActionFlags.cs#L40)
-- `hero.look` = `crystal` (enum: capsule | crystal | orb): The hero's stand-in
-  shape.
-  [ActionFlags.cs:46](packages/com.amethyst.action/Runtime/ActionFlags.cs#L46)
-- `hero.move` = `snappy` (enum: snappy | floaty | momentum): How the hero
-  reaches its top speed.
-  [ActionFlags.cs:28](packages/com.amethyst.action/Runtime/ActionFlags.cs#L28)
-- `hero.speed` = `6` (float): The hero's top speed, m/s.
-  [ActionFlags.cs:34](packages/com.amethyst.action/Runtime/ActionFlags.cs#L34)
+  [ActionFlags.cs:79](packages/com.amethyst.action/Runtime/ActionFlags.cs#L79)
+- `camera.distance` = `14` (float): The camera's distance from the hero, m:
+  closer for focused fights, pulled back for the horde.
+  [ActionFlags.cs:61](packages/com.amethyst.action/Runtime/ActionFlags.cs#L61)
+- `camera.lean` = `1.5` (float): How far the camera leans toward the cursor at
+  most, m.
+  [ActionFlags.cs:67](packages/com.amethyst.action/Runtime/ActionFlags.cs#L67)
+- `dash.clip-speed` = `2.2` (float): Playback speed of the Dodge clips.
+  [ActionFlags.cs:55](packages/com.amethyst.action/Runtime/ActionFlags.cs#L55)
+- `dash.cooldown` = `0.35` (float): Seconds after a dash ends before the next.
+  [ActionFlags.cs:49](packages/com.amethyst.action/Runtime/ActionFlags.cs#L49)
+- `dash.distance` = `3.5` (float): How far the dash goes, m.
+  [ActionFlags.cs:37](packages/com.amethyst.action/Runtime/ActionFlags.cs#L37)
+- `dash.frames` = `10` (int): How long the dash takes, frames at 60 Hz.
+  [ActionFlags.cs:43](packages/com.amethyst.action/Runtime/ActionFlags.cs#L43)
+- `hero.aim` = `cursor` (enum: cursor | movement): Cursor: face and aim at the
+  mouse, snapping to enemies; movement: aim where the hero runs.
+  [ActionFlags.cs:19](packages/com.amethyst.action/Runtime/ActionFlags.cs#L19)
+- `hero.aim-snap` = `25` (float): Cursor aim snaps to the nearest enemy within
+  this many degrees.
+  [ActionFlags.cs:25](packages/com.amethyst.action/Runtime/ActionFlags.cs#L25)
+- `hero.buffer` = `9` (int): Frames (60 Hz) an early press waits to become
+  legal; the last press wins.
+  [ActionFlags.cs:31](packages/com.amethyst.action/Runtime/ActionFlags.cs#L31)
+- `hero.demo` = `false` (bool): Scripted input instead of the keyboard and
+  mouse: runs a loop and dashes (headless checks).
+  [ActionFlags.cs:73](packages/com.amethyst.action/Runtime/ActionFlags.cs#L73)
+- `hero.speed` = `7` (float): The hero's run speed, m/s: faster than every
+  enemy.
+  [ActionFlags.cs:13](packages/com.amethyst.action/Runtime/ActionFlags.cs#L13)
 
 ### packages/com.amethyst.core
 
@@ -129,15 +143,24 @@ in `Awake` or `Start`, or every frame.
 - `music.volume` = `0.7` (float): The music's level, 0 to 1.
   [MusicPlayer.cs:12](packages/com.amethyst.native/Runtime/MusicPlayer.cs#L12)
 
+### testbeds/feel
+
+- variant `cursor-focused`: Cursor aim, focused camera: face the mouse, strafe,
+  the camera close. Sets `hero.aim=cursor`, `camera.distance=14`.
+  [cursor-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/cursor-focused.flags)
+- variant `cursor-horde`: Cursor aim, horde camera: pulled back as in the neon
+  edge trailer. Sets `hero.aim=cursor`, `camera.distance=34`.
+  [cursor-horde.flags](testbeds/feel/Assets/StreamingAssets/variants/cursor-horde.flags)
+- variant `movement-focused`: Movement aim, focused camera: face where you run,
+  as Hades on a controller. Sets `hero.aim=movement`, `camera.distance=14`.
+  [movement-focused.flags](testbeds/feel/Assets/StreamingAssets/variants/movement-focused.flags)
+
 ### testbeds/sandbox
 
-- variant `floaty-orb`: Floaty orb: slow to start and stop, chase camera. Sets
-  `hero.move=floaty`, `hero.look=orb`, `camera.view=chase`, `camera.distance=9`.
-  [floaty-orb.flags](testbeds/sandbox/Assets/StreamingAssets/variants/floaty-orb.flags)
-- variant `momentum-capsule`: Momentum capsule: accelerates hard, no dash, side
-  camera. Sets `hero.move=momentum`, `hero.look=capsule`, `hero.dash=false`,
-  `camera.view=side`.
-  [momentum-capsule.flags](testbeds/sandbox/Assets/StreamingAssets/variants/momentum-capsule.flags)
-- variant `snappy-crystal`: Snappy crystal: instant top speed, short dash. Sets
-  `hero.move=snappy`, `hero.look=crystal`, `hero.speed=7`.
-  [snappy-crystal.flags](testbeds/sandbox/Assets/StreamingAssets/variants/snappy-crystal.flags)
+- variant `close`: Close camera, cursor aim. Sets `camera.distance=12`.
+  [close.flags](testbeds/sandbox/Assets/StreamingAssets/variants/close.flags)
+- variant `far`: Far camera, cursor aim. Sets `camera.distance=30`.
+  [far.flags](testbeds/sandbox/Assets/StreamingAssets/variants/far.flags)
+- variant `movement`: Movement aim, a faster hero. Sets `hero.aim=movement`,
+  `hero.speed=8`.
+  [movement.flags](testbeds/sandbox/Assets/StreamingAssets/variants/movement.flags)

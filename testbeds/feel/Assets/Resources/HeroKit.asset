@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0f50938f1f5946edbe8f7f9da13331d, type: 3}
+  m_Name: HeroKit
+  m_EditorClassIdentifier: Amethyst.Action::Amethyst.Action.HeroKit
+  Knight: {fileID: 127338, guid: 360c73b9bf9a34d4c84bc0581d0499eb, type: 3}
+  Sword: {fileID: 131468, guid: f61def225eac3e247985f6679965a655, type: 3}
+  Shield: {fileID: 150774, guid: a7b97d24ba2370040ba159577de7b931, type: 3}
+  Idle: {fileID: 1375766457120316241, guid: b94969b4c36c3c94284f72888ad9289d, type: 3}
+  RunF: {fileID: 1827226128182048838, guid: 6c670ea8c84cf324980a21b4b9b927a0, type: 3}
+  RunB: {fileID: 1827226128182048838, guid: b28d41dc2454f694fac9ab766e54323a, type: 3}
+  RunL: {fileID: 1827226128182048838, guid: d294a4226e928db4fbbd933c19ccf5a1, type: 3}
+  RunR: {fileID: 1827226128182048838, guid: 4699ac7f1156bfc4dba616d9b3a05234, type: 3}
+  DodgeF: {fileID: 6808892750511483125, guid: 80f9aad568ebdbf4f9fd28c054c27a20, type: 3}
+  DodgeB: {fileID: -377892130397285394, guid: b3ac7f325a7e6a843be780efd40ca046, type: 3}
+  DodgeL: {fileID: 8020556318125480424, guid: e8bce1554d1659347aae4f4f75892c21, type: 3}
+  DodgeR: {fileID: 6279025081173566251, guid: ced228295807f164e9c82db85cc29c88, type: 3}

@@ -49,19 +49,32 @@ namespace Amethyst.Action
             }
 
             var hero = Hero.Create();
-            FollowCamera.Create(hero.transform);
+            FollowCamera.Create(hero);
             return hero;
         }
 
         static Material greybox;
 
+        static Material Greybox =>
+            greybox != null ? greybox : greybox = Resources.Load<Material>("AmethystGreybox");
+
         /// <summary>Gives a primitive its own copy of the greybox material (URP Simple Lit, in
         /// Resources/) in a color: the primitives' built-in material doesn't render in URP players.</summary>
-        public static void Paint(GameObject go, Color color)
+        public static void Paint(GameObject go, Color color) =>
+            go.GetComponent<Renderer>().material = new Material(Greybox) { color = color };
+
+        /// <summary>Redraws a vendor renderer's built-in-pipeline materials in the greybox one,
+        /// keeping their textures.</summary>
+        public static void Restyle(Renderer renderer)
         {
-            if (greybox == null)
-                greybox = Resources.Load<Material>("AmethystGreybox");
-            go.GetComponent<Renderer>().material = new Material(greybox) { color = color };
+            var materials = renderer.sharedMaterials;
+            for (int i = 0; i < materials.Length; i++)
+                materials[i] = new Material(Greybox)
+                {
+                    mainTexture = materials[i] != null ? materials[i].mainTexture : null,
+                    color = Color.white,
+                };
+            renderer.sharedMaterials = materials;
         }
     }
 }

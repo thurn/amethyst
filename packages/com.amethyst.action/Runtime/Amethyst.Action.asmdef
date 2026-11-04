@@ -2,6 +2,7 @@
   "name": "Amethyst.Action",
   "rootNamespace": "Amethyst.Action",
   "references": [
+    "Amethyst.Action.Pure",
     "Amethyst.Core",
     "Amethyst.Core.Unity",
     "Amethyst.Native",

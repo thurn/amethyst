@@ -1,0 +1,6 @@
+{
+  "name": "Amethyst.Action.Editor",
+  "rootNamespace": "Amethyst.Editor",
+  "references": ["Amethyst.Action"],
+  "includePlatforms": ["Editor"]
+}

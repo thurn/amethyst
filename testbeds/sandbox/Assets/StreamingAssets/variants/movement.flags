@@ -1,5 +1,3 @@
-# Momentum capsule: accelerates hard, no dash, side camera
-hero.move = momentum
-hero.look = capsule
-hero.dash = false
-camera.view = side
+# Movement aim, a faster hero
+hero.aim = movement
+hero.speed = 8

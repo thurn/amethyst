@@ -1,0 +1,5 @@
+{
+  "name": "Amethyst.Action.Pure",
+  "rootNamespace": "Amethyst.Action",
+  "noEngineReferences": true
+}

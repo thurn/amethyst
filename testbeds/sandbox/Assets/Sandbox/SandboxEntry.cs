@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Amethyst.Sandbox
 {
     /// <summary>
-    /// The template testbed: the action baseline with three movement-and-look variants
+    /// The template testbed: the action baseline with three camera-and-aim variants
     /// (StreamingAssets/variants/). `just testbed-new NAME` forks it.
     /// </summary>
     static class SandboxEntry
