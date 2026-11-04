@@ -177,8 +177,12 @@ def commit_problems(base: str) -> list[str]:
 
 
 def markdown_files() -> list[str]:
+    """Every tracked Markdown file but the beads' and the agent skills' (whose YAML
+    front matter mdformat would rewrite)."""
     return [
-        p for p in git("ls-files", "*.md").splitlines() if not p.startswith(".beads/")
+        p
+        for p in git("ls-files", "*.md").splitlines()
+        if not p.startswith((".beads/", ".agents/"))
     ]
 
 

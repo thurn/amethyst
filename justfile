@@ -91,7 +91,7 @@ fmt:
     dotnet tool restore >/dev/null && dotnet csharpier format packages game/Assets testbeds dotnet
     just --fmt --unstable
     {{ am }} flags doc
-    git ls-files '*.md' | grep -v '^.beads/' | xargs uv run --quiet --project tools mdformat
+    git ls-files '*.md' | grep -v -e '^.beads/' -e '^.agents/' | xargs uv run --quiet --project tools mdformat
 
 # Build the Rust plugin into packages/com.amethyst.native (every Unity step does this too)
 [group('checks')]

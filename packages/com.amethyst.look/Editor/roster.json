@@ -1,5 +1,5 @@
 {
-  "note": "Playlist Survivors' roster (rhythm_champions/Assets/Champions/Editor/Monsters/monsters.json) as the crowd baker (CrowdBaker.cs) bakes it: each type's vendor prefab and clips by GUID, its standing height (the model is scaled to it), a flyer's hover, children to hide, the renderers it carries, weapons held in a humanoid fist (palm, pitch, yaw, roll: Fist's grip; onBone: on the hand bone as the prefab comes) and each clip's role and annotations (loop; impact, end in seconds; strideM, the walk cycle's travel; liftM, a clip raised for flight). A figure (the hero) is not a crowd type: it is drawn as an animated character (LookFigure). A project bakes the entries whose vendor files its vendor.json syncs.",
+  "note": "Playlist Survivors' roster (rhythm_champions/Assets/Champions/Editor/Monsters/monsters.json) as the crowd baker (CrowdBaker.cs) bakes it: each type's vendor prefab and clips by GUID, its standing height (the model is scaled to it), a flyer's hover, children to hide, the renderers it carries, weapons held in a humanoid fist (palm, pitch, yaw, roll: Fist's grip; onBone: on the hand bone as the prefab comes) and each clip's role and annotations (loop; impact, end in seconds; strideM, the walk cycle's travel; liftM, a clip raised for flight); recipe names the wireframe mesh recipe (tools/recipes/RECIPE.py) that replaces the vendor mesh. A figure (the hero) is not a crowd type: it is drawn as an animated character (LookFigure). A project bakes the entries whose vendor files its vendor.json syncs.",
   "types": [
     {
       "id": "skeleton",
@@ -38,7 +38,8 @@
           "impact": 0.067,
           "end": 1.6
         }
-      ]
+      ],
+      "recipe": "skeleton"
     },
     {
       "id": "slime",
@@ -428,6 +429,55 @@
       ]
     },
     {
+      "id": "knight",
+      "prefab": "360c73b9bf9a34d4c84bc0581d0499eb",
+      "heightM": 1.85,
+      "recipe": "knight",
+      "weapons": [
+        {
+          "prefab": "a7b97d24ba2370040ba159577de7b931",
+          "hand": "left",
+          "onBone": true
+        },
+        {
+          "prefab": "f61def225eac3e247985f6679965a655",
+          "hand": "right",
+          "palm": 0.02,
+          "pitch": 20,
+          "yaw": 90
+        }
+      ],
+      "clips": [
+        {
+          "role": "idle",
+          "guid": "b94969b4c36c3c94284f72888ad9289d",
+          "clip": "A_Idle_Base_Sword",
+          "loop": true
+        },
+        {
+          "role": "walk",
+          "guid": "eead3eb07cb89cb4eb25b3550df5e84b",
+          "clip": "A_Walk_F_Masc",
+          "loop": true,
+          "strideM": 1.779
+        },
+        {
+          "role": "attack",
+          "guid": "b963d0c4e093a9c4ea792b8095e51ba2",
+          "clip": "A_Attack_HeavyStab01_Sword",
+          "impact": 0.967,
+          "end": 1.367
+        },
+        {
+          "role": "hit",
+          "guid": "adc1feaf8563f6247989bffd0737b6ad",
+          "clip": "A_Hit_F_React_Sword",
+          "impact": 0.0,
+          "end": 0.617
+        }
+      ]
+    },
+    {
       "id": "hero",
       "figure": true,
       "prefab": "360c73b9bf9a34d4c84bc0581d0499eb",
@@ -459,7 +509,8 @@
           "clip": "A_Run_F_Masc",
           "loop": true
         }
-      ]
+      ],
+      "recipe": "knight"
     }
   ]
 }

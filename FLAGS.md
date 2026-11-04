@@ -214,13 +214,21 @@ in `Awake` or `Start`, or every frame.
 ### testbeds/look
 
 - `look.crowd` = `320` (int): Crowd figures around the hero.
-  [LookEntry.cs:23](testbeds/look/Assets/Look/LookEntry.cs#L23)
+  [LookEntry.cs:47](testbeds/look/Assets/Look/LookEntry.cs#L47)
 
 - `look.grid` = `1` (float): The floor grid's brightness, times its resting
-  light. [LookEntry.cs:17](testbeds/look/Assets/Look/LookEntry.cs#L17)
+  light. [LookEntry.cs:41](testbeds/look/Assets/Look/LookEntry.cs#L41)
+
+- `look.mesh` = `recipe` (enum: recipe | vendor): Figures' meshes: their
+  wireframe recipes' where they have one, or the vendor's.
+  [LookEntry.cs:29](testbeds/look/Assets/Look/LookEntry.cs#L29)
+
+- `look.scene` = `crowd` (enum: crowd | review): The crowd round the running
+  hero, or the wireframe meshes posed up close.
+  [LookEntry.cs:23](testbeds/look/Assets/Look/LookEntry.cs#L23)
 
 - `look.view` = `36` (float): Ground the camera sees across, m (the trailer's
-  36). [LookEntry.cs:11](testbeds/look/Assets/Look/LookEntry.cs#L11)
+  36). [LookEntry.cs:35](testbeds/look/Assets/Look/LookEntry.cs#L35)
 
 - variant `default`: Trailer: the neon edge trailer's framing (36 m across) and
   grid. Sets .
@@ -233,6 +241,18 @@ in `Awake` or `Start`, or every frame.
 - variant `near-bright`: Near, bright grid: 26 m across, the grid at 170%. Sets
   `look.view=26`, `look.grid=1.7`.
   [near-bright.flags](testbeds/look/Assets/StreamingAssets/variants/near-bright.flags)
+
+- variant `review-vendor`: Review, vendor meshes: the same poses drawn from the
+  vendor meshes. Sets `look.scene=review`, `look.view=9`, `look.mesh=vendor`.
+  [review-vendor.flags](testbeds/look/Assets/StreamingAssets/variants/review-vendor.flags)
+
+- variant `review`: Review: the wireframe knight and skeleton up close, still
+  and mid-clip. Sets `look.scene=review`, `look.view=9`.
+  [review.flags](testbeds/look/Assets/StreamingAssets/variants/review.flags)
+
+- variant `vendor`: Vendor meshes: the trailer framing with every figure from
+  its vendor mesh. Sets `look.mesh=vendor`.
+  [vendor.flags](testbeds/look/Assets/StreamingAssets/variants/vendor.flags)
 
 ### testbeds/sandbox
 

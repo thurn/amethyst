@@ -1,0 +1,4 @@
+# Review, vendor meshes: the same poses drawn from the vendor meshes
+look.scene = review
+look.view = 9
+look.mesh = vendor

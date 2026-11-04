@@ -7,7 +7,8 @@ namespace Amethyst.Look
     /// The hero in the edge look: every renderer under it drawn from a style mesh of its own mesh
     /// (<see cref="StyleMesh.Unweld"/>: a figure's baked one, else made now from a readable mesh;
     /// skinned by Unity as before) in
-    /// HeroEdge, the palette's white, a rung above every crowd hue. While it lives it keeps the
+    /// HeroEdge, the palette's white, a rung above every crowd hue; or, where the figure has a
+    /// wireframe mesh recipe, all of them replaced by that one skin. While it lives it keeps the
     /// chest core on the chest bone. Works on any character: the roster's knight
     /// (<see cref="Spawn"/>) or a hero a testbed builds and animates itself.
     /// </summary>
@@ -22,14 +23,26 @@ namespace Amethyst.Look
         public Material Material => material;
 
         /// <summary>Dresses <paramref name="hero"/> in the edge look, with <paramref name="figure"/>'s
-        /// baked style meshes where it has them.</summary>
-        public static HeroLook Dress(GameObject hero, Palette palette, LookFigure figure = null)
+        /// baked style meshes where it has them: its recipe's mesh unless
+        /// <paramref name="vendorMesh"/>.</summary>
+        public static HeroLook Dress(
+            GameObject hero,
+            Palette palette,
+            LookFigure figure = null,
+            bool vendorMesh = false
+        )
         {
             var look = hero.AddComponent<HeroLook>();
             look.material = EdgeLook.Hero(palette);
+            bool recipe = figure != null && figure.Recipe != null && !vendorMesh;
             int seed = 1;
             foreach (var r in hero.GetComponentsInChildren<Renderer>(true))
             {
+                if (recipe)
+                {
+                    r.enabled = false;
+                    continue;
+                }
                 var skinned = r as SkinnedMeshRenderer;
                 var filter = r is MeshRenderer ? r.GetComponent<MeshFilter>() : null;
                 var source =
@@ -62,6 +75,8 @@ namespace Amethyst.Look
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 r.receiveShadows = false;
             }
+            if (recipe)
+                look.Wear(figure);
             var animator = hero.GetComponentInChildren<Animator>();
             look.chest =
                 animator != null && animator.isHuman
@@ -71,12 +86,39 @@ namespace Amethyst.Look
             return look;
         }
 
+        /// <summary>The figure's recipe mesh as one skin on its bones, found by path.</summary>
+        void Wear(LookFigure figure)
+        {
+            var root = transform;
+            Transform Find(string path) =>
+                path.Length == 0
+                    ? root
+                    : root.Find(path)
+                        ?? throw new System.InvalidOperationException(
+                            $"HeroLook: {figure.Id}'s recipe mesh needs {path} under {root.name}"
+                        );
+            var go = new GameObject("Wireframe");
+            go.transform.SetParent(root, false);
+            var skin = go.AddComponent<SkinnedMeshRenderer>();
+            skin.bones = System.Array.ConvertAll(figure.RecipeBones, Find);
+            skin.rootBone = Find(figure.RecipeRootBone);
+            skin.sharedMesh = figure.Recipe;
+            skin.sharedMaterial = material;
+            skin.updateWhenOffscreen = true;
+            skin.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            skin.receiveShadows = false;
+            // Its vendor renderers are off, and an animator culled by them would stop.
+            var animator = GetComponentInChildren<Animator>();
+            if (animator != null)
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+        }
+
         /// <summary>
         /// The roster figure <paramref name="figure"/> at the origin: its prefab with its weapons
         /// in hand, its animator stripped of controller and root motion (the caller animates it),
-        /// dressed in the edge look.
+        /// dressed in the edge look (its recipe's mesh unless <paramref name="vendorMesh"/>).
         /// </summary>
-        public static HeroLook Spawn(LookFigure figure, Palette palette)
+        public static HeroLook Spawn(LookFigure figure, Palette palette, bool vendorMesh = false)
         {
             var go = Instantiate(figure.Prefab);
             go.name = figure.Id;
@@ -85,7 +127,7 @@ namespace Amethyst.Look
             animator.runtimeAnimatorController = null;
             foreach (var w in figure.Weapons)
                 Hold(w, animator);
-            return Dress(go, palette, figure);
+            return Dress(go, palette, figure, vendorMesh);
         }
 
         /// <summary>Puts a weapon in its hand (the crowd baker holds a figure's the same way).</summary>

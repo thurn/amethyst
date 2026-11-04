@@ -14,7 +14,7 @@ namespace Amethyst.Look.Editor
 {
     /// <summary>
     /// The crowd baker: Playlist Survivors' monster baker, which made the neon edge trailer's
-    /// crowd, without its shards and recipes. Before every player build it bakes each roster
+    /// crowd, without its shards. Before every player build it bakes each roster
     /// entry (roster.json beside this file) whose vendor files the project has, unless its key
     /// (the entry and this code) is unchanged, writing only under the ignored Assets/Baked/Look/:
     /// - a crowd type: the combined vendor mesh's three LODs as style meshes (every active skinned
@@ -23,9 +23,12 @@ namespace Amethyst.Look.Editor
     ///   at 30 Hz) and Resources/AmethystLook/Types/ID.asset (<see cref="MonsterType"/>);
     /// - a figure (the hero): its renderers' style meshes and
     ///   Resources/AmethystLook/Figures/ID.asset (<see cref="LookFigure"/>).
-    /// `just task PROJECT Amethyst.Look.Editor.CrowdBaker.Bake` bakes without building.
+    /// An entry with a wireframe mesh recipe (CrowdBaker.Recipes.cs) also bakes the recipe's mesh:
+    /// a type draws it at every LOD and keeps the vendor's LODs beside it; a figure wears it as one
+    /// skin. `uv run --project tools am unity PROJECT Amethyst.Look.Editor.CrowdBaker.Bake` bakes
+    /// without building.
     /// </summary>
-    public static class CrowdBaker
+    public static partial class CrowdBaker
     {
         const string Root = "Assets/Baked/Look";
         const string KeyFile = "bake.key";
@@ -38,6 +41,7 @@ namespace Amethyst.Look.Editor
             public float heightM;
             public float hoverM;
             public bool figure;
+            public string recipe; // tools/recipes/RECIPE.py builds its wireframe mesh
             public string[] hide = Array.Empty<string>();
             public Weapon[] weapons = Array.Empty<Weapon>();
             public Clip[] clips = Array.Empty<Clip>();
@@ -89,6 +93,7 @@ namespace Amethyst.Look.Editor
             public readonly List<Vector4> BoneIndices = new List<Vector4>();
             public readonly List<Vector4> BoneWeights = new List<Vector4>();
             public readonly List<int> Indices = new List<int>();
+            public readonly List<Part> Parts = new List<Part>();
         }
 
         static string PackageDir =>
@@ -179,7 +184,7 @@ namespace Amethyst.Look.Editor
         {
             string dir = $"{Root}/{e.id}";
             string asset = AssetPath(e);
-            string key = Hex(code + JsonUtility.ToJson(e));
+            string key = Hex(code + JsonUtility.ToJson(e) + RecipeHash(e));
             string keyPath = $"{dir}/{KeyFile}";
             if (
                 File.Exists(keyPath)
@@ -340,8 +345,33 @@ namespace Amethyst.Look.Editor
                 f.Styles[i].name = $"{e.id}_{i}_style";
                 Replace(f.Styles[i], $"{dir}/{e.id}_{i}_style.mesh");
             }
+            string made = "";
+            if (!string.IsNullOrEmpty(e.recipe))
+            {
+                // The recipe's mesh as one skin on the figure's own bones (a held weapon on its hand).
+                var bones = new List<Bone>();
+                var recipe = RunRecipe(e, root, Combine(e, root, bones), bones);
+                f.Recipe = RecipeStyle(
+                    e,
+                    recipe,
+                    StyleMesh.StableSeed(e.id) + sources.Count,
+                    bones.Select(b => b.Bind).ToArray()
+                );
+                Replace(f.Recipe, $"{dir}/{e.id}_recipe.mesh");
+                f.RecipeBones = bones
+                    .Select(b =>
+                        AnimationUtility.CalculateTransformPath(b.Transform, root.transform)
+                    )
+                    .ToArray();
+                var animator = root.GetComponentInChildren<Animator>();
+                f.RecipeRootBone = AnimationUtility.CalculateTransformPath(
+                    BodyBone(root, animator),
+                    root.transform
+                );
+                made = $", recipe {f.Recipe.GetIndexCount(0) / 3} triangles";
+            }
             Replace(f, asset);
-            return $"figure, {sources.Count} style meshes, {f.Clips.Length} clips";
+            return $"figure, {sources.Count} style meshes{made}, {f.Clips.Length} clips";
         }
 
         // ---------------------------------------------------------------------------------
@@ -357,6 +387,7 @@ namespace Amethyst.Look.Editor
         {
             var bones = new List<Bone>();
             var g = Combine(e, root, bones);
+            var recipe = string.IsNullOrEmpty(e.recipe) ? null : RunRecipe(e, root, g, bones);
             var clips = new List<MonsterClip>();
             float[] texels;
             int width,
@@ -382,8 +413,20 @@ namespace Amethyst.Look.Editor
             Replace(tex, $"{dir}/{e.id}_bones.asset");
 
             var clipArray = clips.ToArray();
+            var measured = g;
+            if (recipe != null)
+            {
+                // Bounds round both meshes, so either draws uncut.
+                measured = new Geometry();
+                foreach (var part in new[] { g, recipe.Geometry })
+                {
+                    measured.Positions.AddRange(part.Positions);
+                    measured.BoneIndices.AddRange(part.BoneIndices);
+                    measured.BoneWeights.AddRange(part.BoneWeights);
+                }
+            }
             MeasureBounds(
-                g,
+                measured,
                 texels,
                 width,
                 bones.Count,
@@ -392,14 +435,7 @@ namespace Amethyst.Look.Editor
                 out float radius,
                 out float standing
             );
-            var welded = new Mesh { name = e.id + "_welded" };
-            if (g.Positions.Count > 65535)
-                welded.indexFormat = IndexFormat.UInt32;
-            welded.SetVertices(g.Positions);
-            welded.SetNormals(g.Normals);
-            welded.SetUVs(1, g.BoneIndices);
-            welded.SetUVs(2, g.BoneWeights);
-            welded.SetTriangles(g.Indices, 0, false);
+            var welded = Welded(e.id + "_welded", g);
             welded.bounds = new Bounds(new Vector3(0, centerY, 0), Vector3.one * (2 * radius));
             int seed = StyleMesh.StableSeed(e.id);
             var decimated = BuildLods(welded);
@@ -417,11 +453,21 @@ namespace Amethyst.Look.Editor
             foreach (var m in decimated)
                 UnityEngine.Object.DestroyImmediate(m);
             UnityEngine.Object.DestroyImmediate(welded);
+            var vendorLods = Array.Empty<Mesh>();
+            if (recipe != null)
+            {
+                var style = RecipeStyle(e, recipe, seed + 3);
+                style.bounds = lods[0].bounds;
+                Replace(style, $"{dir}/{e.id}_recipe.mesh");
+                vendorLods = lods;
+                lods = new[] { style, style, style };
+            }
 
             var t = ScriptableObject.CreateInstance<MonsterType>();
             t.name = e.id;
             t.Id = e.id;
             t.Lods = lods;
+            t.VendorLods = vendorLods;
             t.Bones = tex;
             t.BoneCount = bones.Count;
             t.Clips = clipArray;
@@ -430,8 +476,12 @@ namespace Amethyst.Look.Editor
             t.HeightM = standing;
             t.HoverM = e.hoverM;
             Replace(t, asset);
-            return $"LOD triangles {string.Join("/", lods.Select(m => m.GetIndexCount(0) / 3))}, "
-                + $"{bones.Count} bones, {height} frames, height {standing:F2} m";
+            string tris(Mesh[] ms) => string.Join("/", ms.Select(m => m.GetIndexCount(0) / 3));
+            return (
+                    recipe != null
+                        ? $"recipe {tris(lods.Take(1).ToArray())} triangles (vendor LODs {tris(vendorLods)}), "
+                        : $"LOD triangles {tris(lods)}, "
+                ) + $"{bones.Count} bones, {height} frames, height {standing:F2} m";
         }
 
         static int BoneIndex(List<Bone> bones, Transform t, Matrix4x4 bind)
@@ -464,6 +514,11 @@ namespace Amethyst.Look.Editor
         {
             var g = new Geometry();
             var rootInv = RootTR(root).inverse;
+            var skeleton = new HashSet<Transform>(
+                root.GetComponentsInChildren<SkinnedMeshRenderer>(false)
+                    .SelectMany(s => s.bones)
+                    .Where(b => b != null)
+            );
             foreach (var r in root.GetComponentsInChildren<Renderer>(false))
             {
                 if (!r.enabled)
@@ -492,7 +547,20 @@ namespace Amethyst.Look.Editor
                 var fromRoot = toRoot.inverse;
                 int[] boneOf;
                 if (rigid)
-                    boneOf = new[] { BoneIndex(bones, r.transform, fromRoot) };
+                {
+                    // A held weapon rides the skeleton's bone it hangs from, so a recipe
+                    // and a figure's skin see it on the hand.
+                    var on = r.transform.parent;
+                    while (on != null && on != root.transform && !skeleton.Contains(on))
+                        on = on.parent;
+                    boneOf =
+                        on != null && skeleton.Contains(on)
+                            ? new[]
+                            {
+                                BoneIndex(bones, on, (rootInv * on.localToWorldMatrix).inverse),
+                            }
+                            : new[] { BoneIndex(bones, r.transform, fromRoot) };
+                }
                 else
                 {
                     boneOf = new int[skinBones.Length];
@@ -556,6 +624,15 @@ namespace Amethyst.Look.Editor
                 for (int s = 0; s < mesh.subMeshCount; s++)
                     foreach (var i in mesh.GetTriangles(s))
                         g.Indices.Add(baseVertex + i);
+                g.Parts.Add(
+                    new Part
+                    {
+                        name = r.name,
+                        first = baseVertex,
+                        count = verts.Length,
+                        rigid = rigid,
+                    }
+                );
             }
             if (g.Positions.Count == 0)
                 throw new Exception($"CrowdBaker: {e.id} has no active renderers");

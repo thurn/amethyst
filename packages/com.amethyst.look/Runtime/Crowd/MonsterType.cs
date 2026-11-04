@@ -7,12 +7,20 @@ namespace Amethyst.Look
     /// One crowd type as the crowd baker (Editor/CrowdBaker.cs) writes it into the ignored
     /// Assets/Baked/Look/: LOD0 to LOD2 as style meshes (<see cref="StyleMesh.Unweld"/>, bone
     /// indices in UV1 and weights in UV2, LOD1 about half LOD0's triangles, LOD2 a quarter), one
-    /// float texture of skinning matrices and its clips.
+    /// float texture of skinning matrices and its clips. A type with a wireframe mesh recipe
+    /// draws the recipe's mesh at every LOD and keeps the vendor's in <see cref="VendorLods"/>.
     /// </summary>
     public sealed class MonsterType : ScriptableObject
     {
         public string Id;
         public Mesh[] Lods = Array.Empty<Mesh>();
+
+        /// <summary>The vendor mesh's LODs where <see cref="Lods"/> are a recipe's, else empty.</summary>
+        public Mesh[] VendorLods = Array.Empty<Mesh>();
+
+        /// <summary>The LODs to draw: the vendor's when asked and the type has them apart.</summary>
+        public Mesh[] LodsOf(bool vendor) =>
+            vendor && VendorLods.Length == Lods.Length ? VendorLods : Lods;
 
         /// <summary>Skinning matrices at <see cref="MonsterLibrary.ClipRate"/>: bone b's row r of
         /// frame f is texel (3b + r, f).</summary>

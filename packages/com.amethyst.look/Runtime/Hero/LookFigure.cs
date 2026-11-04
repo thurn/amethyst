@@ -24,6 +24,12 @@ namespace Amethyst.Look
         public Mesh[] Sources = Array.Empty<Mesh>(),
             Styles = Array.Empty<Mesh>();
 
+        /// <summary>The figure's wireframe mesh from its recipe, or null: one style mesh skinned
+        /// to the bones at these paths under the root (a held weapon on its hand).</summary>
+        public Mesh Recipe;
+        public string[] RecipeBones = Array.Empty<string>();
+        public string RecipeRootBone;
+
         /// <summary>A weapon held in a humanoid fist (<see cref="Fist"/>), or riding the hand bone
         /// as its prefab comes.</summary>
         [Serializable]

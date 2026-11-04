@@ -86,6 +86,7 @@ namespace Amethyst.Look
         sealed class TypeState
         {
             public MonsterType Type;
+            public Mesh[] Lods;
             public Material Material;
             public GraphicsBuffer[] Instances; // a ring: the CPU never writes one the GPU may still read
             public GraphicsBuffer[] Motions; // the motion clocks, in the same ring
@@ -109,8 +110,14 @@ namespace Amethyst.Look
         }
 
         /// <summary>Every type in the library, each with room for <paramref name="capacityPerType"/>
-        /// figures, in the palette's colours.</summary>
-        public MonsterCrowd(MonsterLibrary lib, int capacityPerType, Palette palette)
+        /// figures, in the palette's colours; each type drawn from its vendor mesh when
+        /// <paramref name="vendorMeshes"/>, else from its recipe's where it has one.</summary>
+        public MonsterCrowd(
+            MonsterLibrary lib,
+            int capacityPerType,
+            Palette palette,
+            bool vendorMeshes = false
+        )
         {
             Library = lib;
             _capacity = capacityPerType;
@@ -121,15 +128,15 @@ namespace Amethyst.Look
             _kBlend = _palette.FindKernel("Blend");
             _types = new TypeState[lib.Types.Length];
             for (int i = 0; i < _types.Length; i++)
-                _types[i] = Create(lib.Types[i], palette);
+                _types[i] = Create(lib.Types[i], palette, vendorMeshes);
             RenderPipelineManager.beginCameraRendering += OnCamera;
         }
 
         public int TypeCount => _types.Length;
 
-        TypeState Create(MonsterType t, Palette palette)
+        TypeState Create(MonsterType t, Palette palette, bool vendorMeshes)
         {
-            var s = new TypeState { Type = t };
+            var s = new TypeState { Type = t, Lods = t.LodsOf(vendorMeshes) };
             s.OnReadback = r =>
             {
                 if (!r.hasError && r.layerDataSize >= 4)
@@ -193,7 +200,7 @@ namespace Amethyst.Look
             var args = new uint[Lods * Bins * ArgsInts];
             for (int l = 0; l < Lods; l++)
             {
-                var d = t.Lods[l].GetSubMesh(0);
+                var d = s.Lods[l].GetSubMesh(0);
                 for (int b = 0; b < Bins; b++)
                 {
                     int at = (l * Bins + b) * ArgsInts;
@@ -385,7 +392,7 @@ namespace Amethyst.Look
                         camera = camera,
                         layer = Layer,
                     };
-                    Graphics.RenderMeshIndirect(rp, s.Type.Lods[l], s.Args, Bins, l * Bins);
+                    Graphics.RenderMeshIndirect(rp, s.Lods[l], s.Args, Bins, l * Bins);
                 }
             }
         }

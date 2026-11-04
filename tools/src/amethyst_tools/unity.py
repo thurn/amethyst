@@ -135,7 +135,8 @@ def compile_errors(log: Path) -> str:
 
 def inputs_key(project: paths.Project, purpose: str) -> str:
     """A hash of everything a project's Unity step reads: its files, the packages it uses,
-    the native plugin, its vendor manifest, the Unity version and this launcher."""
+    the native plugin, the mesh recipes, its vendor manifest, the Unity version and this
+    launcher."""
     roots = [project.path]
     manifest = json.loads(project.manifest.read_text())
     for spec in manifest.get("dependencies", {}).values():
@@ -152,6 +153,9 @@ def inputs_key(project: paths.Project, purpose: str) -> str:
     extras = [Path(__file__)]
     if project.uses_package("com.amethyst.native"):
         extras.append(native.PLUGIN_DIR / native.DYLIB)
+    if project.uses_package("com.amethyst.look"):
+        # Its crowd baker runs the wireframe mesh recipes before every build.
+        extras.extend(sorted((paths.REPO / "tools" / "recipes").glob("*.py")))
     for f in sorted(paths.REPO / rel for rel in listed) + extras:
         if f.is_file():
             h.update(f"{f.relative_to(paths.REPO)}\n".encode())

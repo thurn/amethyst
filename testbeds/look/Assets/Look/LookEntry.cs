@@ -6,8 +6,32 @@ using UnityEngine.SceneManagement;
 
 namespace Amethyst.LookTestbed
 {
+    public enum LookScene
+    {
+        Crowd,
+        Review,
+    }
+
+    public enum LookMesh
+    {
+        Recipe,
+        Vendor,
+    }
+
     public static class LookFlags
     {
+        public static readonly Flag<LookScene> Scene = Flag.Enum(
+            "look.scene",
+            LookScene.Crowd,
+            "The crowd round the running hero, or the wireframe meshes posed up close"
+        );
+
+        public static readonly Flag<LookMesh> Mesh = Flag.Enum(
+            "look.mesh",
+            LookMesh.Recipe,
+            "Figures' meshes: their wireframe recipes' where they have one, or the vendor's"
+        );
+
         public static readonly Flag<float> View = Flag.Float(
             "look.view",
             36f,
@@ -30,7 +54,8 @@ namespace Amethyst.LookTestbed
     /// <summary>
     /// The neon edge look testbed: a white knight running a small circle on the void grid, with a
     /// few hundred hue-coded figures from Playlist Survivors' roster circling it in packs, a few
-    /// wearing white status overlays, framed as the trailer was.
+    /// wearing white status overlays, framed as the trailer was. Or (look.scene) the wireframe
+    /// meshes up close in a few poses.
     /// </summary>
     static class LookEntry
     {
@@ -62,7 +87,7 @@ namespace Amethyst.LookTestbed
             HeroLook hero = null;
             var figure = LookFigure.Load("hero");
             if (figure != null)
-                hero = HeroLook.Spawn(figure, palette);
+                hero = HeroLook.Spawn(figure, palette, LookFlags.Mesh.Value == LookMesh.Vendor);
             else
                 Debug.LogWarning("look: no baked hero (its vendor files are missing)");
 

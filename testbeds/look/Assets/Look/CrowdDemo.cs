@@ -42,7 +42,7 @@ namespace Amethyst.LookTestbed
         readonly List<Figure>[] byType;
         readonly StatusOverlays overlays = new StatusOverlays();
 
-        public CrowdDemo(MonsterLibrary lib, Palette palette, int count)
+        public CrowdDemo(MonsterLibrary lib, Palette palette, int count, bool vendorMeshes)
         {
             this.lib = lib;
             byType = new List<Figure>[lib.Types.Length];
@@ -99,7 +99,7 @@ namespace Amethyst.LookTestbed
             int capacity = 1;
             foreach (var list in byType)
                 capacity = Mathf.Max(capacity, list.Count);
-            Crowd = new MonsterCrowd(lib, capacity, palette);
+            Crowd = new MonsterCrowd(lib, capacity, palette, vendorMeshes);
         }
 
         static float Share(string id) => Shares.TryGetValue(id, out var s) ? s : 0f;

@@ -94,10 +94,12 @@ namespace Amethyst.Look
 
         public static readonly Palette Default = new Palette();
 
-        /// <summary>A monster type's hue by its roster id; an unknown type is fodder cyan.</summary>
+        /// <summary>A crowd type's hue by its roster id (the knight is the hero's white); an
+        /// unknown type is fodder cyan.</summary>
         public Rgb ForType(string id) =>
             id switch
             {
+                "knight" => Hero,
                 "skeleton" or "slime" => Cyan,
                 "demon" or "bat" => Blue,
                 "goblin" => Magenta,
