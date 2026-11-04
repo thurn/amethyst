@@ -1,0 +1,9 @@
+{
+  "name": "Chain",
+  "rootNamespace": "Amethyst.Chain",
+  "references": [
+    "Amethyst.Action.Pure",
+    "Amethyst.Combat",
+    "Amethyst.Look"
+  ]
+}

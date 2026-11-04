@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0f50938f1f5946edbe8f7f9da13331d, type: 3}
+  m_Name: HeroKit
+  m_EditorClassIdentifier: Amethyst.Action::Amethyst.Action.HeroKit
+  Knight: {fileID: 127338, guid: 360c73b9bf9a34d4c84bc0581d0499eb, type: 3}
+  Sword: {fileID: 131468, guid: f61def225eac3e247985f6679965a655, type: 3}
+  Shield: {fileID: 150774, guid: a7b97d24ba2370040ba159577de7b931, type: 3}
+  Idle: {fileID: 1375766457120316241, guid: b94969b4c36c3c94284f72888ad9289d, type: 3}
+  RunF: {fileID: 1827226128182048838, guid: 6c670ea8c84cf324980a21b4b9b927a0, type: 3}
+  RunB: {fileID: 1827226128182048838, guid: b28d41dc2454f694fac9ab766e54323a, type: 3}
+  RunL: {fileID: 1827226128182048838, guid: d294a4226e928db4fbbd933c19ccf5a1, type: 3}
+  RunR: {fileID: 1827226128182048838, guid: 4699ac7f1156bfc4dba616d9b3a05234, type: 3}
+  DodgeF: {fileID: 6808892750511483125, guid: 80f9aad568ebdbf4f9fd28c054c27a20, type: 3}
+  DodgeB: {fileID: -377892130397285394, guid: b3ac7f325a7e6a843be780efd40ca046, type: 3}
+  DodgeL: {fileID: 8020556318125480424, guid: e8bce1554d1659347aae4f4f75892c21, type: 3}
+  DodgeR: {fileID: 6279025081173566251, guid: ced228295807f164e9c82db85cc29c88, type: 3}
+  CleaveA:
+    Clip: {fileID: -7717634560727564301, guid: 9f773338b2a96174ebe9b63870034ca3, type: 3}
+    Contact: 0.35000002
+  CleaveB:
+    Clip: {fileID: 5800342443961765143, guid: 95697c3218923dd43aa160c110bfbc79, type: 3}
+    Contact: 0.26666668
+  CleaveC:
+    Clip: {fileID: -8890989884591690541, guid: c9e0b6900401fcb42980df96b84db76c, type: 3}
+    Contact: 0.4166667
+  Fencing:
+    Clip: {fileID: 1767946901908681430, guid: f1b706a7569d3564c871c395216c5dbd, type: 3}
+    Contact: 0.5166667
+  Stab:
+    Clip: {fileID: 8332939666779294377, guid: b963d0c4e093a9c4ea792b8095e51ba2, type: 3}
+    Contact: 0.8833334
+  Leap:
+    Clip: {fileID: -7914165499043647036, guid: 72f114cf4075d3b4db5ce63cb994a704, type: 3}
+    Contact: 1.1
+  HitReacts:
+  - {fileID: -5694488986427802680, guid: adc1feaf8563f6247989bffd0737b6ad, type: 3}
+  - {fileID: 5410598297907043000, guid: 646e411aff9e6a3409589c9eebc68c3a, type: 3}
+  - {fileID: 8990611995264232770, guid: 202a1ac9f04ce2a419bc2bdd6b148b2a, type: 3}
+  - {fileID: -8134992637236915294, guid: 881ed1a8905746f4d9b1def6f9e773dd, type: 3}
+  Staggers:
+  - {fileID: 8724492062134716513, guid: 3af9f677619822043a708e52c79ba040, type: 3}
+  - {fileID: 8724492062134716513, guid: 2c9d421561b7c9941bd5d9942e4dcaa5, type: 3}
+  - {fileID: -5950831409251336622, guid: ec81d250c60b03d47b70b65309c588ee, type: 3}
+  - {fileID: -5950831409251336622, guid: bb9255eddd5619c4e9398d076eb337fd, type: 3}
+  Swings:
+  - {fileID: 8300000, guid: 641482022e65d08458cfc46d0da318cd, type: 3}
+  - {fileID: 8300000, guid: d0d42bc8c98476646a7b88be93b1948f, type: 3}
+  - {fileID: 8300000, guid: 02981d1f2ba873b468dcd08522e34ced, type: 3}
+  - {fileID: 8300000, guid: 389ca9a16fa6dc745ac9f5c66e2fcaed, type: 3}
+  Finishers:
+  - {fileID: 8300000, guid: f58c815c99aa8fc46aab6d4397f8e9a8, type: 3}
+  - {fileID: 8300000, guid: e6b2a5fc2aa49ce47a945e3d7bc93a60, type: 3}
+  - {fileID: 8300000, guid: 13efcb7de4eb710438cb958974848dd4, type: 3}
+  Slam: {fileID: 8300000, guid: c80677557ff6efc4181829cafab845de, type: 3}
+  Impacts:
+  - {fileID: 8300000, guid: be419f016e79f467fafc6c84b38191e5, type: 3}
+  - {fileID: 8300000, guid: 9baeac61653f1437e9fe612f16393a62, type: 3}
+  - {fileID: 8300000, guid: 70b2bb3a6976a4841a533cd821a9bbaa, type: 3}
+  Chops:
+  - {fileID: 8300000, guid: 5de35d095a26a5042a71af599850b917, type: 3}
+  Breaks:
+  - {fileID: 8300000, guid: 07121959d141245fdb59a0f76ddfd68c, type: 3}
+  - {fileID: 8300000, guid: d2c7d1053b14a4eea9752fa2b8ed9e18, type: 3}
+  - {fileID: 8300000, guid: 178c7e977140a49ffa008796ed052174, type: 3}
+  Fragments:
+  - {fileID: 8300000, guid: 03f23d0405c383c49a96f0eaa5eca358, type: 3}
+  - {fileID: 8300000, guid: ad7754b166594dd48a2a9a20c5a47ea3, type: 3}
+  - {fileID: 8300000, guid: c7db23fc2f331dd4a9d1c8ef2b26a5c1, type: 3}
+  - {fileID: 8300000, guid: c87cb6bc22baef84287f38b148cb56ba, type: 3}
+  Hurts:
+  - {fileID: 8300000, guid: 2e80eeaa8ad78e74a9a4052b5a1f5bfb, type: 3}
+  - {fileID: 8300000, guid: bc583673a9bd96b4691d1755c8e17e13, type: 3}
+  - {fileID: 8300000, guid: f4077baec940f1445ac8e4adf02b7624, type: 3}
+  Telegraphs:
+  - {fileID: 8300000, guid: 6f2b3d1a138b68f45834531ef4d97948, type: 3}
+  - {fileID: 8300000, guid: 72dd03210eefc3340a7c97cbb17491cd, type: 3}
+  Shatters:
+  - {fileID: 8300000, guid: ae0cc068ff742d14cac7a33ade36cc24, type: 3}
+  - {fileID: 8300000, guid: 33b35cbf7033a064b9132e746885b030, type: 3}

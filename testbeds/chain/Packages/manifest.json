@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "com.amethyst.action": "file:../../../packages/com.amethyst.action",
+    "com.amethyst.combat": "file:../../../packages/com.amethyst.combat",
+    "com.amethyst.core": "file:../../../packages/com.amethyst.core",
+    "com.amethyst.look": "file:../../../packages/com.amethyst.look",
+    "com.amethyst.native": "file:../../../packages/com.amethyst.native",
+    "com.unity.inputsystem": "1.20.1",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.audio": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0",
+    "com.unity.render-pipelines.universal": "17.6.0",
+    "com.unity.test-framework": "1.8.0"
+  },
+  "testables": [
+    "com.amethyst.core"
+  ]
+}

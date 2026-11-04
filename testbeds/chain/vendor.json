@@ -1,0 +1,382 @@
+{
+  "assets": [
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_BckStrafeB_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "b28d41dc2454f694fac9ab766e54323a",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_F_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "6c670ea8c84cf324980a21b4b9b927a0",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_FwdStrafeL_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "d294a4226e928db4fbbd933c19ccf5a1",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Base_Locomotion_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationBaseLocomotion/Animations/Polygon/Masculine/Locomotion/Run/A_Run_FwdStrafeR_Masc.fbx",
+      "sourceSha256": "6b6e48cf0d642b13cc49b4fc09eb9061eca897310760ee7d0602e2250bb35398",
+      "guid": "4699ac7f1156bfc4dba616d9b3a05234",
+      "use": "hero: run"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/HeavyStab01/A_Attack_HeavyStab01_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b963d0c4e093a9c4ea792b8095e51ba2",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/LightCombo01/A_Attack_LightCombo01A_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "9f773338b2a96174ebe9b63870034ca3",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/LightCombo01/A_Attack_LightCombo01B_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "95697c3218923dd43aa160c110bfbc79",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/LightCombo01/A_Attack_LightCombo01C_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "c9e0b6900401fcb42980df96b84db76c",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/LightFencing01/A_Attack_LightFencing01_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "f1b706a7569d3564c871c395216c5dbd",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Attack/LightLeaping01/A_Attack_LightLeaping01_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "72f114cf4075d3b4db5ce63cb994a704",
+      "use": "hero: sword moves"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_B_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b3ac7f325a7e6a843be780efd40ca046",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_F_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "80f9aad568ebdbf4f9fd28c054c27a20",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_L_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "e8bce1554d1659347aae4f4f75892c21",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Dodge/A_Dodge_R_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "ced228295807f164e9c82db85cc29c88",
+      "use": "hero: dash"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitReact/A_Hit_B_React_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "646e411aff9e6a3409589c9eebc68c3a",
+      "use": "hero: hit react"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitReact/A_Hit_F_React_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "adc1feaf8563f6247989bffd0737b6ad",
+      "use": "hero: hit react"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitReact/A_Hit_L_React_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "202a1ac9f04ce2a419bc2bdd6b148b2a",
+      "use": "hero: hit react"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitReact/A_Hit_R_React_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "881ed1a8905746f4d9b1def6f9e773dd",
+      "use": "hero: hit react"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitStagger/A_Hit_B_Stagger_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "2c9d421561b7c9941bd5d9942e4dcaa5",
+      "use": "hero: stagger"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitStagger/A_Hit_F_Stagger_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "3af9f677619822043a708e52c79ba040",
+      "use": "hero: stagger"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitStagger/A_Hit_L_Stagger_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "ec81d250c60b03d47b70b65309c588ee",
+      "use": "hero: stagger"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Hit/HitStagger/A_Hit_R_Stagger_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "bb9255eddd5619c4e9398d076eb337fd",
+      "use": "hero: stagger"
+    },
+    {
+      "source": "synty:ANIMATION_Sword_Combat_Unity_2021_1_v1_1_1.unitypackage.gz",
+      "path": "Assets/Synty/AnimationSwordCombat/Animations/Polygon/Idle/Base/A_Idle_Base_Sword.fbx",
+      "sourceSha256": "07b636904a89f5395f357b6291d4d9ac8bb85ccfdb64796912ff1e680b7545fa",
+      "guid": "b94969b4c36c3c94284f72888ad9289d",
+      "use": "hero: idle"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Characters/Character_Knight_01_Orange.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "360c73b9bf9a34d4c84bc0581d0499eb",
+      "use": "hero: the knight"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Broadsword_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "f61def225eac3e247985f6679965a655",
+      "use": "hero: sword"
+    },
+    {
+      "source": "synty:POLYGON_Knights_Unity_2021_3_v1_5_1.unitypackage.gz",
+      "path": "Assets/PolygonKnights/Prefabs/Weapons/SM_Wep_Shield_01.prefab",
+      "sourceSha256": "ef0aedb72af33542c0b846b8b9c0e31e79949b7e46bbc90c41d93d115a04e9f8",
+      "guid": "a7b97d24ba2370040ba159577de7b931",
+      "use": "hero: shield"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Skeleton Warrior/_Prefabs/SkeletonWarriorLP.prefab",
+      "sourceSha256": "a722c1da9a55f88a871f956f53a4838bf294cb1af5298047afb2a469904f6c94",
+      "guid": "6e3f218b742294893ad834f61c027945",
+      "use": "crowd: skeleton"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Magic Pig Games (Infinity PBR)/Characters/Skeleton Warrior/Models/SkeletonWarriorLP.fbx",
+      "sourceSha256": "de8f13673aade336a5d2ef08ed843e2966d2148d0ce00bc5138bed2198d8644a",
+      "guid": "d6688b4afa37b4b15b476037d756982c",
+      "use": "crowd: skeleton clips"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Generic Magic and Impacts/RPG3_GenericPunch_Impact01.wav",
+      "sourceSha256": "bb05853dd83e0b99f6c8eebd219d52cd1c694272c04f587527d13a47b6e240ca",
+      "guid": "be419f016e79f467fafc6c84b38191e5",
+      "use": "hits: impact"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Generic Magic and Impacts/RPG3_GenericPunch_Impact02.wav",
+      "sourceSha256": "f269fa6b14e8d2dc2295a61aa95728c19011597e88dcd9428e69201285d1bd95",
+      "guid": "9baeac61653f1437e9fe612f16393a62",
+      "use": "hits: impact"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Generic Magic and Impacts/RPG3_GenericPunch_Impact03.wav",
+      "sourceSha256": "9ee5c78b393c0b06bd0b25fd52f17ea569c4ec7dbb253fc62f57a6f78674a47d",
+      "guid": "70b2bb3a6976a4841a533cd821a9bbaa",
+      "use": "hits: impact"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Ice Magic/RPG3_IceMagic2_IceBreak01.wav",
+      "sourceSha256": "8f0a45aa8d7612cba212e5eeaf58d5f0c66592f76ca1de70dcf8c6a8a85914de",
+      "guid": "07121959d141245fdb59a0f76ddfd68c",
+      "use": "kills: ice break"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Ice Magic/RPG3_IceMagic2_IceBreak02.wav",
+      "sourceSha256": "28db0592a7a36bdfb9ebc16e2953d0afa5b8b2e1b15b1b84d528396a852e65cf",
+      "guid": "d2c7d1053b14a4eea9752fa2b8ed9e18",
+      "use": "kills: ice break"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/RPG Magic Sound Effects Pack 3 [ELEMENTAL]/Ice Magic/RPG3_IceMagic2_IceBreak03.wav",
+      "sourceSha256": "9a4964c8d3e06ae7f0e5e147ead500b5fb7bb3484b3e061505574f033ae60af4",
+      "guid": "178c7e977140a49ffa008796ed052174",
+      "use": "kills: ice break"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/GORE_SPLATS/GORE_Blade_Chop_mono.wav",
+      "sourceSha256": "4a3203011e74a0f54e897194030ecd3762e46ca0e43bffe8744b9529c45ff2f7",
+      "guid": "5de35d095a26a5042a71af599850b917",
+      "use": "hits: blade chop"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/IMPACTS/Medieval_Armor/IMPACT_Medieval_Armor_Hit_01_mono.wav",
+      "sourceSha256": "80b53f4fa4db4268c9ba9fbdedadaf0de5d98b3413495c06e83322e206485a12",
+      "guid": "2e80eeaa8ad78e74a9a4052b5a1f5bfb",
+      "use": "hero: hurt"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/IMPACTS/Medieval_Armor/IMPACT_Medieval_Armor_Hit_06_mono.wav",
+      "sourceSha256": "5d89a5f06c5f9ec9f0daa8ef82b4662133c3e66158d724e3a423dc7ccd9942ba",
+      "guid": "bc583673a9bd96b4691d1755c8e17e13",
+      "use": "hero: hurt"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/IMPACTS/Medieval_Armor/IMPACT_Medieval_Armor_Hit_07_mono.wav",
+      "sourceSha256": "607dde3a137eda90b98ebce2ad6a3eadef680bf8e972c5fcb00aeecd34d976bc",
+      "guid": "f4077baec940f1445ac8e4adf02b7624",
+      "use": "hero: hurt"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/MONSTERS_CREATURES/MONSTER_Growl_Short_16_mono.wav",
+      "sourceSha256": "56f2a2fbae5230c66246d343b89a45cf1b2e6aa3362c4eacc8cb272051c74be1",
+      "guid": "6f2b3d1a138b68f45834531ef4d97948",
+      "use": "skeleton: telegraph"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/MONSTERS_CREATURES/MONSTER_Growl_Short_17_mono.wav",
+      "sourceSha256": "e74d0ecc42aa9e1334d0600364b3e8eb0b7e0d2caca4ae1e8b5e3243abc0d247",
+      "guid": "72dd03210eefc3340a7c97cbb17491cd",
+      "use": "skeleton: telegraph"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Big_01_mono.wav",
+      "sourceSha256": "bc4e483947355edbe16ce6d0529abe37a1f8ae09a4fd4194e350d6bf4f8bb05b",
+      "guid": "ae0cc068ff742d14cac7a33ade36cc24",
+      "use": "buzzer and hero death shatter"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Big_02_mono.wav",
+      "sourceSha256": "ea21e5063fb36261346f8935282595620efa4157da345cc4728a9f8960b3202f",
+      "guid": "33b35cbf7033a064b9132e746885b030",
+      "use": "buzzer and hero death shatter"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Fragment_RR1_mono.wav",
+      "sourceSha256": "590b388f6aa2c8621e2cd83a46429fa66d4c311cf18ea900a163277aaa1d9d43",
+      "guid": "03f23d0405c383c49a96f0eaa5eca358",
+      "use": "kills: glass fragments"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Fragment_RR2_mono.wav",
+      "sourceSha256": "784a891e6b5020a12616b4840a5802293c5d08b5c75c613da31e96b248f7d583",
+      "guid": "ad7754b166594dd48a2a9a20c5a47ea3",
+      "use": "kills: glass fragments"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Fragment_RR3_mono.wav",
+      "sourceSha256": "0f5e1b92dc9b4aa1d2fb7744d7d02fa4b4ac20c626c255df1d4bff789e108429",
+      "guid": "c7db23fc2f331dd4a9d1c8ef2b26a5c1",
+      "use": "kills: glass fragments"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/SHATTER/SHATTER_Glass_Fragment_RR4_mono.wav",
+      "sourceSha256": "0c596d90ad4cb4a523fe31faf49ccd2ed2c93b8520eb1b4eb8e6de56f6e30c2a",
+      "guid": "c87cb6bc22baef84287f38b148cb56ba",
+      "use": "kills: glass fragments"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WEAPONS/Melee/Swords/SWORD_Swing_Hit_Solid_Metal_Deep_mono.wav",
+      "sourceSha256": "e9bcffbcfdb30fb6493427ae15df9d1309a0d36a8d8362c4b8f0cdd36f76d5af",
+      "guid": "c80677557ff6efc4181829cafab845de",
+      "use": "hero: leap slam landing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Blade_RR1_mono.wav",
+      "sourceSha256": "7b57b23c4274cc95a8774b26c1bf66b67c00ff65df462d076521e87632a79f14",
+      "guid": "641482022e65d08458cfc46d0da318cd",
+      "use": "hero: swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Blade_RR2_mono.wav",
+      "sourceSha256": "76a5dd7a3910ca55e523ab1f78af0ee3fff07bd5211060bbf35164db78063d3c",
+      "guid": "d0d42bc8c98476646a7b88be93b1948f",
+      "use": "hero: swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Blade_RR3_mono.wav",
+      "sourceSha256": "29a9c807bd54d1545f8dafa139996d3c65b5e6a60fd41bb4ff7d403afccde1f1",
+      "guid": "02981d1f2ba873b468dcd08522e34ced",
+      "use": "hero: swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Blade_RR4_mono.wav",
+      "sourceSha256": "015af9075a44f06f8bcdca0a87edf25a68b04543771c82b582e0ed9dfc75eab6",
+      "guid": "389ca9a16fa6dc745ac9f5c66e2fcaed",
+      "use": "hero: swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Super_Fast_RR1_mono.wav",
+      "sourceSha256": "b4c5f4ec406bc4d55311c6ab44ded10da328e304131ed44495401e026e131850",
+      "guid": "f58c815c99aa8fc46aab6d4397f8e9a8",
+      "use": "hero: finisher swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Super_Fast_RR2_mono.wav",
+      "sourceSha256": "1ef76677b889d8e6f9b5eb6bf886517d4dbcb52da698aceef4e986504fb969f7",
+      "guid": "e6b2a5fc2aa49ce47a945e3d7bc93a60",
+      "use": "hero: finisher swing"
+    },
+    {
+      "source": "unity_assets",
+      "path": "Assets/Universal Sound FX/WHOOSHES/Air/WHOOSH_Air_Super_Fast_RR3_mono.wav",
+      "sourceSha256": "157c09cf610967ee1892bb45dd2a1ff72fbcd755f8fb1cb1131f63ec4e2059e5",
+      "guid": "13efcb7de4eb710438cb958974848dd4",
+      "use": "hero: finisher swing"
+    }
+  ]
+}
