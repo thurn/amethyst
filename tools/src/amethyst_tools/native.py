@@ -5,6 +5,7 @@ unchanged build a fraction of a second."""
 from __future__ import annotations
 
 import argparse
+import fcntl
 import shutil
 import subprocess
 from pathlib import Path
@@ -17,6 +18,16 @@ PLUGIN_DIR: Path = paths.REPO / "packages" / "com.amethyst.native" / "Plugins" /
 
 
 def ensure(quiet: bool = True) -> None:
+    """Serialized per worktree: cargo briefly removes the uplifted dylib even on a fresh build,
+    so a parallel project's copy could find it missing."""
+    lock = WORKSPACE / "target" / ".am-native.lock"
+    lock.parent.mkdir(exist_ok=True)
+    with open(lock, "w") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        _build_and_install(quiet)
+
+
+def _build_and_install(quiet: bool) -> None:
     run = subprocess.run(
         ["cargo", "build", "--locked", "--release", "-p", "amethyst_native"],
         cwd=WORKSPACE,
