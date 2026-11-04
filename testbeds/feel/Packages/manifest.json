@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.amethyst.action": "file:../../../packages/com.amethyst.action",
+    "com.amethyst.combat": "file:../../../packages/com.amethyst.combat",
     "com.amethyst.core": "file:../../../packages/com.amethyst.core",
     "com.amethyst.look": "file:../../../packages/com.amethyst.look",
     "com.amethyst.native": "file:../../../packages/com.amethyst.native",

@@ -1,0 +1,13 @@
+{
+  "name": "Amethyst.Combat",
+  "rootNamespace": "Amethyst.Combat",
+  "references": [
+    "Amethyst.Core",
+    "Amethyst.Core.Unity",
+    "Amethyst.Action",
+    "Amethyst.Action.Pure",
+    "Amethyst.Look",
+    "Amethyst.Look.Pure",
+    "Unity.RenderPipelines.Universal.Runtime"
+  ]
+}

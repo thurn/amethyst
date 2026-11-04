@@ -6,17 +6,18 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using Num = System.Numerics;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
     /// <summary>
-    /// One run of the feel room in its combat mode, picked once (blind picks per run): rooms of
-    /// skeletons one after another (<see cref="CombatRoom"/>), every hit reported through each
-    /// feedback channel (feel §3: per-target hitstop, flash, knockback, the kill shatter, trauma
-    /// shake for heavy hits and the hero's damage, global hitstop with a slow-motion tail for a
-    /// room's clear and Empowered kills, sounds through the voice budget) and feel §11.2's metrics
-    /// per room in the run folder. The hero's death shatters it and restarts the arena.
+    /// One run of a fight in its combat mode, picked once (blind picks per run): rooms of its
+    /// <see cref="SpawnList"/>'s enemies one after another (<see cref="CombatRoom"/>), every hit
+    /// reported through each feedback channel (feel §3: per-target hitstop, flash, knockback, the
+    /// kill shatter, trauma shake for heavy hits and the hero's damage, global hitstop with a
+    /// slow-motion tail for a room's clear and Empowered kills, sounds through the voice budget)
+    /// and feel §11.2's metrics per room in the run folder. The hero's death shatters it and
+    /// restarts the arena (the scene reloads; its entry begins the fight again).
     /// </summary>
-    sealed class Fight : MonoBehaviour
+    public sealed class Fight : MonoBehaviour
     {
         const float NextRoomAfter = 2.5f;
         const float RestartAfter = 1.6f;
@@ -32,13 +33,14 @@ namespace Amethyst.Feel
         HeroKit kit;
         ModeTuning tuning;
         CombatMode mode;
+        SpawnList spawns;
         CombatRoom room;
         int seed;
-        SkeletonView view;
+        Palette palette;
+        EnemyView view;
         Shapes shapes;
         FightSounds sounds;
         FeelMetrics metrics;
-        Color hue;
         readonly Trauma trauma = new Trauma();
         readonly List<Vector3> targets = new List<Vector3>();
         float clearedAt = -1f,
@@ -50,18 +52,19 @@ namespace Amethyst.Feel
         float frameClock,
             logAt = 2f;
 
-        /// <summary>Builds the room for a new run: picks its mode and makes its world.</summary>
-        public static void Begin()
+        /// <summary>Builds the room for a new run of <paramref name="spawns"/> (M1's skeletons by
+        /// default): picks its mode and makes its world.</summary>
+        public static void Begin(SpawnList spawns = null)
         {
             var picked = CombatModes.Pick(
-                FeelFlags.Mode.Value,
+                CombatFlags.Mode.Value,
                 (ulong)System.DateTime.UtcNow.Ticks + (ulong)runs++
             );
             var tuning = ModeTuning.For(picked).Copy();
-            if (FeelFlags.Alive.Value > 0)
-                tuning.Alive = FeelFlags.Alive.Value;
-            if (FeelFlags.RoomSeconds.Value > 0f)
-                tuning.RoomSeconds = FeelFlags.RoomSeconds.Value;
+            if (CombatFlags.Alive.Value > 0)
+                tuning.Alive = CombatFlags.Alive.Value;
+            if (CombatFlags.RoomSeconds.Value > 0f)
+                tuning.RoomSeconds = CombatFlags.RoomSeconds.Value;
 
             var palette = Palette.Default;
             var hero = Arena.Build(1, greybox: false, halfSize: tuning.ArenaHalfSize);
@@ -74,11 +77,13 @@ namespace Amethyst.Feel
                 HeroLook.Dress(knight.gameObject, palette, LookFigure.Load("hero"));
 
             var fight = new GameObject("Fight").AddComponent<Fight>();
-            fight.Init(hero, cam, picked, tuning, palette);
+            fight.Init(hero, cam, picked, tuning, palette, spawns ?? SpawnList.Skeletons);
         }
 
-        void Init(Hero h, Camera c, CombatMode m, ModeTuning t, Palette palette)
+        void Init(Hero h, Camera c, CombatMode m, ModeTuning t, Palette p, SpawnList list)
         {
+            palette = p;
+            spawns = list;
             hero = h;
             cam = c;
             mode = m;
@@ -91,32 +96,31 @@ namespace Amethyst.Feel
             if (Run.Args.FixedTime)
                 seed = 1;
             room = NewRoom();
-            view = SkeletonView.Create(Mathf.Max(64, tuning.Alive + 32), palette);
-            hue = EdgeLook.Linear(palette.ForType("skeleton")) * 1.2f;
+            view = EnemyView.Create(Mathf.Max(64, tuning.Alive + 32), palette);
             shapes = new Shapes();
             sounds = new FightSounds(cam.gameObject, kit);
             metrics = new FeelMetrics(mode);
-            Walls(palette);
+            Walls();
             hero.Struck += OnStruck;
             hero.Died += OnDied;
             Debug.Log(
-                $"feel: {mode} mode (combat.mode is {FeelFlags.Mode.Value}), {tuning.Alive} alive, metrics to {metrics.Path}"
+                $"fight: {mode} mode (combat.mode is {CombatFlags.Mode.Value}), {tuning.Alive} alive, metrics to {metrics.Path}"
             );
         }
 
         CombatRoom NewRoom()
         {
-            var r = new CombatRoom(tuning, seed++)
+            var r = new CombatRoom(tuning, seed++, spawns)
             {
-                HitstopScale = Mathf.Max(0f, FeelFlags.Hitstop.Value),
-                KnockbackScale = FeelFlags.Knockback.Value ? 1f : 0f,
+                HitstopScale = Mathf.Max(0f, CombatFlags.Hitstop.Value),
+                KnockbackScale = CombatFlags.Knockback.Value ? 1f : 0f,
                 FlashFrames = 2,
             };
             return r;
         }
 
         // The room's edge, in the walls' grey.
-        void Walls(Palette palette)
+        void Walls()
         {
             var grey = EdgeLook.Linear(palette.Wall);
             grey.a = 1f;
@@ -145,7 +149,7 @@ namespace Amethyst.Feel
             if (hero.Dead || room.Phase == RoomPhase.Cleared)
                 return;
             var (hits, _) = room.Hit(strike);
-            hero.Freeze(Hitstop.Hero(tuning, hits, FeelFlags.Hitstop.Value));
+            hero.Freeze(Hitstop.Hero(tuning, hits, CombatFlags.Hitstop.Value));
             if (hits > 0 && (strike.Move == Move.CleaveC || strike.Move == Move.LeapSlam))
                 Shake(0.3f);
         }
@@ -186,19 +190,19 @@ namespace Amethyst.Feel
                 metrics.Frame(dt, hero.Locked);
 
             targets.Clear();
-            foreach (var s in room.Skeletons)
+            foreach (var s in room.Enemies)
                 if (s.Fighting)
                     targets.Add(new Vector3(s.Position.X, 0f, s.Position.Y));
             hero.Targets = targets;
 
-            view?.Present(room, now, FeelFlags.Flash.Value, FeelFlags.Shatter.Value);
+            view?.Present(room, now, CombatFlags.Flash.Value, CombatFlags.Shatter.Value);
             shapes.Begin();
-            SkeletonView.Shapes(shapes, room, cam, hue, view?.Height ?? 1.8f);
+            EnemyView.Shapes(shapes, room, cam, palette, view);
             shapes.End();
-            sounds.Flush(now, FeelFlags.Sound.Value);
+            sounds.Flush(now, CombatFlags.Sound.Value);
 
             trauma.Step(Time.unscaledDeltaTime);
-            var shake = FeelFlags.Shake.Value ? trauma.Shake : 0f;
+            var shake = CombatFlags.Shake.Value ? trauma.Shake : 0f;
             follow.Shake =
                 shake > 0f
                     ? new Vector3(
@@ -227,7 +231,7 @@ namespace Amethyst.Feel
                         if (!e.Killed)
                             break;
                         metrics.Kills(1);
-                        if (e.Skeleton.Empowered)
+                        if (e.Enemy.Empowered)
                         {
                             Freeze(tuning.FreezeElite);
                             Shake(0.5f);
@@ -235,7 +239,7 @@ namespace Amethyst.Feel
                         break;
                     case RoomEventKind.ArmorBreak:
                         // A big moment: a white flash and a short global hitstop.
-                        SwordEffects.Ring(at + Vector3.up * 0.05f, 1.6f * e.Skeleton.Scale, 0.25f);
+                        SwordEffects.Ring(at + Vector3.up * 0.05f, 1.6f * e.Enemy.Scale, 0.25f);
                         sounds.Budget.Add(CombatSound.Break);
                         Freeze(tuning.FreezeElite / 2);
                         break;
@@ -271,7 +275,7 @@ namespace Amethyst.Feel
         // Global hitstop: the game holds for `frames`, then eases back from slow motion.
         void Freeze(int frames)
         {
-            if (!FeelFlags.Freeze.Value || frames <= 0)
+            if (!CombatFlags.Freeze.Value || frames <= 0)
                 return;
             freezeFrames = Mathf.Max(freezeFrames, frames);
             slowFrames = 0;
@@ -312,8 +316,8 @@ namespace Amethyst.Feel
                 return;
             var ms = 1000f * (real - frameClock) / Mathf.Max(1, frames - 1);
             Debug.Log(
-                $"feel: frame {ms:F2} ms over {frames - 1} frames; {mode}, room {room.Wave} wave, "
-                    + $"{room.Alive} skeletons, {view?.OnScreen ?? 0} on screen, {view?.Shards ?? 0} shattering, "
+                $"fight: frame {ms:F2} ms over {frames - 1} frames; {mode}, room {room.Wave} wave, "
+                    + $"{room.Alive} enemies, {view?.OnScreen ?? 0} on screen, {view?.Shards ?? 0} shattering, "
                     + $"hero {hero.Health} HP"
             );
             frames = 0;
@@ -328,7 +332,7 @@ namespace Amethyst.Feel
                 ? $"wave {room.Wave}/{tuning.Waves}"
                 : $"{room.TimeLeft:F0} s";
             var text =
-                $"{mode}   HP {hero.Health}/{Hero.MaxHealth}   {timer}   {room.Alive} skeletons";
+                $"{mode}   HP {hero.Health}/{Hero.MaxHealth}   {timer}   {room.Alive} enemies";
             var style = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 18,

@@ -1,7 +1,7 @@
 using Amethyst.Action;
 using UnityEngine;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
     /// <summary>
     /// Plays the fight's voices (<see cref="VoiceBudget"/>) on the contact frame: each layer a

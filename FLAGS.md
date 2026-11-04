@@ -180,6 +180,38 @@ in `Awake` or `Start`, or every frame.
   the leap's airtime.
   [ActionFlags.cs:133](packages/com.amethyst.action/Runtime/ActionFlags.cs#L133)
 
+### packages/com.amethyst.combat
+
+- `combat.alive` = `0` (int): Enemies alive at once in the horde (0 keeps the
+  mode's).
+  [CombatFlags.cs:15](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L15)
+- `combat.mode` = `focused` (enum: focused | horde | blind): Focused: a few
+  tough enemies that all telegraph; horde: a stream of contact-damage fodder;
+  blind: one of the two at random each run.
+  [CombatFlags.cs:9](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L9)
+- `combat.room-seconds` = `0` (float): The horde room's timer, s, until its
+  buzzer (0 keeps the mode's).
+  [CombatFlags.cs:21](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L21)
+- `feedback.flash` = `true` (bool): A struck enemy flashes white for 2 frames.
+  [CombatFlags.cs:33](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L33)
+- `feedback.freeze` = `true` (bool): Global hitstop with a slow-motion tail for
+  a room's clear and Empowered kills.
+  [CombatFlags.cs:57](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L57)
+- `feedback.hitstop` = `1` (float): Per-target hitstop, times the mode's frames:
+  0 turns it off.
+  [CombatFlags.cs:27](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L27)
+- `feedback.knockback` = `true` (bool): Hits push enemies along the attack.
+  [CombatFlags.cs:39](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L39)
+- `feedback.shake` = `true` (bool): Trauma-model screen shake for heavy hits and
+  the hero's damage.
+  [CombatFlags.cs:51](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L51)
+- `feedback.shatter` = `true` (bool): Kills shatter in the enemy's hue (off: the
+  body just goes).
+  [CombatFlags.cs:45](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L45)
+- `feedback.sound` = `true` (bool): Hit, kill and telegraph sounds through the
+  voice budget.
+  [CombatFlags.cs:63](packages/com.amethyst.combat/Runtime/CombatFlags.cs#L63)
+
 ### packages/com.amethyst.core
 
 - `audio.mute` = `false` (bool): Silence all audio; batch runs and agents set
@@ -198,69 +230,36 @@ in `Awake` or `Start`, or every frame.
 - `music.volume` = `0.7` (float): The music's level, 0 to 1.
   [MusicPlayer.cs:12](packages/com.amethyst.native/Runtime/MusicPlayer.cs#L12)
 
+### testbeds/chain
+
+- variant `focused`: Focused: waves of a few enemies that all telegraph, the
+  camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
+  [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
+- variant `horde`: Horde: a stream of ~100 contact-damage enemies for a 60 s
+  room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
+  [horde.flags](testbeds/chain/Assets/StreamingAssets/variants/horde.flags)
+
 ### testbeds/feel
-
-- `combat.alive` = `0` (int): Skeletons alive at once in the horde (0 keeps the
-  mode's). [FeelFlags.cs:15](testbeds/feel/Assets/Feel/FeelFlags.cs#L15)
-
-- `combat.mode` = `focused` (enum: focused | horde | blind): Focused: a few
-  tough skeletons that all telegraph; horde: a stream of contact-damage fodder;
-  blind: one of the two at random each run.
-  [FeelFlags.cs:9](testbeds/feel/Assets/Feel/FeelFlags.cs#L9)
-
-- `combat.room-seconds` = `0` (float): The horde room's timer, s, until its
-  buzzer (0 keeps the mode's).
-  [FeelFlags.cs:21](testbeds/feel/Assets/Feel/FeelFlags.cs#L21)
-
-- `feedback.flash` = `true` (bool): A struck skeleton flashes white for 2
-  frames. [FeelFlags.cs:33](testbeds/feel/Assets/Feel/FeelFlags.cs#L33)
-
-- `feedback.freeze` = `true` (bool): Global hitstop with a slow-motion tail for
-  a room's clear and Empowered kills.
-  [FeelFlags.cs:57](testbeds/feel/Assets/Feel/FeelFlags.cs#L57)
-
-- `feedback.hitstop` = `1` (float): Per-target hitstop, times the mode's frames:
-  0 turns it off. [FeelFlags.cs:27](testbeds/feel/Assets/Feel/FeelFlags.cs#L27)
-
-- `feedback.knockback` = `true` (bool): Hits push skeletons along the attack.
-  [FeelFlags.cs:39](testbeds/feel/Assets/Feel/FeelFlags.cs#L39)
-
-- `feedback.shake` = `true` (bool): Trauma-model screen shake for heavy hits and
-  the hero's damage.
-  [FeelFlags.cs:51](testbeds/feel/Assets/Feel/FeelFlags.cs#L51)
-
-- `feedback.shatter` = `true` (bool): Kills shatter in the skeleton's hue (off:
-  the body just goes).
-  [FeelFlags.cs:45](testbeds/feel/Assets/Feel/FeelFlags.cs#L45)
-
-- `feedback.sound` = `true` (bool): Hit, kill and telegraph sounds through the
-  voice budget. [FeelFlags.cs:63](testbeds/feel/Assets/Feel/FeelFlags.cs#L63)
 
 - variant `focused-cursor`: Focused: two waves of 4-6 skeletons that all
   telegraph, the camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
   [focused-cursor.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-cursor.flags)
-
 - variant `focused-movement`: Movement aim, focused: face where you run, as
   Hades on a controller. Sets `combat.mode=focused`, `hero.aim=movement`.
   [focused-movement.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-movement.flags)
-
 - variant `focused-stab`: Focused, the Lunge on HeavyStab01 instead of
   LightFencing01. Sets `combat.mode=focused`, `hero.aim=cursor`,
   `lunge.clip=stab`.
   [focused-stab.flags](testbeds/feel/Assets/StreamingAssets/variants/focused-stab.flags)
-
 - variant `horde-060`: Horde at ~60 alive. Sets `combat.mode=horde`,
   `combat.alive=60`, `hero.aim=cursor`.
   [horde-060.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-060.flags)
-
 - variant `horde-100`: Horde: a stream of ~100 contact-damage skeletons for a 60
   s room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
   [horde-100.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-100.flags)
-
 - variant `horde-200`: Horde at ~200 alive, the densest. Sets
   `combat.mode=horde`, `combat.alive=200`, `hero.aim=cursor`.
   [horde-200.flags](testbeds/feel/Assets/StreamingAssets/variants/horde-200.flags)
-
 - variant `pick-blind`: Blind: each run picks focused or horde at random, so the
   comparison isn't shaped by choice. Sets `combat.mode=blind`,
   `hero.aim=cursor`.

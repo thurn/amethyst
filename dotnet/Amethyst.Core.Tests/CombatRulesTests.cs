@@ -1,11 +1,12 @@
 using System.Linq;
 using System.Numerics;
 using Amethyst.Action;
+using Amethyst.Look;
 using NUnit.Framework;
 
 namespace Amethyst.Tests
 {
-    /// <summary>The combat modes' rules: hitstop, aggression tokens, the voice budget, the blind pick.</summary>
+    /// <summary>The combat modes' rules: hitstop, aggression tokens, spawn lists, the voice budget, the blind pick.</summary>
     public sealed class CombatRulesTests
     {
         [Test]
@@ -59,10 +60,53 @@ namespace Amethyst.Tests
                 room.Step(1f / 60f, Vector2.Zero, false);
                 most = System.Math.Max(
                     most,
-                    room.Skeletons.Count(s => s.State == SkeletonState.WindingUp)
+                    room.Enemies.Count(s => s.State == EnemyState.WindingUp)
                 );
             }
             Assert.That(most, Is.EqualTo(2), "the wave crowds the hero, two at a time wind up");
+        }
+
+        [Test]
+        public void ARoomSpawnsItsListsKindsAtTheirNumbers()
+        {
+            var heavy = new EnemyKind
+            {
+                Id = "heavy",
+                Role = EnemyRole.Heavy,
+                Hp = 2f,
+                Radius = 0.6f,
+                Armored = true,
+            };
+            var spawns = new SpawnList(new[] { (EnemyKinds.Skeleton, 1f), (heavy, 1f) });
+            var room = new CombatRoom(ModeTuning.Horde, 3, spawns);
+            for (int f = 0; f < 60 * 3; f++)
+                room.Step(1f / 60f, Vector2.Zero, false);
+            var heavies = room.Enemies.Where(e => e.Kind == heavy && !e.Empowered).ToList();
+            var skeletons = room.Enemies.Where(e => e.Kind == EnemyKinds.Skeleton).ToList();
+            Assert.That(heavies, Is.Not.Empty);
+            Assert.That(skeletons, Is.Not.Empty);
+            Assert.That(heavies, Has.All.Matches<Enemy>(e => e.MaxHp == 24 && e.Armored));
+            Assert.That(heavies[0].Radius, Is.EqualTo(0.6f));
+            Assert.That(
+                skeletons.Where(e => !e.Empowered),
+                Has.All.Matches<Enemy>(e => e.MaxHp == 12 && !e.Armored)
+            );
+        }
+
+        [Test]
+        public void EveryKindDrawsInItsFamilysHue()
+        {
+            var palette = Palette.Default;
+            foreach (var kind in EnemyKinds.All)
+            {
+                var family = kind.Family switch
+                {
+                    EnemyFamily.Key => new[] { palette.Cyan, palette.Blue },
+                    EnemyFamily.Accent => new[] { palette.Magenta, palette.Violet },
+                    _ => new[] { palette.Orange, palette.Amber },
+                };
+                Assert.That(family, Has.Member(palette.ForType(kind.Id)), kind.Id);
+            }
         }
 
         [Test]

@@ -1,7 +1,7 @@
 using Amethyst.Action;
 using UnityEngine;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
     /// <summary>The hero's death (docs/game-design.md, Health and death): its body hidden and
     /// thrown out as white shards that tumble and fade within a second.</summary>

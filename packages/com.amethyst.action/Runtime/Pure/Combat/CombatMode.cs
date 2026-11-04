@@ -26,10 +26,10 @@ namespace Amethyst.Action
         /// <summary>The camera's distance from the hero.</summary>
         public float CameraDistance;
 
-        /// <summary>Skeletons alive at once: the stream's target, or the most a wave brings.</summary>
+        /// <summary>Enemies alive at once: the stream's target, or the most a wave brings.</summary>
         public int Alive;
 
-        /// <summary>Focused: skeletons per wave, at least and at most, and the waves.</summary>
+        /// <summary>Focused: enemies per wave, at least and at most, and the waves.</summary>
         public int WaveMin,
             WaveMax,
             Waves;
@@ -40,30 +40,31 @@ namespace Amethyst.Action
         /// <summary>Horde: the room's timer; at its buzzer the survivors shatter. 0 for no timer.</summary>
         public float RoomSeconds;
 
-        /// <summary>Horde: seconds between Empowered skeletons, 0 for none, and the most alive.</summary>
+        /// <summary>Horde: seconds between Empowered enemies, 0 for none, and the most alive.</summary>
         public float EliteEvery;
         public int ElitesAlive;
 
-        /// <summary>A skeleton's HP: 2-4 cleaves focused, 1-2 in the horde.</summary>
-        public int SkeletonHp;
+        /// <summary>A basic enemy's HP (a kind's is a multiple): 2-4 cleaves focused, 1-2 in the horde.</summary>
+        public int BasicHp;
 
+        /// <summary>A basic enemy's walk speed, m/s (a kind's is a multiple).</summary>
         public float WalkSpeed;
 
-        /// <summary>Whether plain skeletons wind up a telegraphed Attack 1 (focused: every enemy).</summary>
+        /// <summary>Whether plain fodder winds up a telegraphed attack (focused: every enemy).</summary>
         public bool FodderTelegraphs;
 
-        /// <summary>Damage a plain skeleton deals by walking into the hero, 0 for none.</summary>
+        /// <summary>Damage plain fodder deals by walking into the hero, 0 for none.</summary>
         public int ContactDamageMin,
             ContactDamageMax;
 
-        /// <summary>Damage a telegraphed Attack 1 deals.</summary>
+        /// <summary>Damage a telegraphed attack deals.</summary>
         public int AttackDamage;
 
         /// <summary>The telegraph's wind-up, at least and at most (feel §6.1: 400-600 ms melee).</summary>
         public float TelegraphMin,
             TelegraphMax;
 
-        /// <summary>Whether every hit staggers a plain skeleton (focused) or only knocks it back.</summary>
+        /// <summary>Whether every hit staggers an unarmored enemy (focused) or only knocks it back.</summary>
         public bool Stagger;
 
         /// <summary>Enemies winding up at once at most (feel §6.4).</summary>
@@ -98,7 +99,7 @@ namespace Amethyst.Action
             WaveMax = 6,
             Waves = 2,
             WaveCallAt = 2,
-            SkeletonHp = 30,
+            BasicHp = 30,
             WalkSpeed = 1.9f,
             FodderTelegraphs = true,
             AttackDamage = 12,
@@ -127,7 +128,7 @@ namespace Amethyst.Action
             RoomSeconds = 60f,
             EliteEvery = 15f,
             ElitesAlive = 1,
-            SkeletonHp = 12,
+            BasicHp = 12,
             WalkSpeed = 2.2f,
             ContactDamageMin = 4,
             ContactDamageMax = 6,

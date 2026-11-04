@@ -3,7 +3,7 @@ using Amethyst.Action;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
     /// <summary>
     /// The fight's flat shapes, redrawn every frame from a pool of renderers in flat colours

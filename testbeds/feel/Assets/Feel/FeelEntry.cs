@@ -1,3 +1,4 @@
+using Amethyst.Combat;
 using Amethyst.Look;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,7 +7,7 @@ namespace Amethyst.Feel
 {
     /// <summary>
     /// The feel room (docs/game-design.md, Build order step 1): the knight's kit against skeletons
-    /// in either combat mode (<see cref="FeelFlags.Mode"/>), drawn in the neon edge look, with a
+    /// in either combat mode (<see cref="CombatFlags.Mode"/>), drawn in the neon edge look, with a
     /// variant per mode and horde density (StreamingAssets/variants/).
     /// </summary>
     static class FeelEntry

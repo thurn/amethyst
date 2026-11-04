@@ -2,12 +2,8 @@
   "name": "Feel",
   "rootNamespace": "Amethyst.Feel",
   "references": [
-    "Amethyst.Core",
-    "Amethyst.Core.Unity",
-    "Amethyst.Action",
     "Amethyst.Action.Pure",
-    "Amethyst.Look",
-    "Amethyst.Look.Pure",
-    "Unity.RenderPipelines.Universal.Runtime"
+    "Amethyst.Combat",
+    "Amethyst.Look"
   ]
 }

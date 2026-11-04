@@ -1,21 +1,21 @@
 using Amethyst.Action;
 using Amethyst.Flags;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
-    /// <summary>The feel room's combat mode and its feedback channels, each with its own toggle (feel §11.1).</summary>
-    public static class FeelFlags
+    /// <summary>A fight's combat mode and its feedback channels, each with its own toggle (feel §11.1).</summary>
+    public static class CombatFlags
     {
         public static readonly Flag<CombatMode> Mode = Flag.Enum(
             "combat.mode",
             CombatMode.Focused,
-            "Focused: a few tough skeletons that all telegraph; horde: a stream of contact-damage fodder; blind: one of the two at random each run"
+            "Focused: a few tough enemies that all telegraph; horde: a stream of contact-damage fodder; blind: one of the two at random each run"
         );
 
         public static readonly Flag<int> Alive = Flag.Int(
             "combat.alive",
             0,
-            "Skeletons alive at once in the horde (0 keeps the mode's)"
+            "Enemies alive at once in the horde (0 keeps the mode's)"
         );
 
         public static readonly Flag<float> RoomSeconds = Flag.Float(
@@ -33,19 +33,19 @@ namespace Amethyst.Feel
         public static readonly Flag<bool> Flash = Flag.Bool(
             "feedback.flash",
             true,
-            "A struck skeleton flashes white for 2 frames"
+            "A struck enemy flashes white for 2 frames"
         );
 
         public static readonly Flag<bool> Knockback = Flag.Bool(
             "feedback.knockback",
             true,
-            "Hits push skeletons along the attack"
+            "Hits push enemies along the attack"
         );
 
         public static readonly Flag<bool> Shatter = Flag.Bool(
             "feedback.shatter",
             true,
-            "Kills shatter in the skeleton's hue (off: the body just goes)"
+            "Kills shatter in the enemy's hue (off: the body just goes)"
         );
 
         public static readonly Flag<bool> Shake = Flag.Bool(

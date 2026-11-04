@@ -9,6 +9,16 @@
         "com.amethyst.native": "0.1.0"
       }
     },
+    "com.amethyst.combat": {
+      "version": "file:../../../packages/com.amethyst.combat",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.amethyst.action": "0.1.0",
+        "com.amethyst.core": "0.1.0",
+        "com.amethyst.look": "0.1.0"
+      }
+    },
     "com.amethyst.core": {
       "version": "file:../../../packages/com.amethyst.core",
       "depth": 0,

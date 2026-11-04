@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Amethyst.Action
 {
-    public enum SkeletonState
+    public enum EnemyState
     {
         /// <summary>Behind its spawn marker, not yet in the fight.</summary>
         Arriving,
@@ -19,10 +19,11 @@ namespace Amethyst.Action
         Dying,
     }
 
-    /// <summary>One skeleton of a <see cref="CombatRoom"/>.</summary>
-    public sealed class Skeleton
+    /// <summary>One enemy of a <see cref="CombatRoom"/>, of a roster <see cref="EnemyKind"/>.</summary>
+    public sealed class Enemy
     {
         public int Id;
+        public EnemyKind Kind;
         public bool Empowered;
         public Vector2 Position;
 
@@ -33,9 +34,9 @@ namespace Amethyst.Action
             MaxHp,
             Armor,
             MaxArmor;
-        public SkeletonState State;
+        public EnemyState State;
 
-        /// <summary>Its own clock: room time less its hitstop, so a frozen skeleton's pose holds.</summary>
+        /// <summary>Its own clock: room time less its hitstop, so a frozen enemy's pose holds.</summary>
         public float Clock;
 
         /// <summary>When it entered <see cref="State"/>, on its own clock.</summary>
@@ -67,12 +68,12 @@ namespace Amethyst.Action
         public float NextAttack;
         public uint Seed;
 
-        public float Radius => 0.35f * Scale;
+        public float Radius => Kind.Radius * Scale;
 
         public bool Armored => Armor > 0;
 
         /// <summary>In the fight: hittable, moving, a threat.</summary>
-        public bool Fighting => State != SkeletonState.Arriving && State != SkeletonState.Dying;
+        public bool Fighting => State != EnemyState.Arriving && State != EnemyState.Dying;
 
         public float Age => Clock - Since;
     }
@@ -88,7 +89,7 @@ namespace Amethyst.Action
         /// <summary>A telegraphed attack lands (on the hero or not).</summary>
         Attack,
 
-        /// <summary>A sword hit on a skeleton; <see cref="RoomEvent.Killed"/> when it was the last.</summary>
+        /// <summary>A sword hit on an enemy; <see cref="RoomEvent.Killed"/> when it was the last.</summary>
         Hit,
         ArmorBreak,
 
@@ -105,7 +106,7 @@ namespace Amethyst.Action
     public struct RoomEvent
     {
         public RoomEventKind Kind;
-        public Skeleton Skeleton;
+        public Enemy Enemy;
         public Vector2 Position;
         public Vector2 Direction;
         public int Amount;
@@ -124,21 +125,21 @@ namespace Amethyst.Action
     }
 
     /// <summary>
-    /// One room of the feel testbed in either combat mode (docs/game-design.md, Two combat modes;
-    /// Enemies): skeletons arriving from the room's edges behind spawn markers, never near the hero,
-    /// walking at it with small gaps between bodies; the horde's contact damage and Empowered
-    /// elites, the focused mode's waves and telegraphs; aggression tokens, stagger, knockback and
-    /// per-target hitstop; the horde's timer and buzzer wave. Everything it does is a
-    /// <see cref="RoomEvent"/> in <see cref="Events"/>, which its presenter drains.
+    /// One room of a fight in either combat mode (docs/game-design.md, Two combat modes; Enemies):
+    /// its <see cref="SpawnList"/>'s enemies arriving from the room's edges behind spawn markers,
+    /// never near the hero, walking at it with small gaps between bodies; the horde's contact
+    /// damage and Empowered elites, the focused mode's waves and telegraphs; aggression tokens,
+    /// stagger, knockback and per-target hitstop; the horde's timer and buzzer wave. Everything it
+    /// does is a <see cref="RoomEvent"/> in <see cref="Events"/>, which its presenter drains.
     /// </summary>
     public sealed class CombatRoom
     {
         const float Gap = 0.3f;
         const float HeroRadius = 0.45f;
         const float MinSpawnDistance = 7f;
-        const float AttackRange = 1.6f;
-        const float AttackReach = 2f;
-        const float AttackHalfAngle = 1.2f; // radians
+        const float ConeRange = 1.6f;
+        const float ConeReach = 2f;
+        const float ConeHalfAngle = 1.2f; // radians
         const float StaggerSeconds = 0.4f;
         const float RecoverSeconds = 0.6f;
         const float KnockDamping = 7f;
@@ -147,25 +148,27 @@ namespace Amethyst.Action
         const float Cell = 1.2f;
 
         readonly Random rng;
-        readonly List<Skeleton> skeletons = new List<Skeleton>();
-        readonly Dictionary<long, List<Skeleton>> grid = new Dictionary<long, List<Skeleton>>();
+        readonly List<Enemy> enemies = new List<Enemy>();
+        readonly Dictionary<long, List<Enemy>> grid = new Dictionary<long, List<Enemy>>();
         float spawnBudget;
         float nextElite;
         int nextId;
 
-        public CombatRoom(ModeTuning mode, int seed)
+        public CombatRoom(ModeTuning mode, int seed, SpawnList spawns = null)
         {
             Mode = mode;
+            Spawns = spawns ?? SpawnList.Skeletons;
             rng = new Random(seed);
             Tokens = new AggressionTokens(mode.AggressionTokens);
             nextElite = mode.EliteEvery * 0.5f;
         }
 
         public ModeTuning Mode { get; }
+        public SpawnList Spawns { get; }
         public AggressionTokens Tokens { get; }
         public readonly List<RoomEvent> Events = new List<RoomEvent>();
 
-        public IReadOnlyList<Skeleton> Skeletons => skeletons;
+        public IReadOnlyList<Enemy> Enemies => enemies;
         public float Time { get; private set; }
         public RoomPhase Phase { get; private set; }
         public int Wave { get; private set; }
@@ -179,14 +182,14 @@ namespace Amethyst.Action
         public int FlashFrames { get; set; } = 2;
         public float KnockbackScale { get; set; } = 1f;
 
-        /// <summary>Skeletons in the fight or arriving.</summary>
+        /// <summary>Enemies in the fight or arriving.</summary>
         public int Alive
         {
             get
             {
                 int n = 0;
-                foreach (var s in skeletons)
-                    if (s.State != SkeletonState.Dying)
+                foreach (var s in enemies)
+                    if (s.State != EnemyState.Dying)
                         n++;
                 return n;
             }
@@ -203,16 +206,16 @@ namespace Amethyst.Action
             Spawn(hero, dt);
             Grid();
             var vulnerable = heroVulnerable;
-            for (int i = skeletons.Count - 1; i >= 0; i--)
+            for (int i = enemies.Count - 1; i >= 0; i--)
             {
-                var s = skeletons[i];
-                if (s.State == SkeletonState.Arriving)
+                var s = enemies[i];
+                if (s.State == EnemyState.Arriving)
                 {
                     if (Time >= s.ArriveAt)
-                        Enter(s, SkeletonState.Walking);
+                        Enter(s, EnemyState.Walking);
                     continue;
                 }
-                if (s.State == SkeletonState.Dying)
+                if (s.State == EnemyState.Dying)
                 {
                     if (Time >= s.BreakAt)
                         Break(i);
@@ -231,31 +234,33 @@ namespace Amethyst.Action
             End();
         }
 
-        void Think(Skeleton s, Vector2 hero, float dt, ref bool vulnerable)
+        void Think(Enemy s, Vector2 hero, float dt, ref bool vulnerable)
         {
             var to = hero - s.Position;
             var distance = to.Length();
             var toward = distance > 1e-4f ? to / distance : Vector2.UnitY;
-            var telegraphs = Mode.FodderTelegraphs || s.Empowered;
+            var telegraphs =
+                Mode.FodderTelegraphs || s.Empowered || s.Kind.Role != EnemyRole.Fodder;
             var face = toward;
             switch (s.State)
             {
-                case SkeletonState.Walking:
-                    var stop = telegraphs ? AttackRange * 0.75f * s.Scale : 0f;
+                case EnemyState.Walking:
+                    var range = Range(s);
+                    var stop = telegraphs ? range * 0.75f : 0f;
                     if (distance > stop + s.Radius + HeroRadius)
                     {
-                        var step = Mode.WalkSpeed * dt;
+                        var step = Mode.WalkSpeed * s.Kind.Speed * dt;
                         s.Position += toward * step;
                         s.Walked += step;
                     }
                     if (
                         telegraphs
-                        && distance <= AttackRange * s.Scale + HeroRadius
+                        && distance <= range + HeroRadius
                         && s.Clock >= s.NextAttack
                         && Tokens.TryTake(s.Id)
                     )
                     {
-                        Enter(s, SkeletonState.WindingUp);
+                        Enter(s, EnemyState.WindingUp);
                         s.Windup =
                             Mode.TelegraphMin
                             + (float)rng.NextDouble() * (Mode.TelegraphMax - Mode.TelegraphMin);
@@ -263,7 +268,7 @@ namespace Amethyst.Action
                         Emit(RoomEventKind.Windup, s, s.Position, toward);
                     }
                     else if (
-                        !s.Empowered
+                        !telegraphs
                         && Mode.ContactDamageMax > 0
                         && vulnerable
                         && distance <= s.Radius + HeroRadius + 0.2f
@@ -274,7 +279,7 @@ namespace Amethyst.Action
                             new RoomEvent
                             {
                                 Kind = RoomEventKind.HeroHit,
-                                Skeleton = s,
+                                Enemy = s,
                                 Position = s.Position,
                                 Direction = toward,
                                 Amount = rng.Next(Mode.ContactDamageMin, Mode.ContactDamageMax + 1),
@@ -282,23 +287,23 @@ namespace Amethyst.Action
                         );
                     }
                     break;
-                case SkeletonState.WindingUp:
+                case EnemyState.WindingUp:
                     face = s.AttackDirection;
                     if (s.Age >= s.Windup)
                     {
                         Strike(s, hero, ref vulnerable);
-                        Enter(s, SkeletonState.Recovering);
+                        Enter(s, EnemyState.Recovering);
                     }
                     break;
-                case SkeletonState.Recovering:
+                case EnemyState.Recovering:
                     face = s.AttackDirection;
                     if (s.Age >= RecoverSeconds)
-                        Enter(s, SkeletonState.Walking);
+                        Enter(s, EnemyState.Walking);
                     break;
-                case SkeletonState.Staggered:
+                case EnemyState.Staggered:
                     face = new Vector2(MathF.Sin(s.Yaw), MathF.Cos(s.Yaw));
                     if (s.Age >= StaggerSeconds)
-                        Enter(s, SkeletonState.Walking);
+                        Enter(s, EnemyState.Walking);
                     break;
             }
             s.Position += s.Knock * dt;
@@ -308,29 +313,48 @@ namespace Amethyst.Action
             s.Yaw = Wrap(s.Yaw + Math.Clamp(turn, -TurnRate * dt, TurnRate * dt));
         }
 
-        void Strike(Skeleton s, Vector2 hero, ref bool vulnerable)
+        // An attack's impact, by its kind: what it reaches and what it does.
+        void Strike(Enemy s, Vector2 hero, ref bool vulnerable)
         {
             Tokens.Release(s.Id);
             s.NextAttack = s.Clock + 1.4f + (float)rng.NextDouble();
             Emit(RoomEventKind.Attack, s, s.Position, s.AttackDirection);
-            var to = hero - s.Position;
-            var distance = to.Length();
-            var angle =
-                distance > 1e-4f
-                    ? MathF.Acos(Math.Clamp(Vector2.Dot(to / distance, s.AttackDirection), -1f, 1f))
-                    : 0f;
-            if (
-                !vulnerable
-                || distance > AttackReach * s.Scale + HeroRadius
-                || angle > AttackHalfAngle
-            )
+            switch (s.Kind.Attack)
+            {
+                case AttackKind.Cone:
+                    var to = hero - s.Position;
+                    var distance = to.Length();
+                    var angle =
+                        distance > 1e-4f
+                            ? MathF.Acos(
+                                Math.Clamp(Vector2.Dot(to / distance, s.AttackDirection), -1f, 1f)
+                            )
+                            : 0f;
+                    if (distance <= ConeReach * s.Scale + HeroRadius && angle <= ConeHalfAngle)
+                        HurtHero(s, ref vulnerable);
+                    break;
+            }
+        }
+
+        // The attack kinds' one other difference: how near the hero each starts its wind-up.
+        static float Range(Enemy s) =>
+            s.Kind.Attack switch
+            {
+                AttackKind.Cone => ConeRange * s.Scale,
+                _ => throw new ArgumentOutOfRangeException(nameof(s), s.Kind.Attack, null),
+            };
+
+        // A telegraphed attack's damage, if the hero can take it this step.
+        void HurtHero(Enemy s, ref bool vulnerable)
+        {
+            if (!vulnerable)
                 return;
             vulnerable = false;
             Events.Add(
                 new RoomEvent
                 {
                     Kind = RoomEventKind.HeroHit,
-                    Skeleton = s,
+                    Enemy = s,
                     Position = s.Position,
                     Direction = s.AttackDirection,
                     Amount = s.Empowered ? Mode.AttackDamage * 3 / 2 : Mode.AttackDamage,
@@ -340,7 +364,7 @@ namespace Amethyst.Action
         }
 
         /// <summary>
-        /// A sword move's contact: every skeleton in the fight it reaches takes its damage (armor
+        /// A sword move's contact: every enemy in the fight it reaches takes its damage (armor
         /// first), its knockback (not while armored) and, focused, a stagger, freezing for the hit's
         /// hitstop. Returns the hits and the kills.
         /// </summary>
@@ -352,7 +376,7 @@ namespace Amethyst.Action
                 strike.Move == Move.CleaveC || strike.Move == Move.LeapSlam
                     ? HitWeight.Finisher
                     : HitWeight.Light;
-            foreach (var s in skeletons)
+            foreach (var s in enemies)
             {
                 if (!s.Fighting || !strike.Hits(s.Position, s.Radius))
                     continue;
@@ -380,7 +404,7 @@ namespace Amethyst.Action
                     new RoomEvent
                     {
                         Kind = RoomEventKind.Hit,
-                        Skeleton = s,
+                        Enemy = s,
                         Position = s.Position,
                         Direction = blow,
                         Amount = strike.Damage,
@@ -399,7 +423,7 @@ namespace Amethyst.Action
                 if (Mode.Stagger && !wasArmored)
                 {
                     Tokens.Release(s.Id);
-                    Enter(s, SkeletonState.Staggered);
+                    Enter(s, EnemyState.Staggered);
                 }
             }
             if (kills > 0)
@@ -407,20 +431,20 @@ namespace Amethyst.Action
             return (hits, kills);
         }
 
-        void Die(Skeleton s, Vector2 blow, float force, float breakAt)
+        void Die(Enemy s, Vector2 blow, float force, float breakAt)
         {
             Tokens.Release(s.Id);
             s.Blow = blow;
             s.Force = force;
             s.BreakAt = breakAt;
-            s.State = SkeletonState.Dying;
+            s.State = EnemyState.Dying;
         }
 
         void Break(int index)
         {
-            var s = skeletons[index];
+            var s = enemies[index];
             Emit(RoomEventKind.Shatter, s, s.Position, s.Blow);
-            skeletons.RemoveAt(index);
+            enemies.RemoveAt(index);
         }
 
         // Spawning: the horde's stream toward its target and its elites, the focused mode's waves.
@@ -447,8 +471,8 @@ namespace Amethyst.Action
                 {
                     nextElite = Time + Mode.EliteEvery;
                     int elites = 0;
-                    foreach (var s in skeletons)
-                        if (s.Empowered && s.State != SkeletonState.Dying)
+                    foreach (var s in enemies)
+                        if (s.Empowered && s.State != EnemyState.Dying)
                             elites++;
                     if (elites < Mode.ElitesAlive)
                         Pack(hero, 1, true);
@@ -472,7 +496,7 @@ namespace Amethyst.Action
             }
         }
 
-        // A pack arrives together at one spot on the room's edge, at least MinSpawnDistance from the hero.
+        // A pack of one kind arrives together at one spot on the room's edge, at least MinSpawnDistance from the hero.
         void Pack(Vector2 hero, int count, bool empowered)
         {
             var half = Mode.ArenaHalfSize;
@@ -500,6 +524,8 @@ namespace Amethyst.Action
                     break;
             }
             var marker = 0.5f + (float)rng.NextDouble() * 0.5f;
+            var kind = empowered ? Spawns.PickElite(rng) : Spawns.Pick(rng);
+            var hp = Math.Max(1, (int)MathF.Round(Mode.BasicHp * kind.Hp));
             for (int k = 0; k < count; k++)
             {
                 var angle = (float)rng.NextDouble() * MathF.PI * 2f;
@@ -507,16 +533,17 @@ namespace Amethyst.Action
                 var p = at + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
                 p = Vector2.Clamp(p, new Vector2(-half + 0.5f), new Vector2(half - 0.5f));
                 var to = hero - p;
-                var s = new Skeleton
+                var s = new Enemy
                 {
                     Id = nextId++,
+                    Kind = kind,
                     Empowered = empowered,
                     Position = p,
                     Yaw = MathF.Atan2(to.X, to.Y),
                     Scale = empowered ? 1.5f : 1f,
-                    MaxHp = empowered ? Mode.SkeletonHp * 5 / 2 : Mode.SkeletonHp,
-                    MaxArmor = empowered ? 30 : 0,
-                    State = SkeletonState.Arriving,
+                    MaxHp = empowered ? hp * 5 / 2 : hp,
+                    MaxArmor = empowered || kind.Armored ? 30 : 0,
+                    State = EnemyState.Arriving,
                     MarkerSeconds = marker,
                     ArriveAt = Time + marker,
                     Seed = (uint)rng.Next(),
@@ -524,7 +551,7 @@ namespace Amethyst.Action
                 s.Hp = s.MaxHp;
                 s.Armor = s.MaxArmor;
                 s.NextAttack = 0.3f + (float)rng.NextDouble() * 0.8f;
-                skeletons.Add(s);
+                enemies.Add(s);
                 Emit(RoomEventKind.Marker, s, p, Vector2.Zero);
             }
         }
@@ -535,14 +562,14 @@ namespace Amethyst.Action
         {
             Phase = RoomPhase.Buzzer;
             Emit(RoomEventKind.Buzzer, null, hero, Vector2.Zero);
-            for (int i = skeletons.Count - 1; i >= 0; i--)
+            for (int i = enemies.Count - 1; i >= 0; i--)
             {
-                var s = skeletons[i];
-                if (s.Empowered || s.State == SkeletonState.Dying)
+                var s = enemies[i];
+                if (s.Empowered || s.State == EnemyState.Dying)
                     continue;
-                if (s.State == SkeletonState.Arriving)
+                if (s.State == EnemyState.Arriving)
                 {
-                    skeletons.RemoveAt(i);
+                    enemies.RemoveAt(i);
                     continue;
                 }
                 var away = s.Position - hero;
@@ -566,18 +593,18 @@ namespace Amethyst.Action
             Emit(RoomEventKind.Clear, null, Vector2.Zero, Vector2.Zero);
         }
 
-        void Enter(Skeleton s, SkeletonState state)
+        void Enter(Enemy s, EnemyState state)
         {
             s.State = state;
             s.Since = s.Clock;
         }
 
-        void Emit(RoomEventKind kind, Skeleton s, Vector2 at, Vector2 direction) =>
+        void Emit(RoomEventKind kind, Enemy s, Vector2 at, Vector2 direction) =>
             Events.Add(
                 new RoomEvent
                 {
                     Kind = kind,
-                    Skeleton = s,
+                    Enemy = s,
                     Position = at,
                     Direction = direction,
                 }
@@ -588,7 +615,7 @@ namespace Amethyst.Action
         void Separate(Vector2 hero)
         {
             var half = Mode.ArenaHalfSize - 0.4f;
-            foreach (var s in skeletons)
+            foreach (var s in enemies)
             {
                 if (!s.Fighting)
                     continue;
@@ -630,14 +657,14 @@ namespace Amethyst.Action
         {
             foreach (var list in grid.Values)
                 list.Clear();
-            foreach (var s in skeletons)
+            foreach (var s in enemies)
             {
                 if (!s.Fighting)
                     continue;
                 var (cx, cy) = CellOf(s.Position);
                 var key = Key(cx, cy);
                 if (!grid.TryGetValue(key, out var list))
-                    grid[key] = list = new List<Skeleton>(8);
+                    grid[key] = list = new List<Enemy>(8);
                 list.Add(s);
             }
         }

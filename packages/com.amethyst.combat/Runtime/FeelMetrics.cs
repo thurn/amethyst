@@ -3,7 +3,7 @@ using System.IO;
 using Amethyst.Action;
 using UnityEngine;
 
-namespace Amethyst.Feel
+namespace Amethyst.Combat
 {
     /// <summary>
     /// Feel §11.2's metrics for each room, appended as one JSON line to the run folder's
@@ -98,7 +98,7 @@ namespace Amethyst.Feel
                 actionsPerSecond = seconds > 0f ? (honored + buffered) / seconds : 0f,
             };
             File.AppendAllText(Path, JsonUtility.ToJson(r) + "\n");
-            Debug.Log($"feel: room {room} {outcome}: {JsonUtility.ToJson(r)}");
+            Debug.Log($"fight: room {room} {outcome}: {JsonUtility.ToJson(r)}");
             room++;
             seconds = 0f;
             frames = lockedFrames = kills = heroHits = contact = telegraphed = 0;
