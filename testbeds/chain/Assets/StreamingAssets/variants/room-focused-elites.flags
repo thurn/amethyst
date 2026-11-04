@@ -1,4 +1,5 @@
 # Focused, elites: an Empowered skeleton, slime, demon and bat in the first wave; their armor breaks at 3 s
+chain.world = room
 combat.mode = focused
 chain.crowd = fodder-elites
 combat.elites = 4

@@ -245,106 +245,133 @@ in `Awake` or `Start`, or every frame.
 
 ### testbeds/chain
 
+- `chain.autoclear` = `false` (bool): Each module's room clears as the hero
+  steps in, so hero.demo walks the whole chain (headless checks).
+  [ChainEntry.cs:43](testbeds/chain/Assets/Chain/ChainEntry.cs#L43)
+
 - `chain.break-at` = `0` (float): Room time, s, when every armored enemy's armor
   breaks at once, for stills of the break (0: never).
-  [ChainEntry.cs:39](testbeds/chain/Assets/Chain/ChainEntry.cs#L39)
+  [ChainEntry.cs:61](testbeds/chain/Assets/Chain/ChainEntry.cs#L61)
 
 - `chain.crowd` = `skeletons` (enum: skeletons | heavies | fodder-elites |
-  special-elites): What the room spawns without chain.room: skeletons, skeletons
-  with the counter family's big orks and trolls, or the key family's fodder
-  mixed with Empowered fodder or Empowered specials and heavies.
-  [ChainEntry.cs:27](testbeds/chain/Assets/Chain/ChainEntry.cs#L27)
+  special-elites): What the single room spawns without chain.room: skeletons,
+  skeletons with the counter family's big orks and trolls, or the key family's
+  fodder mixed with Empowered fodder or Empowered specials and heavies.
+  [ChainEntry.cs:49](testbeds/chain/Assets/Chain/ChainEntry.cs#L49)
 
-- `chain.room` = `-1` (int): The Escalation row (0-4) each room's spawn schedule
-  is drawn from, in the mode's table; -1 plays chain.crowd by the mode's own
-  numbers. [ChainEntry.cs:33](testbeds/chain/Assets/Chain/ChainEntry.cs#L33)
+- `chain.room` = `-1` (int): The Escalation row (0-4) each of the single room's
+  spawn schedules is drawn from, in the mode's table; -1 plays chain.crowd by
+  the mode's own numbers.
+  [ChainEntry.cs:55](testbeds/chain/Assets/Chain/ChainEntry.cs#L55)
 
-- variant `focused-elites-special`: Focused, elites: an Empowered goblin,
-  mushroom, big ork and troll in the first wave; their armor breaks at 3 s. Sets
-  `combat.mode=focused`, `chain.crowd=special-elites`, `combat.elites=4`,
-  `chain.break-at=3`, `hero.aim=cursor`.
-  [focused-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites-special.flags)
+- `chain.world` = `modules` (enum: modules | room): The four early arena modules
+  joined by corridors, rooms 1-4 playing Escalation rows 1-4; or one room in
+  place, by chain.crowd, chain.room and combat.hazards.
+  [ChainEntry.cs:37](testbeds/chain/Assets/Chain/ChainEntry.cs#L37)
 
-- variant `focused-elites-white`: Focused, elites, white break: as
-  focused-elites, but each armor break's outline shatters into white shards.
-  Sets `combat.mode=focused`, `chain.crowd=fodder-elites`, `combat.elites=4`,
-  `chain.break-at=3`, `combat.armor-shatter=white`, `hero.aim=cursor`.
-  [focused-elites-white.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites-white.flags)
-
-- variant `focused-elites`: Focused, elites: an Empowered skeleton, slime, demon
-  and bat in the first wave; their armor breaks at 3 s. Sets
-  `combat.mode=focused`, `chain.crowd=fodder-elites`, `combat.elites=4`,
-  `chain.break-at=3`, `hero.aim=cursor`.
-  [focused-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-elites.flags)
-
-- variant `focused-heavies`: Focused, heavies: big orks and trolls in the waves
-  among the skeletons. Sets `combat.mode=focused`, `chain.crowd=heavies`,
-  `hero.aim=cursor`.
-  [focused-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-heavies.flags)
-
-- variant `focused-pillars`: Focused with hazards: a ring of pillars splitting
-  the crowd into lanes, and pylons to burst. Sets `combat.mode=focused`,
-  `combat.hazards=pillars`, `hero.aim=cursor`.
-  [focused-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-pillars.flags)
-
-- variant `focused-room2`: Focused, room 2: two waves of 8 from its Escalation
-  row: skeletons, slimes, bats, demons and goblins. Sets `combat.mode=focused`,
-  `chain.room=2`, `hero.aim=cursor`.
-  [focused-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-room2.flags)
-
-- variant `focused-room4`: Focused, room 4: three waves of 12, at most 7 alive,
-  from its Escalation row: every early kind, big orks and 1-2 elites. Sets
-  `combat.mode=focused`, `chain.room=4`, `hero.aim=cursor`.
-  [focused-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-room4.flags)
-
-- variant `focused-vents`: Focused with hazards: a ring of Spike Vents erupting
-  in turn. Sets `combat.mode=focused`, `combat.hazards=vents`,
-  `hero.aim=cursor`.
-  [focused-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/focused-vents.flags)
-
-- variant `focused`: Focused: waves of a few enemies that all telegraph, the
-  camera close. Sets `combat.mode=focused`, `hero.aim=cursor`.
+- variant `focused`: Focused: the four early arena modules chained by corridors,
+  rooms 1-4 playing Escalation rows 1-4 in waves, the camera close. Sets
+  `combat.mode=focused`, `hero.aim=cursor`.
   [focused.flags](testbeds/chain/Assets/StreamingAssets/variants/focused.flags)
 
-- variant `horde-elites-special`: Horde, elites: an Empowered goblin, mushroom,
-  big ork and troll among the fodder; every armor breaks at 3 s. Sets
-  `combat.mode=horde`, `chain.crowd=special-elites`, `combat.elites=4`,
-  `combat.elite-every=0.5`, `chain.break-at=3`, `hero.aim=cursor`.
-  [horde-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-elites-special.flags)
-
-- variant `horde-elites`: Horde, elites: an Empowered skeleton, slime, demon and
-  bat among the fodder; every armor breaks at 3 s. Sets `combat.mode=horde`,
-  `chain.crowd=fodder-elites`, `combat.elites=4`, `combat.elite-every=0.5`,
-  `chain.break-at=3`, `hero.aim=cursor`.
-  [horde-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-elites.flags)
-
-- variant `horde-heavies`: Horde, heavies: a few big orks and trolls among the
-  skeleton fodder. Sets `combat.mode=horde`, `chain.crowd=heavies`,
-  `hero.aim=cursor`.
-  [horde-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-heavies.flags)
-
-- variant `horde-pillars`: Horde with hazards: a ring of pillars splitting the
-  crowd into lanes, and pylons to burst. Sets `combat.mode=horde`,
-  `combat.hazards=pillars`, `hero.aim=cursor`.
-  [horde-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-pillars.flags)
-
-- variant `horde-room2`: Horde, room 2: a 50 s stream building to ~80 from its
-  Escalation row, a few goblins and one elite. Sets `combat.mode=horde`,
-  `chain.room=2`, `hero.aim=cursor`.
-  [horde-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-room2.flags)
-
-- variant `horde-room4`: Horde, room 4: a 60 s stream building to ~120 from its
-  Escalation row: fodder, a few specials, rare big orks and two elites. Sets
-  `combat.mode=horde`, `chain.room=4`, `hero.aim=cursor`.
-  [horde-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-room4.flags)
-
-- variant `horde-vents`: Horde with hazards: a ring of Spike Vents erupting in
-  turn. Sets `combat.mode=horde`, `combat.hazards=vents`, `hero.aim=cursor`.
-  [horde-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/horde-vents.flags)
-
-- variant `horde`: Horde: a stream of ~100 contact-damage enemies for a 60 s
-  room, the camera pulled back. Sets `combat.mode=horde`, `hero.aim=cursor`.
+- variant `horde`: Horde: the four early arena modules chained by corridors,
+  rooms 1-4 playing Escalation rows 1-4 against the timer, the camera pulled
+  back. Sets `combat.mode=horde`, `hero.aim=cursor`.
   [horde.flags](testbeds/chain/Assets/StreamingAssets/variants/horde.flags)
+
+- variant `room-focused-elites-special`: Focused, elites: an Empowered goblin,
+  mushroom, big ork and troll in the first wave; their armor breaks at 3 s. Sets
+  `chain.world=room`, `combat.mode=focused`, `chain.crowd=special-elites`,
+  `combat.elites=4`, `chain.break-at=3`, `hero.aim=cursor`.
+  [room-focused-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-elites-special.flags)
+
+- variant `room-focused-elites-white`: Focused, elites, white break: as
+  focused-elites, but each armor break's outline shatters into white shards.
+  Sets `chain.world=room`, `combat.mode=focused`, `chain.crowd=fodder-elites`,
+  `combat.elites=4`, `chain.break-at=3`, `combat.armor-shatter=white`,
+  `hero.aim=cursor`.
+  [room-focused-elites-white.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-elites-white.flags)
+
+- variant `room-focused-elites`: Focused, elites: an Empowered skeleton, slime,
+  demon and bat in the first wave; their armor breaks at 3 s. Sets
+  `chain.world=room`, `combat.mode=focused`, `chain.crowd=fodder-elites`,
+  `combat.elites=4`, `chain.break-at=3`, `hero.aim=cursor`.
+  [room-focused-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-elites.flags)
+
+- variant `room-focused-heavies`: Focused, heavies: big orks and trolls in the
+  waves among the skeletons. Sets `chain.world=room`, `combat.mode=focused`,
+  `chain.crowd=heavies`, `hero.aim=cursor`.
+  [room-focused-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-heavies.flags)
+
+- variant `room-focused-pillars`: Focused with hazards: a ring of pillars
+  splitting the crowd into lanes, and pylons to burst. Sets `chain.world=room`,
+  `combat.mode=focused`, `combat.hazards=pillars`, `hero.aim=cursor`.
+  [room-focused-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-pillars.flags)
+
+- variant `room-focused-room2`: Focused, room 2: two waves of 8 from its
+  Escalation row: skeletons, slimes, bats, demons and goblins. Sets
+  `chain.world=room`, `combat.mode=focused`, `chain.room=2`, `hero.aim=cursor`.
+  [room-focused-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-room2.flags)
+
+- variant `room-focused-room4`: Focused, room 4: three waves of 12, at most 7
+  alive, from its Escalation row: every early kind, big orks and 1-2 elites.
+  Sets `chain.world=room`, `combat.mode=focused`, `chain.room=4`,
+  `hero.aim=cursor`.
+  [room-focused-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-room4.flags)
+
+- variant `room-focused-vents`: Focused with hazards: a ring of Spike Vents
+  erupting in turn. Sets `chain.world=room`, `combat.mode=focused`,
+  `combat.hazards=vents`, `hero.aim=cursor`.
+  [room-focused-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/room-focused-vents.flags)
+
+- variant `room-horde-elites-special`: Horde, elites: an Empowered goblin,
+  mushroom, big ork and troll among the fodder; every armor breaks at 3 s. Sets
+  `chain.world=room`, `combat.mode=horde`, `chain.crowd=special-elites`,
+  `combat.elites=4`, `combat.elite-every=0.5`, `chain.break-at=3`,
+  `hero.aim=cursor`.
+  [room-horde-elites-special.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-elites-special.flags)
+
+- variant `room-horde-elites`: Horde, elites: an Empowered skeleton, slime,
+  demon and bat among the fodder; every armor breaks at 3 s. Sets
+  `chain.world=room`, `combat.mode=horde`, `chain.crowd=fodder-elites`,
+  `combat.elites=4`, `combat.elite-every=0.5`, `chain.break-at=3`,
+  `hero.aim=cursor`.
+  [room-horde-elites.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-elites.flags)
+
+- variant `room-horde-heavies`: Horde, heavies: a few big orks and trolls among
+  the skeleton fodder. Sets `chain.world=room`, `combat.mode=horde`,
+  `chain.crowd=heavies`, `hero.aim=cursor`.
+  [room-horde-heavies.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-heavies.flags)
+
+- variant `room-horde-pillars`: Horde with hazards: a ring of pillars splitting
+  the crowd into lanes, and pylons to burst. Sets `chain.world=room`,
+  `combat.mode=horde`, `combat.hazards=pillars`, `hero.aim=cursor`.
+  [room-horde-pillars.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-pillars.flags)
+
+- variant `room-horde-room2`: Horde, room 2: a 50 s stream building to ~80 from
+  its Escalation row, a few goblins and one elite. Sets `chain.world=room`,
+  `combat.mode=horde`, `chain.room=2`, `hero.aim=cursor`.
+  [room-horde-room2.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-room2.flags)
+
+- variant `room-horde-room4`: Horde, room 4: a 60 s stream building to ~120 from
+  its Escalation row: fodder, a few specials, rare big orks and two elites. Sets
+  `chain.world=room`, `combat.mode=horde`, `chain.room=4`, `hero.aim=cursor`.
+  [room-horde-room4.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-room4.flags)
+
+- variant `room-horde-vents`: Horde with hazards: a ring of Spike Vents erupting
+  in turn. Sets `chain.world=room`, `combat.mode=horde`, `combat.hazards=vents`,
+  `hero.aim=cursor`.
+  [room-horde-vents.flags](testbeds/chain/Assets/StreamingAssets/variants/room-horde-vents.flags)
+
+- variant `walk-focused`: Focused, walk: each room clears as the hero steps in
+  and the demo walks the chain through its gates. Sets `combat.mode=focused`,
+  `chain.autoclear=true`, `hero.demo=true`.
+  [walk-focused.flags](testbeds/chain/Assets/StreamingAssets/variants/walk-focused.flags)
+
+- variant `walk-horde`: Horde, walk: each room clears as the hero steps in and
+  the demo walks the chain through its gates. Sets `combat.mode=horde`,
+  `chain.autoclear=true`, `hero.demo=true`.
+  [walk-horde.flags](testbeds/chain/Assets/StreamingAssets/variants/walk-horde.flags)
 
 ### testbeds/feel
 

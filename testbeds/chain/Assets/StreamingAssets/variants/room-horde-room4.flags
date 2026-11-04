@@ -1,4 +1,5 @@
 # Horde, room 4: a 60 s stream building to ~120 from its Escalation row: fodder, a few specials, rare big orks and two elites
+chain.world = room
 combat.mode = horde
 chain.room = 4
 hero.aim = cursor

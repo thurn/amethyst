@@ -253,6 +253,15 @@ namespace Amethyst.Action
 
         /// <summary>A room playing <paramref name="schedule"/> in <paramref name="layout"/>.</summary>
         public CombatRoom(SpawnSchedule schedule, int seed, HazardLayout layout = null)
+            : this(
+                schedule,
+                seed,
+                new Hazards(layout ?? HazardLayout.Open(new Vector2(schedule.Mode.ArenaHalfSize)))
+            ) { }
+
+        /// <summary>A room playing <paramref name="schedule"/> in <paramref name="hazards"/>, which
+        /// others may share (a chain's module, whose posts block the hero walking through).</summary>
+        public CombatRoom(SpawnSchedule schedule, int seed, Hazards hazards)
         {
             var mode = schedule.Mode;
             Mode = mode;
@@ -262,7 +271,7 @@ namespace Amethyst.Action
                     edges.Add(side);
             if (edges.Count == 0)
                 throw new ArgumentException("CombatRoom: a schedule with no edges");
-            Hazards = new Hazards(layout ?? HazardLayout.Open(new Vector2(mode.ArenaHalfSize)));
+            Hazards = hazards;
             erupted = new int[Hazards.Layout.Vents.Length];
             for (int i = 0; i < erupted.Length; i++)
                 erupted[i] = Hazards.Eruption(i, 0f);
@@ -756,6 +765,8 @@ namespace Amethyst.Action
         // enemy in it.
         void Vents(Vector2 hero, ref bool vulnerable)
         {
+            if (Phase == RoomPhase.Cleared)
+                return; // a cleared room's vents rest
             var vents = Hazards.Layout.Vents;
             for (int i = 0; i < vents.Length; i++)
             {
@@ -993,6 +1004,7 @@ namespace Amethyst.Action
         void Pack(Vector2 hero, EnemyKind kind, int count, bool empowered)
         {
             var half = Hazards.Layout.Half;
+            var center = Hazards.Layout.Center;
             var at = Vector2.Zero;
             var best = -1f;
             for (int tries = 0; tries < 8; tries++)
@@ -1000,13 +1012,14 @@ namespace Amethyst.Action
                 var along = (float)rng.NextDouble() * 2f - 1f;
                 var inset = 0.8f + (float)rng.NextDouble() * 1.5f;
                 var side = edges[rng.Next(edges.Count)];
-                var p = side switch
-                {
-                    0 => new Vector2(along * (half.X - 1f), half.Y - inset),
-                    1 => new Vector2(along * (half.X - 1f), inset - half.Y),
-                    2 => new Vector2(half.X - inset, along * (half.Y - 1f)),
-                    _ => new Vector2(inset - half.X, along * (half.Y - 1f)),
-                };
+                var p =
+                    side switch
+                    {
+                        0 => new Vector2(along * (half.X - 1f), half.Y - inset),
+                        1 => new Vector2(along * (half.X - 1f), inset - half.Y),
+                        2 => new Vector2(half.X - inset, along * (half.Y - 1f)),
+                        _ => new Vector2(inset - half.X, along * (half.Y - 1f)),
+                    } + center;
                 var d = Vector2.Distance(p, hero);
                 if (d > best)
                 {
@@ -1055,7 +1068,11 @@ namespace Amethyst.Action
                         p = at + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * spread;
                         break;
                 }
-                p = Vector2.Clamp(p, -half + new Vector2(0.5f), half - new Vector2(0.5f));
+                p = Vector2.Clamp(
+                    p,
+                    center - half + new Vector2(0.5f),
+                    center + half - new Vector2(0.5f)
+                );
                 var scale = empowered ? EliteScale : 1f;
                 Hazards.Collide(ref p, kind.Radius * scale, kind.Flies);
                 var to = hero - p;
@@ -1103,6 +1120,18 @@ namespace Amethyst.Action
                 Die(s, d > 1e-4f ? away / d : Vector2.UnitY, 6f, Time + d / WaveSpeed);
             }
             volleys.RemoveAll(v => !v.Owner.Empowered);
+        }
+
+        /// <summary>Clears the room at once (a debug walk's): its enemies and volleys go and it
+        /// emits its <see cref="RoomEventKind.Clear"/>.</summary>
+        public void ClearNow()
+        {
+            if (Phase == RoomPhase.Cleared)
+                return;
+            enemies.Clear();
+            Wave = Waves;
+            Phase = RoomPhase.Buzzer;
+            End();
         }
 
         // The room clears when its last wave or its last elite after the buzzer is dead.

@@ -1,4 +1,5 @@
 # Focused, room 2: two waves of 8 from its Escalation row: skeletons, slimes, bats, demons and goblins
+chain.world = room
 combat.mode = focused
 chain.room = 2
 hero.aim = cursor

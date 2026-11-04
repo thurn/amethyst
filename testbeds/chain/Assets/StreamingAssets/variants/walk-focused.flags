@@ -1,0 +1,4 @@
+# Focused, walk: each room clears as the hero steps in and the demo walks the chain through its gates
+combat.mode = focused
+chain.autoclear = true
+hero.demo = true

@@ -44,6 +44,10 @@ namespace Amethyst.Action
         /// <summary>Where the enemies are, for aim snapping; whoever spawns them keeps it current.</summary>
         public IReadOnlyList<Vector3> Targets { get; set; } = System.Array.Empty<Vector3>();
 
+        /// <summary>Where the demo (<see cref="ActionFlags.Demo"/>) walks instead of fighting, when
+        /// set: a chain's way on through its open gates.</summary>
+        public Vector3? Goal { get; set; }
+
         /// <summary>The ground point under the mouse, or null without one.</summary>
         public Vector3? Cursor { get; private set; }
 
@@ -237,7 +241,7 @@ namespace Amethyst.Action
             else if (!dash.Active(now))
                 p += input.Move * (ActionFlags.Speed.Value * dt);
             var at = new Num.Vector2(p.x, p.z);
-            Arena.Hazards.Collide(ref at, Radius, false);
+            Arena.Obstacles.Collide(ref at, Radius, false);
             transform.position = new Vector3(at.X, 0f, at.Y);
 
             if (playing == Move.None && !dash.Active(now))
@@ -509,7 +513,8 @@ namespace Amethyst.Action
             return intent;
         }
 
-        // A deterministic script for headless runs and shots, in seconds since the hero appeared:
+        // A deterministic script for headless runs and shots, in seconds since the hero appeared
+        // (or, while it has a Goal, a walk there):
         // still for a second, every move once with the cursor 5 m to the right (Cleave A, B, C at
         // 1.0 s, a dash and Lunge at 2.2 s, the Leap Slam at 3.2 s), then a run in a circle with
         // the cursor on the nearest target (else orbiting the other way), dashing into a Lunge and
@@ -532,6 +537,15 @@ namespace Amethyst.Action
             var last = demoTime;
             demoTime = t;
             bool Crossed(float at) => t >= at && last < at;
+            if (Goal is Vector3 goal)
+            {
+                var to = goal - transform.position;
+                to.y = 0f;
+                intent.Move =
+                    to.sqrMagnitude > 0.04f ? Vector3.ClampMagnitude(to, 1f) : Vector3.zero;
+                intent.Cursor = transform.position + intent.Move * 5f;
+                return intent;
+            }
             if (t < Loop)
             {
                 intent.Cursor = transform.position + Vector3.right * 5f;

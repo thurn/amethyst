@@ -1,4 +1,5 @@
 # Focused, elites: an Empowered goblin, mushroom, big ork and troll in the first wave; their armor breaks at 3 s
+chain.world = room
 combat.mode = focused
 chain.crowd = special-elites
 combat.elites = 4

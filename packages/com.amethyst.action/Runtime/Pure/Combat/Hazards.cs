@@ -25,6 +25,15 @@ namespace Amethyst.Action
         Vents,
     }
 
+    /// <summary>What blocks a body: it moves a body of <c>radius</c> at <c>p</c> out of whatever
+    /// it overlaps.</summary>
+    public interface IObstacles
+    {
+        /// <summary>Moves a body of <paramref name="radius"/> at <paramref name="p"/> out of what
+        /// blocks it (<paramref name="flies"/>: over pillars and pylons); true if anything did.</summary>
+        bool Collide(ref Vector2 p, float radius, bool flies);
+    }
+
     /// <summary>A wall: an axis-aligned box on the ground.</summary>
     public struct WallBox
     {
@@ -64,7 +73,11 @@ namespace Amethyst.Action
     {
         const float WallThickness = 1f;
 
-        /// <summary>The floor inside the outer walls, from the centre each way, m.</summary>
+        /// <summary>The floor's centre, m: the origin for a room of its own, elsewhere for an arena
+        /// module placed in the chain's world (<see cref="Moved"/>).</summary>
+        public Vector2 Center;
+
+        /// <summary>The floor inside the outer walls, from <see cref="Center"/> each way, m.</summary>
         public Vector2 Half;
         public WallBox[] Walls = Array.Empty<WallBox>();
         public Post[] Pillars = Array.Empty<Post>();
@@ -120,7 +133,35 @@ namespace Amethyst.Action
             return layout;
         }
 
-        static WallBox Box(Vector2 center, Vector2 half) =>
+        /// <summary>This layout moved <paramref name="by"/> m, everything in it with it.</summary>
+        public HazardLayout Moved(Vector2 by)
+        {
+            var walls = (WallBox[])Walls.Clone();
+            for (int i = 0; i < walls.Length; i++)
+                walls[i].Center += by;
+            return new HazardLayout
+            {
+                Center = Center + by,
+                Half = Half,
+                Walls = walls,
+                Pillars = Shift(Pillars, by),
+                Pylons = Shift(Pylons, by),
+                Vents = Array.ConvertAll(
+                    Vents,
+                    v => new Vent
+                    {
+                        Center = v.Center + by,
+                        Radius = v.Radius,
+                        Offset = v.Offset,
+                    }
+                ),
+            };
+        }
+
+        static Post[] Shift(Post[] posts, Vector2 by) =>
+            Array.ConvertAll(posts, p => new Post { Center = p.Center + by, Radius = p.Radius });
+
+        internal static WallBox Box(Vector2 center, Vector2 half) =>
             new WallBox { Center = center, Half = half };
 
         static Post[] Ring(int count, float radius, float start, float size)
@@ -144,7 +185,7 @@ namespace Amethyst.Action
     /// pylons block walkers, not fliers), walkers' steering around posts, which pylons are gone and
     /// where each vent is in its cycle.
     /// </summary>
-    public sealed class Hazards
+    public sealed class Hazards : IObstacles
     {
         /// <summary>A vent's marker, eruption and rest, s: one cycle is their sum.</summary>
         public const float VentMarker = 0.8f,
@@ -190,12 +231,28 @@ namespace Amethyst.Action
         public bool Collide(ref Vector2 p, float radius, bool flies) =>
             Collide(ref p, radius, flies, out _, out _, out _);
 
+        /// <summary>As <see cref="Collide(ref Vector2, float, bool)"/> for a walker, without the
+        /// floor's bounds: its walls (with their doorways) and standing posts only, for a hero who
+        /// walks on between rooms.</summary>
+        public bool Block(ref Vector2 p, float radius) =>
+            Collide(ref p, radius, false, false, out _, out _, out _);
+
         /// <summary>As <see cref="Collide(ref Vector2, float, bool)"/>, with the deepest thing it
         /// struck, its index in its layout array (-1 for the floor's bounds) and the way out of it.</summary>
         public bool Collide(
             ref Vector2 p,
             float radius,
             bool flies,
+            out HazardKind hit,
+            out int index,
+            out Vector2 normal
+        ) => Collide(ref p, radius, flies, true, out hit, out index, out normal);
+
+        bool Collide(
+            ref Vector2 p,
+            float radius,
+            bool flies,
+            bool bounded,
             out HazardKind hit,
             out int index,
             out Vector2 normal
@@ -207,7 +264,9 @@ namespace Amethyst.Action
             var deepest = 0f;
             // The floor's bounds first, so nothing tunnels through an outer wall in a long step.
             var bound = Layout.Half - new Vector2(radius);
-            var inside = Vector2.Clamp(p, -bound, bound);
+            var inside = bounded
+                ? Vector2.Clamp(p, Layout.Center - bound, Layout.Center + bound)
+                : p;
             if (inside != p)
             {
                 var back = inside - p;

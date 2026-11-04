@@ -1,4 +1,5 @@
 # Horde with hazards: a ring of Spike Vents erupting in turn
+chain.world = room
 combat.mode = horde
 combat.hazards = vents
 hero.aim = cursor

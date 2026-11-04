@@ -1,4 +1,5 @@
 # Horde, elites: an Empowered skeleton, slime, demon and bat among the fodder; every armor breaks at 3 s
+chain.world = room
 combat.mode = horde
 chain.crowd = fodder-elites
 combat.elites = 4

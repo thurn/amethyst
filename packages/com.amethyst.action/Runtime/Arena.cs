@@ -10,22 +10,28 @@ namespace Amethyst.Action
         public static float HalfSize { get; private set; } = 28f;
 
         /// <summary>What blocks the hero: the room's walls and, in a fight, its pillars and pylons.
-        /// Whoever runs a room's <see cref="CombatRoom"/> sets its own.</summary>
-        public static Hazards Hazards { get; set; } =
+        /// Whoever runs a room's <see cref="CombatRoom"/> or a <see cref="Chain"/> sets its own.</summary>
+        public static IObstacles Obstacles { get; set; } =
             new Hazards(HazardLayout.Open(new System.Numerics.Vector2(28f)));
 
         /// <summary>
         /// The arena <paramref name="halfSize"/> m each way with the hero and its camera, and with
         /// <paramref name="greybox"/> its greybox ground, sun and crystals (a project drawing its own
-        /// world, as the edge look does, leaves them out).
+        /// world, as the edge look does, leaves them out); the hero starts at <paramref name="at"/>.
         /// </summary>
-        public static Hero Build(ulong seed = 1, bool greybox = true, float halfSize = 28f)
+        public static Hero Build(
+            ulong seed = 1,
+            bool greybox = true,
+            float halfSize = 28f,
+            Vector3 at = default
+        )
         {
             HalfSize = halfSize;
-            Hazards = new Hazards(HazardLayout.Open(new System.Numerics.Vector2(halfSize)));
+            Obstacles = new Hazards(HazardLayout.Open(new System.Numerics.Vector2(halfSize)));
             if (greybox)
                 Greyboxed(seed);
             var hero = Hero.Create();
+            hero.transform.position = at;
             FollowCamera.Create(hero);
             return hero;
         }

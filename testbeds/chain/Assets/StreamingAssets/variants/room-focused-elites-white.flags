@@ -1,4 +1,5 @@
 # Focused, elites, white break: as focused-elites, but each armor break's outline shatters into white shards
+chain.world = room
 combat.mode = focused
 chain.crowd = fodder-elites
 combat.elites = 4

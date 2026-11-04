@@ -1,4 +1,5 @@
 # Focused with hazards: a ring of Spike Vents erupting in turn
+chain.world = room
 combat.mode = focused
 combat.hazards = vents
 hero.aim = cursor

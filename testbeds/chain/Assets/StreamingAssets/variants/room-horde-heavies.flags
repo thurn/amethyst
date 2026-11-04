@@ -1,4 +1,5 @@
 # Horde, heavies: a few big orks and trolls among the skeleton fodder
+chain.world = room
 combat.mode = horde
 chain.crowd = heavies
 hero.aim = cursor

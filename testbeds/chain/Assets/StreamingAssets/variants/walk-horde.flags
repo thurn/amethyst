@@ -1,0 +1,4 @@
+# Horde, walk: each room clears as the hero steps in and the demo walks the chain through its gates
+combat.mode = horde
+chain.autoclear = true
+hero.demo = true

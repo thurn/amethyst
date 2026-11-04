@@ -100,6 +100,13 @@ namespace Amethyst.Combat
             File.AppendAllText(Path, JsonUtility.ToJson(r) + "\n");
             Debug.Log($"fight: room {room} {outcome}: {JsonUtility.ToJson(r)}");
             room++;
+            Restart(presses);
+        }
+
+        /// <summary>Starts the room's record afresh: what came before (a corridor's walk) doesn't
+        /// count; <paramref name="presses"/> counts every press so far.</summary>
+        public void Restart(InputBuffer presses)
+        {
             seconds = 0f;
             frames = lockedFrames = kills = heroHits = contact = telegraphed = 0;
             honored0 = presses.Honored;

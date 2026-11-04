@@ -1,4 +1,5 @@
 # Horde with hazards: a ring of pillars splitting the crowd into lanes, and pylons to burst
+chain.world = room
 combat.mode = horde
 combat.hazards = pillars
 hero.aim = cursor

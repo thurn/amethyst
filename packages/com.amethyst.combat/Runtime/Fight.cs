@@ -15,8 +15,12 @@ namespace Amethyst.Combat
     /// kill shatter, trauma shake for heavy hits and the hero's damage, global hitstop with a
     /// slow-motion tail for a room's clear and Empowered kills, sounds through the voice budget)
     /// and feel §11.2's metrics per room in the run folder; each room in its hazard layout
-    /// (<see cref="CombatFlags.Hazards"/>), drawn by <see cref="HazardView"/>. The hero's death
-    /// shatters it and restarts the arena (the scene reloads; its entry begins the fight again).
+    /// (<see cref="CombatFlags.Hazards"/>), drawn by <see cref="HazardView"/>. Or, begun as a
+    /// chain (<see cref="BeginChain"/>), arena modules in one world joined by corridors
+    /// (<see cref="Chain"/>): stepping into each seals its gate behind the hero and starts its room,
+    /// room N playing row N of the mode's Escalation table; its clear dissolves the exit's gate.
+    /// The hero's death shatters it and restarts the arena or the chain at its first module (the
+    /// scene reloads; its entry begins the fight again).
     /// </summary>
     public sealed class Fight : MonoBehaviour
     {
@@ -39,6 +43,13 @@ namespace Amethyst.Combat
         HazardLayout layout;
         HazardView hazards;
         CombatRoom room;
+        Chain chain;
+        SpawnSchedule[] schedules; // the chain's rooms'
+        HazardView[] modules; // the chain's modules'
+        HazardView corridors;
+        int roomModule = -1; // the chain module the room plays in
+        bool autoclear,
+            walked;
         int seed;
         Palette palette;
         EnemyView view;
@@ -64,7 +75,16 @@ namespace Amethyst.Combat
         /// default) by the mode's own numbers, or with <paramref name="row"/> 0 or more each room
         /// a schedule drawn from that row of the mode's Escalation table: picks its mode and makes
         /// its world.</summary>
-        public static void Begin(SpawnList spawns = null, int row = -1)
+        public static void Begin(SpawnList spawns = null, int row = -1) =>
+            Start(spawns ?? SpawnList.Skeletons, row, null);
+
+        /// <summary>Builds a new run of the chain: <paramref name="modules"/> shuffled and laid out,
+        /// rooms 1 on playing rows 1 on; <paramref name="autoclear"/> clears each room as the hero
+        /// steps in (a debug walk's).</summary>
+        public static void BeginChain(ArenaModule[] modules, bool autoclear) =>
+            Start(SpawnList.Skeletons, 1, modules, autoclear);
+
+        static void Start(SpawnList spawns, int row, ArenaModule[] modules, bool autoclear = false)
         {
             var picked = CombatModes.Pick(
                 CombatFlags.Mode.Value,
@@ -83,8 +103,17 @@ namespace Amethyst.Combat
             if (CombatFlags.EliteEvery.Value > 0f)
                 tuning.EliteEvery = CombatFlags.EliteEvery.Value;
 
+            var seed = Run.Args.FixedTime ? 1 : (int)(System.DateTime.UtcNow.Ticks & 0x7fffffff);
+            var world = modules != null ? ChainLayout.Of(modules, seed) : null;
+            var start = world?.Start ?? Num.Vector2.Zero;
+
             var palette = Palette.Default;
-            var hero = Arena.Build(1, greybox: false, halfSize: tuning.ArenaHalfSize);
+            var hero = Arena.Build(
+                1,
+                greybox: false,
+                halfSize: tuning.ArenaHalfSize,
+                at: new Vector3(start.X, 0f, start.Y)
+            );
             var cam = Camera.main;
             cam.backgroundColor = EdgeLook.Linear(palette.Void).gamma;
             cam.gameObject.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing =
@@ -95,10 +124,20 @@ namespace Amethyst.Combat
 
             var fight = new GameObject("Fight").AddComponent<Fight>();
             fight.row = row;
-            fight.Init(hero, cam, picked, tuning, palette, spawns ?? SpawnList.Skeletons);
+            fight.seed = seed;
+            fight.autoclear = autoclear;
+            fight.Init(hero, cam, picked, tuning, palette, spawns, world);
         }
 
-        void Init(Hero h, Camera c, CombatMode m, ModeTuning t, Palette p, SpawnList list)
+        void Init(
+            Hero h,
+            Camera c,
+            CombatMode m,
+            ModeTuning t,
+            Palette p,
+            SpawnList list,
+            ChainLayout world
+        )
         {
             palette = p;
             spawns = list;
@@ -110,13 +149,44 @@ namespace Amethyst.Combat
             follow.Distance = tuning.CameraDistance;
             floor = GridFloor.Create(palette.Cobalt);
             kit = HeroKit.Load();
-            seed = (int)(System.DateTime.UtcNow.Ticks & 0x7fffffff);
-            if (Run.Args.FixedTime)
-                seed = 1;
-            layout = HazardLayout.Of(CombatFlags.Hazards.Value, tuning.ArenaHalfSize);
-            hazards = new HazardView(layout, palette, tuning.CameraDistance * 0.0015f);
-            room = NewRoom();
-            view = EnemyView.Create(Mathf.Max(64, room.Schedule.Alive + 32), palette);
+            var line = tuning.CameraDistance * 0.0015f;
+            if (world != null)
+            {
+                chain = new Chain(world);
+                Arena.Obstacles = chain;
+                schedules = new SpawnSchedule[chain.Count];
+                modules = new HazardView[chain.Count];
+                var most = 0;
+                for (int k = 0; k < chain.Count; k++)
+                {
+                    schedules[k] = SpawnSchedule.Draw(tuning, row + k, seed + k);
+                    most = Mathf.Max(most, schedules[k].Alive);
+                    modules[k] = new HazardView(
+                        world.Rooms[k],
+                        palette,
+                        line,
+                        new[] { world.Entries[k], world.Exits[k] }
+                    );
+                    modules[k].Gate(0, false, quiet: true);
+                }
+                corridors = new HazardView(
+                    new HazardLayout { Walls = world.CorridorWalls.ToArray() },
+                    palette,
+                    line
+                );
+                room = NewRoom(0);
+                view = EnemyView.Create(Mathf.Max(64, most + 32), palette);
+                Debug.Log(
+                    $"chain: {chain.Count} modules, {string.Join(", ", System.Array.ConvertAll(world.Modules, x => x.Name))}"
+                );
+            }
+            else
+            {
+                layout = HazardLayout.Of(CombatFlags.Hazards.Value, tuning.ArenaHalfSize);
+                hazards = new HazardView(layout, palette, line);
+                room = NewRoom();
+                view = EnemyView.Create(Mathf.Max(64, room.Schedule.Alive + 32), palette);
+            }
             shapes = new Shapes();
             sounds = new FightSounds(cam.gameObject, kit);
             metrics = new FeelMetrics(mode);
@@ -127,33 +197,79 @@ namespace Amethyst.Combat
             );
         }
 
+        // The single room's next room, in its hazard layout.
         CombatRoom NewRoom()
         {
             var s = seed++;
-            var r = new CombatRoom(
-                row >= 0 ? SpawnSchedule.Draw(tuning, row, s) : SpawnSchedule.Of(tuning, spawns, s),
-                s,
-                layout
-            )
-            {
-                HitstopScale = Mathf.Max(0f, CombatFlags.Hitstop.Value),
-                KnockbackScale = CombatFlags.Knockback.Value ? 1f : 0f,
-                FlashFrames = 2,
-            };
-            Arena.Hazards = r.Hazards;
-            if (row >= 0)
+            var r = Tuned(
+                new CombatRoom(
+                    row >= 0
+                        ? SpawnSchedule.Draw(tuning, row, s)
+                        : SpawnSchedule.Of(tuning, spawns, s),
+                    s,
+                    layout
+                )
+            );
+            Arena.Obstacles = r.Hazards;
+            return r;
+        }
+
+        // The chain's room in module `k`, playing its schedule in the module's hazards.
+        CombatRoom NewRoom(int k)
+        {
+            roomModule = k;
+            return Tuned(new CombatRoom(schedules[k], seed + 101 * k, chain.Hazards[k]));
+        }
+
+        CombatRoom Tuned(CombatRoom r)
+        {
+            r.HitstopScale = Mathf.Max(0f, CombatFlags.Hitstop.Value);
+            r.KnockbackScale = CombatFlags.Knockback.Value ? 1f : 0f;
+            r.FlashFrames = 2;
+            if (r.Schedule.Row >= 0)
                 Debug.Log($"fight: {r.Schedule}");
             return r;
         }
 
         void OnStruck(Strike strike)
         {
-            if (hero.Dead || room.Phase == RoomPhase.Cleared)
+            if (hero.Dead || room.Phase == RoomPhase.Cleared || !Live)
                 return;
             var (hits, _) = room.Hit(strike);
             hero.Freeze(Hitstop.Hero(tuning, hits, CombatFlags.Hitstop.Value));
             if (hits > 0 && (strike.Move == Move.CleaveC || strike.Move == Move.LeapSlam))
                 Shake(0.3f);
+        }
+
+        // Whether the room is in play: always alone, in a chain once the hero has stepped into its
+        // module.
+        bool Live => chain == null || chain.Entered(roomModule);
+
+        // The chain: sealing the hero into the next module starts its room; the scripted walk
+        // follows the chain through the open gates.
+        void Walk()
+        {
+            var at = new Num.Vector2(hero.transform.position.x, hero.transform.position.z);
+            if (!hero.Dead && chain.Step(at))
+            {
+                var k = chain.Room;
+                if (k != roomModule)
+                    room = NewRoom(k);
+                modules[k].Gate(0, true);
+                metrics.Restart(hero.Presses);
+                Debug.Log(
+                    $"chain: room {k + 1} entered: {chain.Layout.Modules[k].Name}, row {room.Schedule.Row}"
+                );
+                if (autoclear)
+                    room.ClearNow();
+            }
+            var goal = chain.Goal;
+            hero.Goal = goal is Num.Vector2 g ? new Vector3(g.X, 0f, g.Y) : (Vector3?)null;
+            if (chain.Done && !walked)
+            {
+                walked = true;
+                Debug.Log($"chain: walked all {chain.Count} rooms");
+            }
         }
 
         void OnDied()
@@ -175,7 +291,9 @@ namespace Amethyst.Combat
                 Restart();
                 return;
             }
-            if (
+            if (chain != null)
+                Walk();
+            else if (
                 room.Phase == RoomPhase.Cleared
                 && clearedAt >= 0f
                 && now - clearedAt >= NextRoomAfter
@@ -185,10 +303,10 @@ namespace Amethyst.Combat
                 clearedAt = -1f;
             }
             var at = new Num.Vector2(hero.transform.position.x, hero.transform.position.z);
-            if (dt > 0f)
+            if (dt > 0f && Live)
                 room.Step(dt, at, hero.Vulnerable);
             Drain();
-            if (dt > 0f && !hero.Dead && room.Phase != RoomPhase.Cleared)
+            if (dt > 0f && !hero.Dead && Live && room.Phase != RoomPhase.Cleared)
                 metrics.Frame(dt, hero.Locked);
 
             targets.Clear();
@@ -199,7 +317,17 @@ namespace Amethyst.Combat
 
             view?.Present(room, now, CombatFlags.Flash.Value, CombatFlags.Shatter.Value);
             shapes.Begin();
-            hazards.Present(shapes, room);
+            if (chain != null)
+                for (int k = 0; k < modules.Length; k++)
+                    modules[k]
+                        .Present(
+                            shapes,
+                            chain.Hazards[k],
+                            k == roomModule ? room.Time : 0f,
+                            k == roomModule && Live && room.Phase != RoomPhase.Cleared
+                        );
+            else
+                hazards.Present(shapes, room.Hazards, room.Time);
             EnemyView.Shapes(shapes, room, cam, palette, view);
             shapes.End();
             sounds.Flush(now, CombatFlags.Sound.Value);
@@ -223,7 +351,7 @@ namespace Amethyst.Combat
             foreach (var e in room.Events)
             {
                 view?.Note(e);
-                hazards.Note(e, room.Time);
+                (chain != null ? modules[roomModule] : hazards).Note(e, room.Time);
                 var at = new Vector3(e.Position.X, 0f, e.Position.Y);
                 switch (e.Kind)
                 {
@@ -264,9 +392,10 @@ namespace Amethyst.Combat
                         sounds.Budget.Add(CombatSound.Hit);
                         break;
                     case RoomEventKind.Buzzer:
+                        var half = room.Hazards.Layout.Half;
                         SwordEffects.Ring(
                             hero.transform.position + Vector3.up * 0.05f,
-                            tuning.ArenaHalfSize * 1.5f,
+                            Mathf.Max(half.X, half.Y) * 1.5f,
                             0.6f
                         );
                         sounds.Budget.Add(CombatSound.Break, 8);
@@ -277,6 +406,14 @@ namespace Amethyst.Combat
                         Freeze(tuning.FreezeClear);
                         if (!hero.Dead)
                             metrics.End("cleared", hero.Presses);
+                        if (chain != null)
+                        {
+                            Debug.Log(
+                                $"chain: room {roomModule + 1} cleared after {room.Time:F1} s ({(autoclear ? "autoclear" : room.Schedule.Seconds > 0f ? "buzzer" : "last kill")})"
+                            );
+                            chain.Clear();
+                            modules[roomModule].Gate(1, false);
+                        }
                         break;
                 }
             }
@@ -344,8 +481,12 @@ namespace Amethyst.Combat
             var timer = float.IsInfinity(room.TimeLeft)
                 ? $"wave {room.Wave}/{room.Waves}"
                 : $"{room.TimeLeft:F0} s";
+            var place =
+                chain != null
+                    ? $"room {Mathf.Min(chain.Room + 1, chain.Count)}/{chain.Count}   "
+                    : "";
             var text =
-                $"{mode}   HP {hero.Health}/{Hero.MaxHealth}   {timer}   {room.Alive} enemies";
+                $"{mode}   {place}HP {hero.Health}/{Hero.MaxHealth}   {timer}   {room.Alive} enemies";
             var style = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 18,
@@ -356,7 +497,7 @@ namespace Amethyst.Combat
 
         void OnApplicationQuit()
         {
-            if (!ended && !hero.Dead && room.Phase != RoomPhase.Cleared)
+            if (!ended && !hero.Dead && Live && room.Phase != RoomPhase.Cleared)
                 metrics.End("quit", hero.Presses);
             ended = true;
             Time.timeScale = 1f;
@@ -367,6 +508,10 @@ namespace Amethyst.Combat
             view?.Dispose();
             shapes?.Dispose();
             hazards?.Dispose();
+            corridors?.Dispose();
+            if (modules != null)
+                foreach (var m in modules)
+                    m.Dispose();
             if (hero != null)
             {
                 hero.Struck -= OnStruck;
